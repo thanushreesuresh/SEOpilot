@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T03:40:59+05:30 — Record verified discovery evidence
+
+- Changed: Updated README, verification and submission records with source 78dd569 and passing hosted run 40137186217; inspected hosted desktop/mobile screenshots and confirmed original database counts with read-only access.
+- Validation: Hosted 521 backend tests, 34 AST tests, seven validator/proxy tests each, 29 Chromium scenarios, lint/type/build and contract/credential/history checks passed. Local full checks passed; human review remains pending.
+- Limitations: Documentation-only checkpoint. No new probes, paid calls, counter resets or website writes. Local manual restart and owned-pilot App/PR/deployment/live-verification acceptance remain pending.
+
 ## 2026-10-25T03:35:23+05:30 — Retain crawl discovery evidence
 
 - Changed: Added bounded robots/sitemap check snapshots to audit contracts, crawler progress, persistence, demo, dashboard and Markdown/CSV/JSON exports. Successful checks can substantiate missing-policy resolution in comparisons only with matching rules, finished analysis and the same nonempty assessed scope.

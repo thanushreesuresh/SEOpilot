@@ -2,6 +2,24 @@
 
 Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and committed lockfiles. Historical real SEO/AI observations remain in the [bounded live record](live-validation-2026-10-25.md).
 
+## Crawl discovery checkpoint
+
+At 2026-10-25T03:40:59+05:30, source **`78dd569fb0a45b7afe7082b68afb8bece43500be`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40137186217). This later documentation checkpoint changes no implementation.
+
+| Discovery check | Observed result |
+| --- | --- |
+| Complete backend suite | **521 passed**, 65.57 seconds locally and 27.76 seconds on GitHub; existing upstream TestClient warning remains |
+| AST / hosted-validator / authenticated-proxy checks | **34 / 7 / 7 passed** locally and on GitHub |
+| Ruff, ESLint, TypeScript, production build | Passed locally and on GitHub |
+| Generated-contract drift and credential/history checks | Passed on GitHub; local working/staged/history and ignored-private-path checks passed |
+| Hosted Chromium | **29 passed** in 33.2 seconds, including new desktop/mobile discovery, escaped evidence, keyboard expansion, legacy unknown and viewport-containment cases |
+| Original database, read-only | Still 5 audits, 7 pages, 26 issues, 29 recommendations, 0 decisions, 3 admissions and 6 AI reservations |
+| Additional live AI requests / website writes | **0 / 0** for this iteration |
+
+Independent standards/specification reviews found no actionable issues in the immutable patch. New offline tests verify successful/absent/invalid/blocked/failed checks, immutable progress snapshots, request-budget reuse, bounded contracts, cancellation/restart retention, legacy defaults, report inclusion and guarded site-policy resolution in either comparison direction. Hosted desktop and 390-pixel mobile screenshots were inspected: evidence cards wrap within the viewport, the keyboard summary has visible focus, and the HTML canary renders as escaped text. The existing development indicator and full-page capture placement of fixed navigation are not framework error overlays.
+
+The local services were not restarted, so their old runtime is not acceptance evidence for this code. The prior automatic approval rejection of restarting the dashboard remains in effect; use the documented manual restart steps. No live credentials were read or printed, no original counters reset, and tests used fresh databases with live credentials disabled. Owned-pilot App setup, exact-patch approval, human merge/deployment, live verification and human review remain pending.
+
 ## Cancellation checkpoint
 
 At 2026-10-25T03:22:10+05:30, source **`da67735cbc92945e383b6c092e1c59025f2daba0`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40135903810). This later documentation checkpoint changes no implementation.

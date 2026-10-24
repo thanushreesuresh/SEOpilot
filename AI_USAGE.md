@@ -1,5 +1,7 @@
 # AI usage record
 
+| 2026-10-25T03:40:59+05:30 | Codex | Verified discovery delivery | Inspected hosted desktop/mobile evidence, confirmed passing source/run and preserved database counts, updated delivery records | Pending human review | Hosted 521 backend, 34 AST, seven validator/proxy each and 29 browser scenarios passed with lint/type/build/contract/credential checks; no live AI calls, counter resets or website writes; manual restart and owned-pilot acceptance pending |
+
 | 2026-10-25T03:35:23+05:30 | Codex | Crawl discovery evidence | Added typed bounded policy probes, progress retention, guarded site-finding comparisons, public reports, dashboard details and offline/hosted-browser fixtures | Pending human review; independent standards/specification reviews found no actionable issues | Baseline 498 and final 521 backend tests, Ruff, ESLint, TypeScript, 34 AST, seven validator/proxy tests each and production build passed locally; three new browser cases await hosted CI; zero extra probes/AI calls or user-counter resets |
 
 | 2026-10-25T03:22:10+05:30 | Codex | Verified cancellation delivery | Recorded exact source/run evidence, inspected the final hosted mobile screenshot and confirmed original database counts with read-only access | Pending human review | Hosted 498 backend, 34 AST, seven validator/proxy each and 26 browser scenarios passed with lint/type/build/contract/credential checks; no paid calls, counter resets or website writes; local restart and owned-pilot actions pending |
