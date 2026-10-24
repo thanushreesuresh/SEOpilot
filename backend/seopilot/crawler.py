@@ -54,14 +54,18 @@ async def crawl(
     *,
     resolver: Resolver | None = None,
     transport: Transport | None = None,
+    targets: list[str] | None = None,
 ) -> CrawlResult:
     seed = normalize_url(url)
     origin = origin_of(seed)
     result = CrawlResult()
-    discovered: dict[str, int] = {seed: 0}
+    seeds = [normalize_url(item) for item in targets] if targets else [seed]
+    if not seeds or len(seeds) > 3 or any(origin_of(item) != origin for item in seeds):
+        raise ValueError("Verification requires one to three URLs on the original origin.")
+    discovered: dict[str, int] = dict.fromkeys(seeds, 0)
     visited: set[str] = set()
     final_urls: set[str] = set()
-    queue = deque([(seed, 0)])
+    queue = deque([(item, 0) for item in seeds])
     request_count = 0
     last_request: float | None = None
     delay = options.delay_ms / 1000
@@ -245,7 +249,7 @@ async def crawl(
                 if page.truncated_fields:
                     truncated = True
                     warn("Some extracted page fields reached their size limits; findings use the retained evidence only.")
-                if page.outcome == "html":
+                if page.outcome == "html" and not targets:
                     for link in page.links:
                         try:
                             link = normalize_url(link)

@@ -83,3 +83,23 @@ def test_connection_conflict_and_foreign_key(tmp_path):
     run.audit_id = "forged"
     with pytest.raises(sqlite3.IntegrityError):
         store.fixes.create(run)
+
+
+def test_proposals_are_frozen_and_retention_is_not_limited_to_ui_history(tmp_path):
+    store, project, audit = setup(tmp_path)
+    oldest = run_for(project, audit)
+    oldest.expires_at = "2000-01-01T00:00:00+00:00"
+    oldest.status = "cancelled"
+    store.fixes.create(oldest)
+    store.fixes.write_artifact(oldest.id, {"private": "SOURCE_CANARY"})
+    for _ in range(101):
+        run = run_for(project, audit)
+        run.status = "cancelled"
+        store.fixes.create(run)
+    assert len(store.fixes.history()) == 100
+    store.fixes.cleanup()
+    assert store.fixes.get(oldest.id).source_purged
+    assert not store.fixes._artifact_path(oldest.id).exists()
+    run.patch_hash = "0"*64
+    with pytest.raises(ValueError, match="immutable"):
+        store.fixes.save(run)

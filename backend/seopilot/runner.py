@@ -23,7 +23,10 @@ async def execute(audit: Audit, store: Store, *, settings: Settings | None = Non
         audit.progress.message = f"Checked {len(pages)} pages; {discovered} discovered"
         store.save(audit)
 
-    result = await crawl(audit.url, audit.options, progress=progress)
+    if audit.verification_urls:
+        result = await crawl(audit.url, audit.options, progress=progress, targets=audit.verification_urls)
+    else:
+        result = await crawl(audit.url, audit.options, progress=progress)
     audit.pages = result.pages
     audit.warnings = result.warnings
     audit.coverage = result.coverage
@@ -61,7 +64,7 @@ async def execute(audit: Audit, store: Store, *, settings: Settings | None = Non
     store.save(audit)
 
 
-async def run_queue(store: Store, processor: Callable[[Audit, Store], Awaitable[None]] = execute):
+async def run_queue(store: Store, processor: Callable[[Audit, Store], Awaitable[None]] = execute, fix_tick=None):
     claim_failures = 0
     while True:
         try:
@@ -75,6 +78,8 @@ async def run_queue(store: Store, processor: Callable[[Audit, Store], Awaitable[
             await asyncio.sleep(0.5 * claim_failures)
             continue
         if audit is None:
+            if fix_tick is not None:
+                await fix_tick()
             await asyncio.sleep(0.3)
             continue
         try:

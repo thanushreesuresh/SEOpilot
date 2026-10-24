@@ -5,6 +5,27 @@ import { proxyRequest } from "../src/lib/server-proxy.ts";
 
 const TOKEN = "a".repeat(64);
 
+test("v2 proxy forwards only explicit UUID routes and methods", async () => {
+  const id = "12345678-1234-1234-1234-123456789abc";
+  const allowed = [["github/connection", "GET"], ["projects", "POST"], [`projects/${id}/disconnect`, "POST"],
+    ["fix-runs", "POST"], [`fix-runs/${id}`, "GET"], [`fix-runs/${id}/patch`, "GET"],
+    ...["publish", "cancel", "delete-source", "verify"].map((action) => [`fix-runs/${id}/${action}`, "POST"]),
+    [`audits/${id}/issues/${id}/disposition`, "PATCH"], [`audits/${id}/dispositions`, "GET"]];
+  for (const [route, method] of allowed) {
+    const res = response();
+    let called = false;
+    await proxyRequest(request(route, method, method === "GET" ? [] : ["{}"]), res, {
+      readToken: async () => TOKEN, fetchUpstream: async (url) => { called = true; assert.equal(url, `http://127.0.0.1:8000/api/${route}`); return new Response("{}"); },
+    });
+    assert.equal(called, true, route);
+  }
+  for (const route of [`fix-runs/${id}/merge`, `projects/${id}/secrets`, "github/token", "fix-runs/forged/publish", "fix-runs?project_id=x"]) {
+    const res = response();
+    await proxyRequest(request(route, "POST"), res, { readToken: async () => { throw new Error("must not reach upstream"); }, fetchUpstream: fetch });
+    assert.equal(res.statusCode, 404, route);
+  }
+});
+
 function request(route = "audits", method = "GET", chunks = [], headers = {}) {
   const stream = Readable.from(chunks);
   stream.query = { path: route.split("/") };

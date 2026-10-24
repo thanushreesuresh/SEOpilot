@@ -1,10 +1,15 @@
 """Public v2 contracts. Source contents and credentials never enter API models."""
 
+from datetime import datetime, timedelta, timezone
 from typing import Literal
 
 from pydantic import Field
 
 from .models import Contract, new_id, now
+
+
+def poll_deadline() -> str:
+    return (datetime.now(timezone.utc)+timedelta(minutes=10)).isoformat()
 
 
 class RepositoryInfo(Contract):
@@ -109,6 +114,7 @@ class FixRun(Contract):
     verification: dict = Field(default_factory=dict)
     verification_audit_id: str | None = None
     source_purged: bool = False
+    poll_until: str = Field(default_factory=poll_deadline)
 
 
 class PatchExport(Contract):

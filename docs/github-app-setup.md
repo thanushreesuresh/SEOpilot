@@ -10,6 +10,8 @@ SEOPilot v2 is a local, single-operator tool for websites you own. Private repos
 
 Disconnecting deletes cached patches and stops local work. Existing GitHub branches and PRs remain for manual review. Remove the App installation in GitHub to revoke external access completely. The user-managed private key is not automatically deleted.
 
-The selected pilot is [thanushree-portfolio](https://github.com/thanushreesuresh/thanushree-portfolio). Its production origin and App installation must be confirmed locally before pilot publication.
+Before publishing, review and install the [owner-managed validation workflow](../validation/README.md) in the website repository. SEOPilot will never write workflow files for you. GitHub status polling lasts ten minutes per explicit publication, verification or **Refresh status** action; it then pauses until you refresh again. Pending writes are reconciled before another write attempt.
+
+The selected pilot is [thanushree-portfolio](https://github.com/thanushreesuresh/thanushree-portfolio), serving the user-confirmed origin [thanushree-portfolio-six.vercel.app](https://thanushree-portfolio-six.vercel.app/). Its GitHub repository ID is `1348533178` and base branch is `main`; the App installation and explicit project mapping must still be configured locally before pilot publication.
 
 Sources: [GitHub App comparison](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps), [token scoping and expiry](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app). PyJWT/cryptography signs App JWTs; HTTPX uses verified TLS without ambient proxies.

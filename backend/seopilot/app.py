@@ -24,7 +24,7 @@ ALLOWED_ORIGINS = {"http://localhost:3000", "http://127.0.0.1:3000"}
 MAX_BODY = 16384
 
 
-def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, processor=None, settings: Settings | None = None) -> FastAPI:
+def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, processor=None, settings: Settings | None = None, github_client=None) -> FastAPI:
     path = db_path or os.environ.get("SEOPILOT_DB") or Path(__file__).resolve().parents[1] / ".data" / "seopilot.db"
     # No database or worker is created merely by importing the OpenAPI definition.
     starts: deque[float] = deque()
@@ -38,15 +38,23 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
                           (Path(path).parent / "proxy-token" if db_path else BACKEND_ROOT / ".data" / "proxy-token"))
         app.state.proxy_token = proxy_token(token_path)
         app.state.store.recover()
-        task = asyncio.create_task(run_queue(app.state.store, processor=processor or partial(execute, settings=config))) if start_worker else None
+        from .fix_api import initialize
+        from .fix_engine import FixEngine
+
+        initialize(app, github_client)
+        app.state.fix_engine = FixEngine(app.state.store, app.state.github, app.state.fix_lock)
+        app.state.store.fixes.cleanup()
+        task = asyncio.create_task(run_queue(app.state.store, processor=processor or partial(execute, settings=config),
+                                            fix_tick=app.state.fix_engine.tick)) if start_worker else None
         app.state.worker = task
         yield
         if task:
             task.cancel()
             with suppress(asyncio.CancelledError, RuntimeError):
                 await task
+        await app.state.github.close()
 
-    app = FastAPI(title="SEOPilot", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="SEOPilot", version="0.2.0", lifespan=lifespan)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1"])
 
     @app.middleware("http")
@@ -162,6 +170,9 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
         request.app.state.store.save(audit)
         return audit
 
+    from .fix_api import router
+
+    app.include_router(router())
     return app
 
 

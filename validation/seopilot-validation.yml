@@ -1,0 +1,56 @@
+# OWNER INSTALLATION ONLY: copy this file to .github/workflows/seopilot-validation.yml
+# and copy validation/{package.json,package-lock.json,lib.mjs,run.mjs} to .seopilot/validation/.
+name: SEOPilot validation
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+concurrency:
+  group: seopilot-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    if: github.event.pull_request.draft && github.event.pull_request.head.repo.full_name == github.repository && startsWith(github.head_ref, 'seopilot/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout owner-installed validator from the exact base commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: validation-host
+          sparse-checkout: .seopilot/validation
+          persist-credentials: false
+      - name: Checkout exact proposal commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: website
+          persist-credentials: false
+      - name: Install pinned Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.17.0'
+          check-latest: false
+      - name: Install trusted validator dependencies
+        working-directory: validation-host/.seopilot/validation
+        run: npm ci --ignore-scripts
+      - name: Install pinned Chromium revision
+        working-directory: validation-host/.seopilot/validation
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Build and render proposed pages without application credentials
+        working-directory: validation-host/.seopilot/validation
+        run: node run.mjs
+        env:
+          SEOPILOT_TARGET_ROOT: ${{ github.workspace }}/website
+          SEOPILOT_OUTPUT_DIRECTORY: ${{ runner.temp }}/seopilot-validation
+      - name: Upload bounded validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: seopilot-validation-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/seopilot-validation/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 6

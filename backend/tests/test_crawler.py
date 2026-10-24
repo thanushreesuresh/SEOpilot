@@ -12,6 +12,20 @@ ORIGIN = "https://example.com"
 HTML = b'<html><head><title>Fixture business</title></head><body><h1>Welcome</h1></body></html>'
 
 
+@pytest.mark.asyncio
+async def test_verification_crawls_frozen_urls_only_and_keeps_robots_protection():
+    web = FixtureWeb({"/one": (200, "text/html", HTML+b'<a href="/unselected">Other</a>'),
+                      "/two": (200, "text/html", HTML),
+                      "/robots.txt": (200, "text/plain", b"User-agent: *\nDisallow: /two\n")})
+    result = await crawl(ORIGIN+"/one", CrawlOptions(page_limit=2), targets=[ORIGIN+"/one", ORIGIN+"/two"],
+                         resolver=web.resolve, transport=web.transport)
+    assert [page.url for page in result.pages] == [ORIGIN+"/one", ORIGIN+"/two"]
+    assert result.pages[1].outcome == "blocked"
+    assert ORIGIN+"/two" not in web.calls and ORIGIN+"/unselected" not in web.calls
+    with pytest.raises(ValueError):
+        await crawl(ORIGIN, CrawlOptions(), targets=["https://other.example/"], resolver=web.resolve, transport=web.transport)
+
+
 class FixtureWeb:
     def __init__(self, routes=None):
         self.routes = {

@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T01:26:56+05:30 — PR publication, recovery and deployment verification
+
+- Changed: Added queued proposal/publication API and worker stages, precise patch binding/export, duplicate-safe branch/commit/PR reconciliation, bounded hosted artifact validation, manual post-deployment verification and stable rule/URL/field comparisons. Added finding dispositions without altering historical scores, targeted crawler mode, versioned scores, 10-minute polling windows and immediate cancellation/source deletion.
+- Why: Turn explicit approval into a reviewable draft PR and distinguish validated source, merge, deployment and actual live metadata.
+- Validation: 352 backend tests passed before the final polling/truncation safeguards; 30 integrated workflow fixtures and 24 artifact tests cover uncertain writes, forged identities/results, source privacy, quotas and failed/reduced live coverage. Seven proxy tests passed; Ruff passed. Final safeguard checks continue in the product milestone.
+- Limitations: Live App installation, owner-installed workflow, manual review/merge/deployment and pilot acceptance remain pending. No target repository scripts ran locally and no additional AI requests were made. Human review pending.
+
 ## 2026-10-25T01:18:15+05:30 — Trusted static metadata adapter
 
 - Changed: Added `repository-tools/` pinned TypeScript AST parser and isolated Python adapter. Exact range edits preserve page content and unrelated metadata; static inherited values can receive page overrides.

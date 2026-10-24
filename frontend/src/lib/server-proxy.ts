@@ -8,6 +8,12 @@ const UPSTREAM = "http://127.0.0.1:8000/api/";
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 const AUDIT_PATH = new RegExp(`^audits/${UUID}$`, "i");
 const DECISION_PATH = new RegExp(`^recommendations/${UUID}/decision$`, "i");
+const FIX_PATH = new RegExp(`^fix-runs/${UUID}$`, "i");
+const FIX_READ = new RegExp(`^fix-runs/${UUID}/patch$`, "i");
+const FIX_ACTION = new RegExp(`^fix-runs/${UUID}/(publish|cancel|delete-source|verify|refresh)$`, "i");
+const DISPOSITION = new RegExp(`^audits/${UUID}/issues/${UUID}/disposition$`, "i");
+const DISPOSITIONS = new RegExp(`^audits/${UUID}/dispositions$`, "i");
+const DISCONNECT = new RegExp(`^projects/${UUID}/disconnect$`, "i");
 const RESPONSE_HEADERS = ["retry-after", "ratelimit-limit", "ratelimit-remaining", "ratelimit-reset", "x-audit-reused"];
 
 type Dependencies = {
@@ -28,6 +34,10 @@ function allowedMethod(route: string) {
   if (route === "audits") return "GET, POST";
   if (route === "demo-audits") return "POST";
   if (DECISION_PATH.test(route)) return "PATCH";
+  if (["github/connection"].includes(route) || FIX_PATH.test(route) || FIX_READ.test(route) || DISPOSITIONS.test(route)) return "GET";
+  if (["projects", "fix-runs"].includes(route)) return "GET, POST";
+  if (FIX_ACTION.test(route) || DISCONNECT.test(route)) return "POST";
+  if (DISPOSITION.test(route)) return "PATCH";
   return "";
 }
 

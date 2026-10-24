@@ -127,6 +127,8 @@ The smoke test sends `allow_ai=false`, even if the running API has live AI confi
 
 ## Status
 
+The v2 backend now supports project connection management, immutable patch review/export, explicit hash-bound draft-PR publication, restart reconciliation, trusted hosted-check reports and post-deployment verification. Live verification disables AI, retains the three-audits/IP allowance, and checks the frozen page set; missing, blocked or truncated evidence cannot pass. Two PR publications are allowed globally per rolling 24 hours and one active fix run per project. [Install the owner-managed validation workflow](validation/README.md); the App does not write workflows or merge/deploy changes.
+
 The static metadata adapter is available in `repository-tools/`. Install its pinned parser with `cd repository-tools; npm ci` and run `npm test` there. It edits only TypeScript App Router server-page titles/descriptions and refuses dynamic metadata, Client Components, uncertain inheritance, unsupported title templates and ambiguous routes. It parses source without executing target imports, configuration or scripts. Patch review and publication are separate steps in the v2 dashboard integration.
 
 V2 development adds a private GitHub App boundary, selected-repository authorization and versioned project/fix persistence while retaining audit and AI quotas. See [App setup](docs/github-app-setup.md). The draft-PR workflow is being integrated; no pilot PR or deployed change is claimed at this checkpoint.

@@ -107,6 +107,229 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/github/connection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Connection */
+        get: operations["connection_api_github_connection_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Projects */
+        get: operations["projects_api_projects_get"];
+        put?: never;
+        /** Connect */
+        post: operations["connect_api_projects_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{project_id}/disconnect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Disconnect */
+        post: operations["disconnect_api_projects__project_id__disconnect_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/audits/{audit_id}/dispositions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dispositions */
+        get: operations["dispositions_api_audits__audit_id__dispositions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/audits/{audit_id}/issues/{issue_id}/disposition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Disposition */
+        patch: operations["disposition_api_audits__audit_id__issues__issue_id__disposition_patch"];
+        trace?: never;
+    };
+    "/api/fix-runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fixes */
+        get: operations["fixes_api_fix_runs_get"];
+        put?: never;
+        /** Create Fix */
+        post: operations["create_fix_api_fix_runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/fix-runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fix */
+        get: operations["fix_api_fix_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/fix-runs/{run_id}/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh Fix */
+        post: operations["refresh_fix_api_fix_runs__run_id__refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/fix-runs/{run_id}/patch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Patch */
+        get: operations["export_patch_api_fix_runs__run_id__patch_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/fix-runs/{run_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish */
+        post: operations["publish_api_fix_runs__run_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/fix-runs/{run_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel */
+        post: operations["cancel_api_fix_runs__run_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/fix-runs/{run_id}/delete-source": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete Source */
+        post: operations["delete_source_api_fix_runs__run_id__delete_source_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/fix-runs/{run_id}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify */
+        post: operations["verify_api_fix_runs__run_id__verify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -173,6 +396,13 @@ export interface components {
              * @default
              */
             summary: string;
+            /**
+             * Rules Version
+             * @default 1
+             */
+            rules_version: string;
+            /** Verification Urls */
+            verification_urls: string[];
         };
         /** AuditRequest */
         AuditRequest: {
@@ -214,6 +444,30 @@ export interface components {
             pages: number;
             /** Issues */
             issues: number;
+        };
+        /** ConnectionStatus */
+        ConnectionStatus: {
+            /** Configured */
+            configured: boolean;
+            /** Message */
+            message: string;
+            /** Repositories */
+            repositories: components["schemas"]["RepositoryInfo"][];
+            /**
+             * Publication Limit
+             * @default 2
+             */
+            publication_limit: number;
+            /**
+             * Publications Remaining
+             * @default 2
+             */
+            publications_remaining: number;
+            /**
+             * Actions Notice
+             * @default Publishing a branch or PR can run repository CI and preview automation. GitHub Actions usage is separate from OpenAI usage.
+             */
+            actions_notice: string;
         };
         /** Coverage */
         Coverage: {
@@ -322,6 +576,16 @@ export interface components {
              */
             status: "approved" | "rejected";
         };
+        /** DispositionRequest */
+        DispositionRequest: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "intentional" | "dismissed" | "open";
+            /** Reason */
+            reason: string;
+        };
         /** Evidence */
         Evidence: {
             /** Id */
@@ -330,6 +594,118 @@ export interface components {
             field: string;
             /** Value */
             value: string;
+        };
+        /** FindingDisposition */
+        FindingDisposition: {
+            /** Audit Id */
+            audit_id: string;
+            /** Issue Id */
+            issue_id: string;
+            /** Rule Id */
+            rule_id: string;
+            /** Url */
+            url: string;
+            /** Status */
+            status: string;
+            /** Reason */
+            reason: string;
+            /** Recorded At */
+            recorded_at: string;
+        };
+        /** FixRequest */
+        FixRequest: {
+            /** Project Id */
+            project_id: string;
+            /** Audit Id */
+            audit_id: string;
+            /** Edits */
+            edits: components["schemas"]["MetadataEdit"][];
+        };
+        /** FixRun */
+        FixRun: {
+            /** Id */
+            id: string;
+            /** Project Id */
+            project_id: string;
+            /** Audit Id */
+            audit_id: string;
+            /** Repository Id */
+            repository_id: number;
+            /** Base Branch */
+            base_branch: string;
+            /** Base Sha */
+            base_sha: string;
+            /** Patch Hash */
+            patch_hash: string;
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at: string;
+            /** Expires At */
+            expires_at: string;
+            /**
+             * Status
+             * @default proposed
+             * @enum {string}
+             */
+            status: "preparing" | "proposed" | "publishing" | "pr_opened" | "checks_passed" | "checks_failed" | "merged" | "awaiting_deployment" | "live_verified" | "verification_failed" | "cancelled" | "expired" | "conflict" | "failed";
+            /** Targets */
+            targets: components["schemas"]["FixTarget"][];
+            /** Changed Files */
+            changed_files: string[];
+            /** Changed Lines */
+            changed_lines: number;
+            /**
+             * Branch
+             * @default
+             */
+            branch: string;
+            /** Head Sha */
+            head_sha: string | null;
+            /** Pr Number */
+            pr_number: number | null;
+            /** Pr Url */
+            pr_url: string | null;
+            /**
+             * Message
+             * @default Review the complete diff before approving publication.
+             */
+            message: string;
+            validation: components["schemas"]["ValidationResult"];
+            /** Verification */
+            verification: {
+                [key: string]: unknown;
+            };
+            /** Verification Audit Id */
+            verification_audit_id: string | null;
+            /**
+             * Source Purged
+             * @default false
+             */
+            source_purged: boolean;
+            /** Poll Until */
+            poll_until: string;
+        };
+        /** FixTarget */
+        FixTarget: {
+            /** Url */
+            url: string;
+            /** Route */
+            route: string;
+            /** Path */
+            path: string;
+            /** Old Title */
+            old_title: string | null;
+            /** Old Description */
+            old_description: string | null;
+            /** Title */
+            title: string | null;
+            /** Description */
+            description: string | null;
+            /** Canonical */
+            canonical: string[];
+            /** Robots */
+            robots: string[];
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -392,6 +768,17 @@ export interface components {
              */
             is_site: boolean;
         };
+        /** MetadataEdit */
+        MetadataEdit: {
+            /** Url */
+            url: string;
+            /** Title */
+            title?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Recommendation Ids */
+            recommendation_ids?: string[];
+        };
         /** Page */
         Page: {
             /** Id */
@@ -446,6 +833,15 @@ export interface components {
             /** Truncated Fields */
             truncated_fields: string[];
         };
+        /** PatchExport */
+        PatchExport: {
+            /** Filename */
+            filename: string;
+            /** Patch */
+            patch: string;
+            /** Patch Hash */
+            patch_hash: string;
+        };
         /** Progress */
         Progress: {
             /**
@@ -473,6 +869,80 @@ export interface components {
              * @default Waiting to start
              */
             message: string;
+        };
+        /** Project */
+        Project: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Production Origin */
+            production_origin: string;
+            /** Installation Id */
+            installation_id: number;
+            /** Repository Id */
+            repository_id: number;
+            /** Repository Owner */
+            repository_owner: string;
+            /** Repository Name */
+            repository_name: string;
+            /** Base Branch */
+            base_branch: string;
+            /**
+             * App Subdirectory
+             * @default
+             */
+            app_subdirectory: string;
+            /**
+             * Workflow
+             * @default seopilot-validation.yml
+             */
+            workflow: string;
+            /**
+             * Connected
+             * @default true
+             */
+            connected: boolean;
+            /** Confirmed At */
+            confirmed_at: string;
+        };
+        /** ProjectRequest */
+        ProjectRequest: {
+            /** Name */
+            name: string;
+            /** Production Origin */
+            production_origin: string;
+            /** Installation Id */
+            installation_id: number;
+            /** Repository Id */
+            repository_id: number;
+            /** Base Branch */
+            base_branch: string;
+            /**
+             * App Subdirectory
+             * @default
+             */
+            app_subdirectory?: string;
+            /**
+             * Workflow
+             * @default seopilot-validation.yml
+             */
+            workflow?: string;
+            /**
+             * Confirms Ownership
+             * @constant
+             */
+            confirms_ownership: true;
+        };
+        /** PublishRequest */
+        PublishRequest: {
+            /** Patch Hash */
+            patch_hash: string;
+            /**
+             * Confirms Publication
+             * @constant
+             */
+            confirms_publication: true;
         };
         /** Recommendation */
         Recommendation: {
@@ -524,8 +994,26 @@ export interface components {
              */
             basis: "observed" | "inferred";
         };
+        /** RepositoryInfo */
+        RepositoryInfo: {
+            /** Id */
+            id: number;
+            /** Installation Id */
+            installation_id: number;
+            /** Owner */
+            owner: string;
+            /** Name */
+            name: string;
+            /** Default Branch */
+            default_branch: string;
+        };
         /** Score */
         Score: {
+            /**
+             * Version
+             * @default 1
+             */
+            version: string;
             /** Value */
             value: number | null;
             /**
@@ -576,6 +1064,25 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** ValidationResult */
+        ValidationResult: {
+            /**
+             * Status
+             * @default pending
+             */
+            status: string;
+            /**
+             * Summary
+             * @default Validation has not completed.
+             */
+            summary: string;
+            /** Run Url */
+            run_url: string | null;
+            /** Details */
+            details: {
+                [key: string]: unknown;
+            };
         };
     };
     responses: never;
@@ -761,6 +1268,451 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Audit"];
+                };
+            };
+        };
+    };
+    connection_api_github_connection_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionStatus"];
+                };
+            };
+        };
+    };
+    projects_api_projects_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Project"][];
+                };
+            };
+        };
+    };
+    connect_api_projects_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Project"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    disconnect_api_projects__project_id__disconnect_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Project"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dispositions_api_audits__audit_id__dispositions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                audit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FindingDisposition"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    disposition_api_audits__audit_id__issues__issue_id__disposition_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                audit_id: string;
+                issue_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DispositionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FindingDisposition"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    fixes_api_fix_runs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FixRun"][];
+                };
+            };
+        };
+    };
+    create_fix_api_fix_runs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FixRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FixRun"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    fix_api_fix_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FixRun"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refresh_fix_api_fix_runs__run_id__refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FixRun"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_patch_api_fix_runs__run_id__patch_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatchExport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_api_fix_runs__run_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FixRun"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_api_fix_runs__run_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FixRun"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_source_api_fix_runs__run_id__delete_source_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FixRun"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    verify_api_fix_runs__run_id__verify_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FixRun"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
