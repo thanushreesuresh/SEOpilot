@@ -1,5 +1,7 @@
 # AI usage record
 
+| 2026-10-25T01:38:44+05:30 | Codex | Hosted CI isolation | Diagnosed inherited runtime kill switch disabling fake-provider contracts; isolated test settings with blank credentials | Pending human review | 356 tests passed with disabled parent setting; first hosted run stopped before browsers; no live provider calls |
+
 | Date and time with timezone | Tool / model, if known | Task | Assistance and affected files | Human review / corrections | Validation and result |
 | --- | --- | --- | --- | --- | --- |
 | 2026-10-25T01:33:36+05:30 | Codex | V2 product completion | Built onboarding, metadata/diff/publication/verification UI, dispositions, hosted browser scenarios and retention safeguards; reconciled setup/architecture/verification/submission records | Pending human review; independent reviews corrected null edits, truncation, stale verification, latest dispositions and source retention | 355 backend plus six later retention tests, 34 AST, seven validator/proxy tests each, Ruff, ESLint, TypeScript/build passed; copied migration preserved history/counters; hosted browser/pilot pending; zero additional AI calls |

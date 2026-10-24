@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T01:38:44+05:30 — Isolate fake-provider tests from CI runtime settings
+
+- Changed: Test bootstrap enables mock AI contract paths while still masking credentials and disabling dotenv. Browser services retain their explicit AI kill switch.
+- Why: The first v2 hosted run inherited `SEOPILOT_AI_ENABLED=false` and stopped at 16 fake-provider assertions before browser checks; 340 other tests passed.
+- Validation: Full suite passed 356 tests in 42.59 seconds with the same disabled parent setting; Ruff and diff checks passed. No production behavior, quota or credential value changed.
+- Limitations: Hosted browser acceptance and owned pilot remain pending. Human review pending.
+
 ## 2026-10-25T01:33:36+05:30 — Complete the v2 dashboard and delivery documentation
 
 - Changed: Added project/App onboarding, audit/source mapping, metadata preparation, escaped diff/download, exact-hash draft-PR consent, checks/history, deployment acknowledgement, live verification, finding dispositions and immediate source deletion. Added 15 hosted browser scenarios, isolated credentials, pinned validation tooling and orphan temporary-file cleanup. Updated setup, architecture, verification and pilot/submission records.
