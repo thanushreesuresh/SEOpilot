@@ -1,5 +1,7 @@
 # AI usage record
 
+| 2026-10-25T01:42:32+05:30 | Codex | Hosted browser acceptance | Corrected accessible-role/alert selectors and opt-out initialization wait from Chromium logs | Pending human review | Hosted backend 356 passed, browser 10 passed/5 failed before fixes; corrected suite submitted for rerun; no live credentials |
+
 | 2026-10-25T01:38:44+05:30 | Codex | Hosted CI isolation | Diagnosed inherited runtime kill switch disabling fake-provider contracts; isolated test settings with blank credentials | Pending human review | 356 tests passed with disabled parent setting; first hosted run stopped before browsers; no live provider calls |
 
 | Date and time with timezone | Tool / model, if known | Task | Assistance and affected files | Human review / corrections | Validation and result |

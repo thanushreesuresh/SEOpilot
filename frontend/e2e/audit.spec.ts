@@ -18,9 +18,9 @@ test("sample audit, filters, evidence, decisions and history persist", async ({ 
   await expect(page.getByText(/Rejected/).first()).toBeVisible();
   await page.getByRole("combobox", { name: "Severity", exact: true }).selectOption("High");
   await expect(page.getByText("Page returned an HTTP error").first()).toBeVisible();
-  await page.getByRole("textbox", { name: "Search URLs", exact: true }).fill("no-such-fixture-page");
+  await page.getByRole("searchbox", { name: "Search URLs", exact: true }).fill("no-such-fixture-page");
   await expect(page.getByText(/No .*match|No findings|No issues/i).first()).toBeVisible();
-  await page.getByRole("textbox", { name: "Search URLs", exact: true }).fill("");
+  await page.getByRole("searchbox", { name: "Search URLs", exact: true }).fill("");
   await page.getByRole("button", { name: "Audit history", exact: true }).click();
   await expect(page.getByRole("heading", { name: /Audit history/i })).toBeVisible();
   await page.goto(resultUrl);
@@ -32,8 +32,8 @@ test("restricted URL is rejected without a crawl", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("textbox", { name: "Website URL", exact: true }).fill("http://127.0.0.1/");
   await page.getByRole("button", { name: "Run audit", exact: true }).click();
-  await expect(page.getByRole("alert")).toBeVisible();
-  await expect(page.getByRole("alert")).toContainText(/public|restricted|private|local|not allowed|not permitted/i);
+  const error = page.getByRole("alert").filter({ hasText: /public|restricted|private|local|not allowed|not permitted/i });
+  await expect(error).toBeVisible();
 });
 
 test("mobile dashboard remains readable and operational", async ({ page }) => {
@@ -86,6 +86,7 @@ test("AI can be switched off and duplicate audit reuse is explained", async ({ p
     return route.fulfill({ status: 202, headers: { "x-audit-reused": "true" }, json: { ...sample, mode: "live", allow_ai: false, ai_status: "unavailable" } });
   });
   await page.goto("/");
+  await expect(page.getByRole("checkbox", { name: /Include optional AI suggestions/i })).toBeEnabled();
   await page.getByRole("checkbox", { name: /Include optional AI suggestions/i }).uncheck();
   await page.getByRole("textbox", { name: "Website URL", exact: true }).fill("https://example.com/");
   await page.getByRole("button", { name: "Run audit", exact: true }).click();

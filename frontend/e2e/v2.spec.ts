@@ -198,7 +198,7 @@ test("a mismatched patch hash cannot unlock publication", async ({ page }) => {
   const state = await mockWorkspace(page, { run: fixRun(), patchHash: "d".repeat(64) });
   await openProjects(page);
   await page.getByRole("button", { name: "Inspect exact diff", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("This patch no longer matches the proposal.");
+  await expect(page.getByRole("alert").filter({ hasText: "This patch no longer matches the proposal." })).toBeVisible();
   await expect(page.getByRole("checkbox", { name: /I reviewed this exact patch/ })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Create draft PR", exact: true })).toBeDisabled();
   expect(state.requests.filter((request) => request.path.endsWith("/publish"))).toEqual([]);
@@ -260,7 +260,7 @@ test("mobile keyboard review supports patch download and immediate source deleti
 test("connection failures show a retryable error without enabling writes", async ({ page }) => {
   const state = await mockWorkspace(page, { projects: [], connectionFailure: true });
   await openProjects(page);
-  await expect(page.getByRole("alert")).toContainText("GitHub connection is unavailable. Check local setup.");
+  await expect(page.getByRole("alert").filter({ hasText: "GitHub connection is unavailable. Check local setup." })).toBeVisible();
   await expect(page.getByRole("button", { name: "Connect a project", exact: true })).toBeDisabled();
   state.connectionFailure = false;
   await page.getByRole("button", { name: "Refresh connection", exact: true }).click();

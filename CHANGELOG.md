@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T01:42:32+05:30 — Align hosted browser assertions with accessible controls
+
+- Changed: Browser scenarios select the URL searchbox, distinguish application errors from Next.js's route announcer, and wait for the AI control to finish initializing before opting out.
+- Why: Hosted Chromium passed 10 scenarios and exposed five selector/synchronization failures in previously unexecuted test code; backend 356 tests and static/build checks passed on Linux.
+- Validation: Reviewed each failure against its rendered locator log; frontend lint/type checks rerun. A fresh hosted run verifies the corrected cases.
+- Limitations: Pilot App installation and human deployment remain pending. No paid requests or user counter resets.
+
 ## 2026-10-25T01:38:44+05:30 — Isolate fake-provider tests from CI runtime settings
 
 - Changed: Test bootstrap enables mock AI contract paths while still masking credentials and disabling dotenv. Browser services retain their explicit AI kill switch.
