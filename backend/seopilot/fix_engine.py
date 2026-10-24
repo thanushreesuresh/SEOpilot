@@ -9,6 +9,7 @@ from contextlib import suppress
 from datetime import datetime
 from urllib.parse import urlsplit
 
+from .audit_reporting import compare_audits
 from .fix_models import FixRun, FixTarget, ValidationResult
 from .fix_storage import TERMINAL
 from .models import Audit
@@ -27,32 +28,38 @@ def unified_patch(before: str, after: str, path: str) -> str:
 
 def compare_live(before: Audit, after: Audit, run: FixRun) -> dict:
     """Unknown/missing coverage never counts as a resolved observation."""
+    try:
+        comparison = compare_audits(before, after)
+    except ValueError:
+        comparison = None
+    analysis_finished = comparison is not None and after.status in {"completed", "partial"}
     pages = {normalize_url(page.url): page for page in after.pages}
     checks = []
     for target in run.targets:
         page = pages.get(normalize_url(target.url))
-        assessed = (page is not None and page.outcome == "html" and page.status_code is not None
+        assessed = (analysis_finished and page is not None and page.outcome == "html" and page.status_code is not None
                     and 200 <= page.status_code < 300
-                    and not set(page.truncated_fields) & {"title", "description", "canonicals", "robots"})
+                    and not set(page.truncated_fields) & {"body", "title", "description", "canonicals", "robots"})
         passed = bool(assessed and (target.title is None or page.title == target.title)
                       and (target.description is None or page.description == target.description)
                       and page.canonicals == target.canonical and page.robots == target.robots)
         checks.append({"url": target.url, "passed": passed, "outcome": page.outcome if page else "unchecked",
-                       "metadata_matches": passed})
-    assessed_urls = {normalize_url(page.url) for page in after.pages if page.outcome == "html"}
-
-    def keys(audit):
-        return {(item.rule_id, normalize_url(item.url), evidence.field)
-                for item in audit.issues if not item.is_site for evidence in item.evidence
-                if normalize_url(item.url) in assessed_urls}
-
-    old_keys, new_keys = keys(before), keys(after)
+                       "metadata_matches": passed,
+                       "reason": "Recorded metadata matches." if passed else
+                       "The audit did not finish comparable deterministic analysis." if not analysis_finished else
+                       "Complete successful metadata evidence is missing or differs from the approved values."})
     comparable = before.rules_version == after.rules_version and before.score.version == after.score.version
-    return {"status": "verified" if all(item["passed"] for item in checks) else "failed", "checks": checks,
-            "resolved": [list(item) for item in sorted(old_keys-new_keys)] if comparable else [],
-            "new": [list(item) for item in sorted(new_keys-old_keys)] if comparable else [],
+
+    def changed_keys(status):
+        return [[item["rule_id"], item["url"], item["field"]] for item in comparison[status]] if comparison else []
+
+    return {"status": "verified" if checks and all(item["passed"] for item in checks) else "failed", "checks": checks,
+            "resolved": changed_keys("resolved"), "new": changed_keys("added"),
+            "unresolved_unknown": comparison["unresolved_unknown"] if comparison else [],
+            "comparison_limitations": comparison["limitations"] if comparison else
+            ["The saved audit snapshots are incompatible; findings and scores cannot be compared."],
             "versions_match": comparable, "before_score": before.score.value, "after_score": after.score.value,
-            "score_comparable": comparable and {page.url for page in before.pages if page.outcome in {"html", "http_error"}} == {page.url for page in after.pages if page.outcome in {"html", "http_error"}},
+            "score_comparable": comparison is not None and comparison["score_delta"] is not None,
             "coverage": after.coverage.model_dump(),
             "note": "Historical scores are preserved. Reduced or unknown coverage is not an improvement; traffic and rankings require measurement over time."}
 
@@ -236,7 +243,7 @@ class FixEngine:
             return
         if run.verification_audit_id:
             after = self.store.get(run.verification_audit_id)
-            if after and after.status in {"completed", "partial", "failed", "interrupted"}:
+            if after and after.status in {"completed", "partial", "failed", "interrupted", "cancelled"}:
                 run.verification = compare_live(self.store.get(run.audit_id), after, run)
                 run.status = "live_verified" if run.verification["status"] == "verified" else "verification_failed"
                 run.message = "The recorded live pages match the approved metadata and indexing directives." if run.status == "live_verified" else "Live verification did not pass. Review failed, blocked or unchecked pages before retrying."

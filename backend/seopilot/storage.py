@@ -70,6 +70,10 @@ class Store:
             db.close()
 
     def _write(self, db: sqlite3.Connection, audit: Audit):
+        previous = db.execute("SELECT status FROM audits WHERE id=?", (audit.id,)).fetchone()
+        if previous and previous[0] == "cancelled" and audit.status != "cancelled":
+            # An in-flight callback must not resurrect a cancelled snapshot.
+            return
         audit.updated_at = now()
         db.execute("INSERT OR IGNORE INTO projects(id,origin) VALUES (?,?)", (new_id(), audit.origin or audit.url))
         project_id = db.execute("SELECT id FROM projects WHERE origin=?", (audit.origin or audit.url,)).fetchone()[0]
@@ -86,7 +90,37 @@ class Store:
 
     def save(self, audit: Audit):
         with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
             self._write(db, audit)
+
+    def is_cancelled(self, audit_id: str) -> bool:
+        with self.connection() as db:
+            row = db.execute("SELECT status FROM audits WHERE id=?", (audit_id,)).fetchone()
+            return bool(row and row[0] == "cancelled")
+
+    def cancel_audit(self, audit_id: str) -> Audit | None:
+        with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT payload FROM audits WHERE id=?", (audit_id,)).fetchone()
+            if row is None:
+                return None
+            audit = Audit.model_validate_json(row[0])
+            if audit.status == "cancelled":
+                return audit
+            if audit.status not in {"queued", "crawling", "analyzing", "reviewing"}:
+                raise ValueError("This audit has already finished and cannot be cancelled.")
+            if audit.status == "reviewing" or audit.ai_status == "pending":
+                audit.ai_status = "cancelled"
+            audit.status = "cancelled"
+            audit.completed_at = now()
+            audit.progress.stage = "cancelled"
+            audit.progress.message = "Audit cancelled. Retained evidence may be incomplete."
+            audit.warnings.append(
+                "Cancelled by you. The accepted admission and any AI reservations remain charged. "
+                "An AI request already in progress may still be billed."
+            )
+            self._write(db, audit)
+            return audit
 
     def get(self, audit_id: str) -> Audit | None:
         with self.connection() as db:
@@ -154,6 +188,9 @@ class Store:
         tick = time.time()
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
+            audit = db.execute("SELECT status FROM audits WHERE id=?", (audit_id,)).fetchone()
+            if audit is None or audit[0] == "cancelled":
+                return False
             global_count = db.execute("SELECT COUNT(*) FROM ai_calls WHERE reserved_at>?", (tick - 86400,)).fetchone()[0]
             audit_count = db.execute("SELECT COUNT(*) FROM ai_calls WHERE audit_id=?", (audit_id,)).fetchone()[0]
             if global_count >= daily_limit or audit_count >= max_per_audit:
@@ -198,7 +235,7 @@ class Store:
             if not row:
                 return None
             audit = Audit.model_validate_json(db.execute("SELECT payload FROM audits WHERE id=?", (row[0],)).fetchone()[0])
-            if audit.status not in ("completed", "partial", "interrupted"):
+            if audit.status not in ("completed", "partial", "interrupted", "cancelled"):
                 raise ValueError("Wait until the audit finishes before reviewing recommendations")
             recommendation = next(item for item in audit.recommendations if item.id == recommendation_id)
             if recommendation.status == status:

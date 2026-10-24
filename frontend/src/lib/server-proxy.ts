@@ -7,6 +7,7 @@ const MAX_BODY_BYTES = 16 * 1024;
 const UPSTREAM = "http://127.0.0.1:8000/api/";
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 const AUDIT_PATH = new RegExp(`^audits/${UUID}$`, "i");
+const AUDIT_CANCEL = new RegExp(`^audits/${UUID}/cancel$`, "i");
 const DECISION_PATH = new RegExp(`^recommendations/${UUID}/decision$`, "i");
 const FIX_PATH = new RegExp(`^fix-runs/${UUID}$`, "i");
 const FIX_READ = new RegExp(`^fix-runs/${UUID}/patch$`, "i");
@@ -34,6 +35,7 @@ function allowedMethod(route: string) {
   if (["health", "usage"].includes(route) || AUDIT_PATH.test(route)) return "GET";
   if (route === "audits") return "GET, POST";
   if (route === "demo-audits") return "POST";
+  if (AUDIT_CANCEL.test(route)) return "POST";
   if (DECISION_PATH.test(route)) return "PATCH";
   if (["github/connection"].includes(route) || FIX_PATH.test(route) || FIX_READ.test(route) || DISPOSITIONS.test(route)) return "GET";
   if (["projects", "fix-runs"].includes(route)) return "GET, POST";

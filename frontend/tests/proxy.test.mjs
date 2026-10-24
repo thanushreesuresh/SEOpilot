@@ -8,7 +8,7 @@ const TOKEN = "a".repeat(64);
 test("v2 proxy forwards only explicit UUID routes and methods", async () => {
   const id = "12345678-1234-1234-1234-123456789abc";
   const allowed = [["github/connection", "GET"], ["projects", "POST"], [`projects/${id}/disconnect`, "POST"],
-    ["audit-comparisons", "POST"], ...["markdown", "csv", "json"].map((format) => [`audits/${id}/report/${format}`, "GET"]),
+    ["audit-comparisons", "POST"], [`audits/${id}/cancel`, "POST"], ...["markdown", "csv", "json"].map((format) => [`audits/${id}/report/${format}`, "GET"]),
     ["fix-runs", "POST"], [`fix-runs/${id}`, "GET"], [`fix-runs/${id}/patch`, "GET"],
     ...["publish", "cancel", "delete-source", "verify"].map((action) => [`fix-runs/${id}/${action}`, "POST"]),
     [`audits/${id}/issues/${id}/disposition`, "PATCH"], [`audits/${id}/dispositions`, "GET"]];
@@ -20,7 +20,7 @@ test("v2 proxy forwards only explicit UUID routes and methods", async () => {
     });
     assert.equal(called, true, route);
   }
-  for (const route of [`fix-runs/${id}/merge`, `projects/${id}/secrets`, `audits/${id}/report/html`, "audits/forged/report/json", "github/token", "fix-runs/forged/publish", "fix-runs?project_id=x"]) {
+  for (const route of [`fix-runs/${id}/merge`, `projects/${id}/secrets`, `audits/${id}/report/html`, "audits/forged/report/json", "audits/forged/cancel", "github/token", "fix-runs/forged/publish", "fix-runs?project_id=x"]) {
     const res = response();
     await proxyRequest(request(route, "POST"), res, { readToken: async () => { throw new Error("must not reach upstream"); }, fetchUpstream: fetch });
     assert.equal(res.statusCode, 404, route);

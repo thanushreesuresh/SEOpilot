@@ -7,7 +7,7 @@ import { ExternalUrl, Notice, Severity, Spinner } from "./ui";
 type ChangeStatus = FindingChange["status"];
 const statuses: ChangeStatus[] = ["added", "persistent", "resolved", "unresolved_unknown"];
 const statusLabels: Record<ChangeStatus, string> = { added: "Added", persistent: "Persistent", resolved: "Resolved", unresolved_unknown: "Unresolved / unknown" };
-const finishedStatuses = new Set(["completed", "partial", "failed", "interrupted"]);
+const finishedStatuses = new Set(["completed", "partial", "failed", "interrupted", "cancelled"]);
 
 function origin(url: string): string {
   try { return new URL(url).origin; } catch { return ""; }

@@ -2,6 +2,12 @@
 
 Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and committed lockfiles. Historical real SEO/AI observations remain in the [bounded live record](live-validation-2026-10-25.md).
 
+## Cancellation checkpoint
+
+At 2026-10-25T03:06:28+05:30, all **495 backend tests passed** locally in 51.58 seconds, with the existing upstream warning. Ruff, seven proxy tests, frontend ESLint/TypeScript and production build passed. Separate standards/spec reviews found no actionable issues in the immutable staged code patch. Tests cover every active cancellation stage, idempotency, origin/ID errors, restart durability, stale saves, worker continuation/shutdown, cancellation during fake AI generation/review, preserved reservations and fresh verification admissions. Thirteen reproduced live-verification evidence failures now pass.
+
+Three new desktop/mobile keyboard/error browser cases await GitHub-hosted execution, expanding the suite to 26. The earlier hosted 465/23 pass below does not verify this milestone. Local production processes have not been restarted and are not acceptance evidence for it; the earlier automatic approval rejection of the dashboard restart still applies. Fixtures use fresh databases and disabled live credentials. No original counter or private configuration was reset or printed. Human review remains pending.
+
 ## Saved-evidence improvement checkpoint
 
 At 2026-10-25T02:38:32+05:30, source **`39b31e5dd58670b92b4bafcb83f2a995784323a9`** passed the [complete hosted workflow](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40132659834). This documentation checkpoint does not change the verified implementation.

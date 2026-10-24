@@ -90,13 +90,13 @@ def test_incompatible_audits_are_rejected(changes):
         compare_audits(audit(), audit(**changes))
 
 
-@pytest.mark.parametrize("status", ["completed", "partial", "failed", "interrupted"])
+@pytest.mark.parametrize("status", ["completed", "partial", "failed", "interrupted", "cancelled"])
 def test_finished_audits_can_be_inspected_but_incomplete_score_is_not_compared(status):
     result = compare_audits(audit(), audit(status=status))
     assert result["score_delta"] == (0 if status == "completed" else None)
 
 
-@pytest.mark.parametrize("status", ["failed", "interrupted"])
+@pytest.mark.parametrize("status", ["failed", "interrupted", "cancelled"])
 @pytest.mark.parametrize("absent_in", ["before", "after"])
 def test_unfinished_analysis_cannot_turn_missing_findings_into_added_or_resolved(status, absent_in):
     before_page, after_page = page(title=""), page(title="")

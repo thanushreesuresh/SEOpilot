@@ -185,6 +185,46 @@
         }
       }
     },
+    "/api/audits/{audit_id}/cancel": {
+      "post": {
+        "summary": "Cancel Audit",
+        "operationId": "cancel_audit_api_audits__audit_id__cancel_post",
+        "parameters": [
+          {
+            "name": "audit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Audit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Audit"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/demo-audits": {
       "post": {
         "summary": "Demo",
@@ -900,7 +940,8 @@
               "completed",
               "partial",
               "failed",
-              "interrupted"
+              "interrupted",
+              "cancelled"
             ],
             "title": "Status",
             "default": "queued"
@@ -982,7 +1023,8 @@
               "available",
               "failed",
               "demo",
-              "limited"
+              "limited",
+              "cancelled"
             ],
             "title": "Ai Status",
             "default": "unavailable"
@@ -1303,7 +1345,8 @@
               "completed",
               "partial",
               "failed",
-              "interrupted"
+              "interrupted",
+              "cancelled"
             ],
             "title": "Status"
           },

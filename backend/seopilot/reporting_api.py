@@ -38,7 +38,7 @@ def reporting_router() -> APIRouter:
         audit = store.get(str(audit_id))
         if audit is None:
             raise HTTPException(404, "Audit not found")
-        if audit.status not in {"completed", "partial", "failed", "interrupted"}:
+        if audit.status not in {"completed", "partial", "failed", "interrupted", "cancelled"}:
             raise HTTPException(409, "Wait for the audit to finish before exporting a report.")
         try:
             history = [*store.decisions(audit.id), *[item.model_dump() for item in store.fixes.dispositions(audit.id)]]

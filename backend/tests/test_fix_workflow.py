@@ -451,6 +451,22 @@ def test_live_verification_cannot_bypass_existing_daily_audit_allowance(workflow
     assert workflow.get(run["id"])["verification_audit_id"] is None
 
 
+def test_cancelled_live_verification_fails_and_retry_uses_a_fresh_admission(workflow):
+    run = workflow.publish(workflow.create())
+    merge(workflow, run)
+    first = workflow.post(f"fix-runs/{run['id']}/verify").json()
+    cancelled_id = first["verification_audit_id"]
+    response = workflow.client.post(f"/api/audits/{cancelled_id}/cancel", json={})
+    assert response.status_code == 200
+    workflow.tick()
+    saved = workflow.get(run["id"])
+    assert saved["status"] == "verification_failed" and saved["verification"]["resolved"] == []
+    retry = workflow.post(f"fix-runs/{run['id']}/verify")
+    assert retry.status_code == 202 and retry.json()["verification_audit_id"] != cancelled_id
+    assert workflow.store.quota("unknown")["used"] == 3
+    assert workflow.store.ai_calls_remaining(20) == 20
+
+
 def test_failed_live_verification_can_recheck_new_deployment_without_reusing_old_evidence(workflow):
     run = workflow.publish(workflow.create())
     merge(workflow, run)

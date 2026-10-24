@@ -16,7 +16,7 @@ def now() -> str:
 
 
 Severity = Literal["Critical", "High", "Medium", "Low"]
-AuditStatus = Literal["queued", "crawling", "analyzing", "reviewing", "completed", "partial", "failed", "interrupted"]
+AuditStatus = Literal["queued", "crawling", "analyzing", "reviewing", "completed", "partial", "failed", "interrupted", "cancelled"]
 
 
 class Contract(BaseModel):
@@ -165,7 +165,7 @@ class Audit(Contract):
     warnings: list[str] = Field(default_factory=list)
     coverage: Coverage = Field(default_factory=Coverage)
     score: Score = Field(default_factory=Score)
-    ai_status: Literal["unavailable", "pending", "available", "failed", "demo", "limited"] = "unavailable"
+    ai_status: Literal["unavailable", "pending", "available", "failed", "demo", "limited", "cancelled"] = "unavailable"
     summary: str = ""
     rules_version: str = "1"
     verification_urls: list[str] = Field(default_factory=list, max_length=3)

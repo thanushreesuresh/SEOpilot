@@ -4,6 +4,7 @@ import asyncio
 import logging
 import sqlite3
 from collections.abc import Awaitable, Callable
+from contextlib import suppress
 
 from .models import Audit, Page, now
 from .settings import Settings
@@ -65,6 +66,27 @@ async def execute(audit: Audit, store: Store, *, settings: Settings | None = Non
     store.save(audit)
 
 
+async def _process_audit(audit: Audit, store: Store, processor):
+    task = asyncio.ensure_future(processor(audit, store))
+    try:
+        while not task.done():
+            if store.is_cancelled(audit.id):
+                task.cancel()
+                break
+            await asyncio.wait({task}, timeout=0.3)
+        try:
+            await task
+        except asyncio.CancelledError:
+            # Cancelling this child must not swallow lifespan/server shutdown.
+            if asyncio.current_task().cancelling() or not store.is_cancelled(audit.id):
+                raise
+    finally:
+        if not task.done():
+            task.cancel()
+            with suppress(asyncio.CancelledError):
+                await task
+
+
 async def run_queue(store: Store, processor: Callable[[Audit, Store], Awaitable[None]] = execute, fix_tick=None):
     claim_failures = 0
     while True:
@@ -84,7 +106,7 @@ async def run_queue(store: Store, processor: Callable[[Audit, Store], Awaitable[
             await asyncio.sleep(0.3)
             continue
         try:
-            await processor(audit, store)
+            await _process_audit(audit, store, processor)
         except asyncio.CancelledError:
             audit.status = "interrupted"
             audit.progress.stage = "interrupted"

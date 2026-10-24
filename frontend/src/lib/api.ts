@@ -25,6 +25,7 @@ export const api = {
   usage: (signal?: AbortSignal) => request<UsageStatus>("/usage", { signal }),
   history: (signal?: AbortSignal) => request<AuditSummary[]>("/audits", { signal }),
   audit: (id: string, signal?: AbortSignal) => request<Audit>(`/audits/${encodeURIComponent(id)}`, { signal }),
+  cancel: (id: string, signal?: AbortSignal) => request<Audit>(`/audits/${encodeURIComponent(id)}/cancel`, { method: "POST", body: "{}", signal }),
   create: async (data: AuditRequest) => {
     let reused = false;
     const audit = await request<Audit>("/audits", { method: "POST", body: JSON.stringify(data) }, (response) => { reused = response.headers.get("x-audit-reused") === "true"; });

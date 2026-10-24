@@ -54,7 +54,7 @@ export default function Dashboard() {
       try {
         const next = await api.audit(id!, abort.signal);
         if (abort.signal.aborted) return;
-        setAudit(next); setPollError("");
+        setAudit((current) => current?.id === next.id && current.status !== "cancelled" ? next : current); setPollError("");
         if (isActive(next)) timer = setTimeout(poll, 1000);
         else { void refreshHistory().catch(() => {}); void refreshUsage(); }
       } catch (cause) {
@@ -90,6 +90,11 @@ export default function Dashboard() {
   function updateRecommendation(next: Recommendation) {
     setAudit((current) => current ? { ...current, recommendations: current.recommendations.map((item) => item.id === next.id ? next : item) } : current);
   }
+  function auditCancelled(next: Audit) {
+    setAudit((current) => current?.id === next.id ? next : current);
+    void refreshHistory().catch(() => {});
+    void refreshUsage();
+  }
   function switchView(next: "overview" | "history" | "projects") { setView(next); if (next !== "overview") void refreshHistory().catch((cause) => setError(cause instanceof Error ? cause.message : "Could not load audit history.")); }
 
   return <div className="app-shell">
@@ -112,7 +117,7 @@ export default function Dashboard() {
           {notice ? <Notice>{notice}</Notice> : null}
           {error ? <Notice variant="error">{error}</Notice> : null}
           {pollError ? <Notice variant="error">{pollError} Progress will reconnect automatically.</Notice> : null}
-          {loading ? <div className="loading-surface" role="status"><Spinner />Loading your workspace…</div> : audit ? <AuditResults key={audit.id} audit={audit} onRecommendation={updateRecommendation} /> : <EmptyAudit onDemo={demo} disabled={!!submitting} />}
+          {loading ? <div className="loading-surface" role="status"><Spinner />Loading your workspace…</div> : audit ? <AuditResults key={audit.id} audit={audit} onRecommendation={updateRecommendation} onCancelled={auditCancelled} /> : <EmptyAudit onDemo={demo} disabled={!!submitting} />}
         </> : view === "projects" ? <ProjectWorkspace history={history} currentAudit={audit} /> : <>
           <section className="page-heading history-heading"><div><h1>Audit history</h1><p>A clear record of your website, findings, and decisions.</p></div><div className="history-actions"><button className="button button-secondary" aria-expanded={comparing} aria-controls="audit-comparison" onClick={() => setComparing(!comparing)}><GitCompareArrows size={15} aria-hidden="true" />{comparing ? "Hide comparison" : "Compare audits"}</button><button className="button button-secondary" onClick={() => switchView("overview")}><ArrowLeft size={15} />Back to overview</button></div></section>
           {error ? <Notice variant="error">{error}</Notice> : null}

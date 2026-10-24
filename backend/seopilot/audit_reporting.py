@@ -13,7 +13,7 @@ from .models import Audit, Issue, Page
 from .network import normalize_url, origin_of
 
 MAX_REPORT_BYTES = 1024 * 1024
-FINISHED_STATUSES = {"completed", "partial", "failed", "interrupted"}
+FINISHED_STATUSES = {"completed", "partial", "failed", "interrupted", "cancelled"}
 CHANGE_STATUSES = ("added", "persistent", "resolved", "unresolved_unknown")
 FindingKey = tuple[str, str, str, bool]
 

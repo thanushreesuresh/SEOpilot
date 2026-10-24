@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T03:06:28+05:30 — Cancel audits without resetting spending limits
+
+- Changed: Added durable queued/running audit cancellation, an allowlisted API action and accessible dashboard control. Retained evidence supports history, exports, comparisons and recommendation review; stale writes and new AI reservations cannot resurrect a cancelled run.
+- Reliability: The worker cancels/drains its active child and continues to the next audit while preserving shutdown behavior. Cancelled live verification fails and retries consume fresh admissions. Deployment comparison now reuses saved-audit evidence checks, preventing failed/interrupted/cancelled or body-truncated snapshots from verifying matching metadata or claiming unsupported finding/score improvements.
+- Validation: Reproduced the missing cancellation path and 13 live-verification evidence failures before fixes. All 495 backend tests passed in 51.58 seconds, plus Ruff, seven proxy tests, ESLint, TypeScript and production build. Separate standards/spec reviews found no actionable issues. Three new browser scenarios await hosted execution; the suite now has 26.
+- Limitations: Cancellation preserves accepted admissions and all paid-call reservations; requests already in progress may still be billed and cleanup is cooperative. No live credentials, production counters or website writes were used. Existing local processes need manual restart; the earlier dashboard restart was blocked by automatic approval review. Pilot App/manual deployment and human review remain pending.
+
 ## 2026-10-25T02:38:32+05:30 — Record verified saved-evidence improvements
 
 - Changed: Updated README, architecture, verification and submission records for source 39b31e5 and hosted run 40132659834; documented stopping the dashboard before rebuilding.

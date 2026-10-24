@@ -7,6 +7,7 @@ from collections import deque
 from contextlib import asynccontextmanager, suppress
 from functools import partial
 from pathlib import Path
+from uuid import UUID
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -156,6 +157,16 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
         if not recommendation:
             raise HTTPException(404, "Recommendation not found")
         return recommendation
+
+    @app.post("/api/audits/{audit_id}/cancel", response_model=Audit)
+    async def cancel_audit(audit_id: UUID, request: Request):
+        try:
+            audit = request.app.state.store.cancel_audit(str(audit_id))
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from None
+        if audit is None:
+            raise HTTPException(404, "Audit not found")
+        return audit
 
     @app.post("/api/demo-audits", response_model=Audit, status_code=201)
     async def demo(request: Request):

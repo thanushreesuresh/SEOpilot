@@ -1,5 +1,7 @@
 # AI usage record
 
+| 2026-10-25T03:06:28+05:30 | Codex | Audit cancellation and deployment evidence | Added durable cancellation/worker cleanup, quota guards, API/contracts/UI and offline/browser fixtures; reproduced and corrected live verification's incomplete-evidence and score-comparability gaps using the existing comparison service | Pending human review; independent standards/spec reviews found no actionable issues | 495 backend tests, Ruff, seven proxy tests, ESLint, TypeScript and production build passed; 26 hosted browser cases pending; no live AI calls, counter resets or website writes |
+
 | 2026-10-25T02:38:32+05:30 | Codex | Verified saved-evidence delivery | Recorded the passing source SHA and hosted checks, inspected the mobile screenshot and documented safe production rebuild/restart behavior | Pending human review | Hosted465 backend,34 AST,7 validator/proxy each,23 browser passed with static/build/contract/credential checks; zero paid calls/counter resets; local restart blocked by automatic approval review; owned pilot remains pending |
 
 | 2026-10-25T02:34:08+05:30 | Codex | Accessible history header containment | Independent review identified an unpositioned parent for the offscreen hidden column label; anchored headers, removed ineffective workaround and added a reversible causal layout measurement | Pending human review | Local lint/typecheck/build passed; hosted result pending; strict mobile/keyboard assertions preserved; no paid calls |

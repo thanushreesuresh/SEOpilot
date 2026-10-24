@@ -90,6 +90,23 @@ export interface paths {
         patch: operations["decide_api_recommendations__recommendation_id__decision_patch"];
         trace?: never;
     };
+    "/api/audits/{audit_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Audit */
+        post: operations["cancel_audit_api_audits__audit_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/demo-audits": {
         parameters: {
             query?: never;
@@ -390,7 +407,7 @@ export interface components {
              * @default queued
              * @enum {string}
              */
-            status: "queued" | "crawling" | "analyzing" | "reviewing" | "completed" | "partial" | "failed" | "interrupted";
+            status: "queued" | "crawling" | "analyzing" | "reviewing" | "completed" | "partial" | "failed" | "interrupted" | "cancelled";
             /** Created At */
             created_at: string;
             /** Updated At */
@@ -424,7 +441,7 @@ export interface components {
              * @default unavailable
              * @enum {string}
              */
-            ai_status: "unavailable" | "pending" | "available" | "failed" | "demo" | "limited";
+            ai_status: "unavailable" | "pending" | "available" | "failed" | "demo" | "limited" | "cancelled";
             /**
              * Summary
              * @default
@@ -530,7 +547,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "queued" | "crawling" | "analyzing" | "reviewing" | "completed" | "partial" | "failed" | "interrupted";
+            status: "queued" | "crawling" | "analyzing" | "reviewing" | "completed" | "partial" | "failed" | "interrupted" | "cancelled";
             /** Created At */
             created_at: string;
             /** Score */
@@ -1417,6 +1434,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Recommendation"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_audit_api_audits__audit_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                audit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Audit"];
                 };
             };
             /** @description Validation Error */
