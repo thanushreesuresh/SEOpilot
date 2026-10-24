@@ -38,7 +38,7 @@ function audit(id: string, date: string, blocked = false): Audit {
     })),
     issues: [], recommendations: [], warnings: [],
     coverage: { attempted: 3, assessed: blocked ? 2 : 3, blocked: blocked ? 1 : 0, failed: 0, unchecked: 0, truncated: false },
-    score: { version: "1", value: id === BEFORE_ID ? 80 : 85, assessed_pages: blocked ? 2 : 3, formula: "Saved fixture score." },
+    score: { version: "1", value: id === BEFORE_ID ? 80 : 85, assessed_pages: blocked ? 2 : 3, formula: "Saved fixture score.", breakdown: null },
     ai_status: "demo", summary: "Saved sample results for reporting interface checks.", rules_version: "1", verification_urls: [], discovery: null,
   };
 }

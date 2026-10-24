@@ -5,7 +5,17 @@ from collections import defaultdict
 from dataclasses import dataclass
 from urllib.parse import urldefrag, urljoin, urlsplit
 
-from .models import Evidence, Issue, Page, Recommendation, Score
+from .models import (
+    Evidence,
+    ExcludedScorePage,
+    Issue,
+    Page,
+    PagePenalty,
+    Recommendation,
+    Score,
+    ScoreBreakdown,
+    ScoreRule,
+)
 
 POINTS = {"Critical": 20, "High": 10, "Medium": 5, "Low": 2}
 RULES_VERSION = "2"
@@ -190,25 +200,40 @@ def analyze(
 
 def calculate_score(pages: list[Page], issues: list[Issue]) -> Score:
     assessed = {p.id: p for p in pages if _assessed(p)}
+    detail = ScoreBreakdown(excluded_pages=[
+        ExcludedScorePage(page_id=page.id, url=page.url, outcome=page.outcome, status_code=page.status_code)
+        for page in pages if not _assessed(page)
+    ])
     if not assessed:
-        return Score()
+        return Score(breakdown=detail)
     penalties = {page_id: 0 for page_id in assessed}
-    site: dict[str, int] = {}
+    page_rules: dict[str, list[ScoreRule]] = {page_id: [] for page_id in assessed}
+    site: dict[str, ScoreRule] = {}
     seen: set[tuple[str, str]] = set()
     for issue in issues:
         points = POINTS[issue.severity]
+        rule = ScoreRule(rule_id=issue.rule_id, title=issue.title, severity=issue.severity, points=points)
         if issue.is_site:
-            site[issue.rule_id] = max(site.get(issue.rule_id, 0), points)
+            if issue.rule_id not in site or points > site[issue.rule_id].points:
+                site[issue.rule_id] = rule
             continue
         for page_id in issue.page_ids:
             key = (issue.rule_id, page_id)
             if page_id in penalties and key not in seen:
                 penalties[page_id] += points
+                page_rules[page_id].append(rule)
                 seen.add(key)
     for page_id, page in assessed.items():
-        penalties[page_id] = 100 if page.outcome == "http_error" else min(100, penalties[page_id])
-    value = max(0, min(100, round(100 - sum(penalties.values()) / len(assessed) - min(20, sum(site.values())))))
-    return Score(value=value, assessed_pages=len(assessed))
+        penalty = 100 if page.outcome == "http_error" else min(100, penalties[page_id])
+        detail.pages.append(PagePenalty(page_id=page_id, url=page.url, outcome=page.outcome,
+                                        rule_points=penalties[page_id], penalty=penalty, rules=page_rules[page_id]))
+    detail.site_rules = list(site.values())
+    detail.site_rule_points = sum(rule.points for rule in detail.site_rules)
+    detail.site_penalty = min(20, detail.site_rule_points)
+    detail.mean_page_penalty = sum(page.penalty for page in detail.pages) / len(assessed)
+    detail.unrounded_value = 100 - detail.mean_page_penalty - detail.site_penalty
+    value = max(0, min(100, round(detail.unrounded_value)))
+    return Score(value=value, assessed_pages=len(assessed), breakdown=detail)
 
 
 def rule_recommendations(issues: list[Issue], pages: list[Page]) -> list[Recommendation]:

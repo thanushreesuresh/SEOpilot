@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T03:51:30+05:30 — Explain recorded health-score deductions
+
+- Changed: Added an optional persisted score breakdown from the existing scoring aggregation, page/site deductions and exclusions in the dashboard, URL search links to findings, generated contracts and Markdown/CSV/JSON report support. Older scores stay explicitly unrecorded and unchanged.
+- Why: A score and formula alone did not show which observed page/rule deductions contributed, whether caps or HTTP-error overrides applied, or why missing coverage could not improve the denominator.
+- Validation: Baseline 521 and final 534 backend tests passed locally; Ruff, frontend ESLint/TypeScript, 34 AST tests, seven validator/proxy tests each and production build passed. Independent standards/specification reviews found no actionable issues. New tests cover rule/group deduplication, caps, HTTP overrides, exclusions, rounding, persistence, review immutability and export escaping. Four desktop/mobile/legacy/no-score browser scenarios await hosted execution.
+- Limitations: Diagnostic weights/formula and rule/score versions remain unchanged; deductions do not forecast gains. Counts explain retained snapshots, not undiscovered URLs. No paid AI calls, extra crawl requests, original database/counter changes or website writes. Human review, local manual restart and owned-pilot acceptance remain pending.
+
 ## 2026-10-25T03:40:59+05:30 — Record verified discovery evidence
 
 - Changed: Updated README, verification and submission records with source 78dd569 and passing hosted run 40137186217; inspected hosted desktop/mobile screenshots and confirmed original database counts with read-only access.

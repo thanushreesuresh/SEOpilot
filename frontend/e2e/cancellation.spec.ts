@@ -12,7 +12,7 @@ async function cancellationFixture(page: Page, request: APIRequestContext, statu
     pages: status === "queued" ? [] : [{ ...sample.pages[0], url: "https://cancel.example.com/", title: "Collected page evidence" }],
     issues: [], recommendations: [], warnings: [], summary: "Saved cancellation fixture.",
     coverage: { attempted: status === "reviewing" ? 1 : 0, assessed: status === "reviewing" ? 1 : 0, failed: 0, blocked: 0, unchecked: 0, truncated: false },
-    score: { ...sample.score, value: null, assessed_pages: 0 },
+    score: { ...sample.score, value: null, assessed_pages: 0, breakdown: null },
   };
   const state = { cancelRequests: 0, failNext: false, unexpected: [] as string[] };
   await page.route("**/api/**", async (route) => {

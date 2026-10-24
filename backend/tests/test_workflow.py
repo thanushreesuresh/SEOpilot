@@ -42,15 +42,18 @@ def test_real_runner_api_history_and_decisions_with_fixture_transport(tmp_path, 
         assert result["coverage"]["assessed"] == 4
         assert result["discovery"]["robots_state"] == "present"
         assert result["score"]["value"] is not None
+        assert len(result["score"]["breakdown"]["pages"]) == result["score"]["assessed_pages"] == 4
         assert all(issue["evidence"] for issue in result["issues"])
         assert any(issue["rule_id"] == "broken_internal_link" for issue in result["issues"])
         rec_id = result["recommendations"][0]["id"]
         decision = client.patch(f"/api/recommendations/{rec_id}/decision", json={"status": "approved"})
         assert decision.status_code == 200 and decision.json()["decided_at"]
+        assert client.get(f"/api/audits/{audit_id}").json()["score"] == result["score"]
         assert client.get("/api/audits").json()[0]["id"] == audit_id
     with TestClient(create_app(path, start_worker=False), base_url="http://localhost") as client:
         restored = client.get(f"/api/audits/{audit_id}").json()
         assert restored["discovery"] == result["discovery"]
+        assert restored["score"] == result["score"]
         assert restored["recommendations"][0]["status"] == "approved"
         assert client.patch(f"/api/recommendations/{rec_id}/decision", json={"status": "rejected"}).json()["status"] == "rejected"
 

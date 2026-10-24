@@ -156,10 +156,44 @@ class Progress(Contract):
     message: str = "Waiting to start"
 
 
+class ScoreRule(Contract):
+    rule_id: str
+    title: str
+    severity: Severity
+    points: int = Field(ge=0, le=20)
+
+
+class PagePenalty(Contract):
+    page_id: str
+    url: str
+    outcome: Literal["html", "http_error"]
+    rule_points: int = Field(ge=0)
+    penalty: int = Field(ge=0, le=100)
+    rules: list[ScoreRule] = Field(default_factory=list)
+
+
+class ExcludedScorePage(Contract):
+    page_id: str
+    url: str
+    outcome: Literal["html", "http_error", "non_html", "blocked", "error"]
+    status_code: int | None = None
+
+
+class ScoreBreakdown(Contract):
+    pages: list[PagePenalty] = Field(default_factory=list)
+    excluded_pages: list[ExcludedScorePage] = Field(default_factory=list)
+    site_rules: list[ScoreRule] = Field(default_factory=list)
+    mean_page_penalty: float | None = Field(default=None, ge=0, le=100)
+    site_rule_points: int = Field(default=0, ge=0)
+    site_penalty: int = Field(default=0, ge=0, le=20)
+    unrounded_value: float | None = Field(default=None, ge=-20, le=100)
+
+
 class Score(Contract):
     version: str = "1"
     value: int | None = None
     assessed_pages: int = 0
+    breakdown: ScoreBreakdown | None = None
     formula: str = "100 − mean(capped page penalties) − capped site penalties. Critical=20, High=10, Medium=5, Low=2; HTTP error pages=100. Site cap=20. Unknown pages excluded."
 
 

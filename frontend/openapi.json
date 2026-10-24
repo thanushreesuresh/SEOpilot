@@ -1832,6 +1832,49 @@
         ],
         "title": "Evidence"
       },
+      "ExcludedScorePage": {
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "title": "Page Id"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "html",
+              "http_error",
+              "non_html",
+              "blocked",
+              "error"
+            ],
+            "title": "Outcome"
+          },
+          "status_code": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Code"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "page_id",
+          "url",
+          "outcome",
+          "status_code"
+        ],
+        "title": "ExcludedScorePage"
+      },
       "FindingChange": {
         "properties": {
           "stable_id": {
@@ -2608,6 +2651,55 @@
         ],
         "title": "Page"
       },
+      "PagePenalty": {
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "title": "Page Id"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "html",
+              "http_error"
+            ],
+            "title": "Outcome"
+          },
+          "rule_points": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Rule Points"
+          },
+          "penalty": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Penalty"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreRule"
+            },
+            "type": "array",
+            "title": "Rules"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "page_id",
+          "url",
+          "outcome",
+          "rule_points",
+          "penalty",
+          "rules"
+        ],
+        "title": "PagePenalty"
+      },
       "PatchExport": {
         "properties": {
           "filename": {
@@ -3020,6 +3112,16 @@
             "title": "Assessed Pages",
             "default": 0
           },
+          "breakdown": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScoreBreakdown"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "formula": {
             "type": "string",
             "title": "Formula",
@@ -3032,9 +3134,123 @@
           "version",
           "value",
           "assessed_pages",
+          "breakdown",
           "formula"
         ],
         "title": "Score"
+      },
+      "ScoreBreakdown": {
+        "properties": {
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/PagePenalty"
+            },
+            "type": "array",
+            "title": "Pages"
+          },
+          "excluded_pages": {
+            "items": {
+              "$ref": "#/components/schemas/ExcludedScorePage"
+            },
+            "type": "array",
+            "title": "Excluded Pages"
+          },
+          "site_rules": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreRule"
+            },
+            "type": "array",
+            "title": "Site Rules"
+          },
+          "mean_page_penalty": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Page Penalty"
+          },
+          "site_rule_points": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Site Rule Points",
+            "default": 0
+          },
+          "site_penalty": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 0.0,
+            "title": "Site Penalty",
+            "default": 0
+          },
+          "unrounded_value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": -20.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unrounded Value"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pages",
+          "excluded_pages",
+          "site_rules",
+          "mean_page_penalty",
+          "site_rule_points",
+          "site_penalty",
+          "unrounded_value"
+        ],
+        "title": "ScoreBreakdown"
+      },
+      "ScoreRule": {
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "Critical",
+              "High",
+              "Medium",
+              "Low"
+            ],
+            "title": "Severity"
+          },
+          "points": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 0.0,
+            "title": "Points"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rule_id",
+          "title",
+          "severity",
+          "points"
+        ],
+        "title": "ScoreRule"
       },
       "StructuredDataSummary": {
         "properties": {

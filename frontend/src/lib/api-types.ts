@@ -780,6 +780,20 @@ export interface components {
             /** Value */
             value: string;
         };
+        /** ExcludedScorePage */
+        ExcludedScorePage: {
+            /** Page Id */
+            page_id: string;
+            /** Url */
+            url: string;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "html" | "http_error" | "non_html" | "blocked" | "error";
+            /** Status Code */
+            status_code: number | null;
+        };
         /** FindingChange */
         FindingChange: {
             /** Stable Id */
@@ -1052,6 +1066,24 @@ export interface components {
             truncated_fields: string[];
             structured_data: components["schemas"]["StructuredDataSummary"] | null;
         };
+        /** PagePenalty */
+        PagePenalty: {
+            /** Page Id */
+            page_id: string;
+            /** Url */
+            url: string;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "html" | "http_error";
+            /** Rule Points */
+            rule_points: number;
+            /** Penalty */
+            penalty: number;
+            /** Rules */
+            rules: components["schemas"]["ScoreRule"][];
+        };
         /** PatchExport */
         PatchExport: {
             /** Filename */
@@ -1240,11 +1272,49 @@ export interface components {
              * @default 0
              */
             assessed_pages: number;
+            breakdown: components["schemas"]["ScoreBreakdown"] | null;
             /**
              * Formula
              * @default 100 − mean(capped page penalties) − capped site penalties. Critical=20, High=10, Medium=5, Low=2; HTTP error pages=100. Site cap=20. Unknown pages excluded.
              */
             formula: string;
+        };
+        /** ScoreBreakdown */
+        ScoreBreakdown: {
+            /** Pages */
+            pages: components["schemas"]["PagePenalty"][];
+            /** Excluded Pages */
+            excluded_pages: components["schemas"]["ExcludedScorePage"][];
+            /** Site Rules */
+            site_rules: components["schemas"]["ScoreRule"][];
+            /** Mean Page Penalty */
+            mean_page_penalty: number | null;
+            /**
+             * Site Rule Points
+             * @default 0
+             */
+            site_rule_points: number;
+            /**
+             * Site Penalty
+             * @default 0
+             */
+            site_penalty: number;
+            /** Unrounded Value */
+            unrounded_value: number | null;
+        };
+        /** ScoreRule */
+        ScoreRule: {
+            /** Rule Id */
+            rule_id: string;
+            /** Title */
+            title: string;
+            /**
+             * Severity
+             * @enum {string}
+             */
+            severity: "Critical" | "High" | "Medium" | "Low";
+            /** Points */
+            points: number;
         };
         /** StructuredDataSummary */
         StructuredDataSummary: {

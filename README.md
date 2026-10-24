@@ -117,6 +117,14 @@ At most one robots probe and three same-origin sitemap locations are retained. S
 
 Progress updates persist completed policy checks before content crawling, preserving them after cancellation or restart. Existing audits without the optional discovery snapshot stay **not recorded / unknown**; their evidence and scores are unchanged. Fresh demo audits include explicitly labelled fixture checks with zero HTTP requests. Comparisons can now resolve `robots_absent` or `sitemap_absent` only when the other audit retains a successful same-origin 2xx check of the corresponding kind, confirms presence, finishes deterministic analysis, uses matching rules and assesses the same nonempty URL set. A state label or omitted finding alone cannot prove resolution. Rules version 2 and score version 1 remain unchanged.
 
+## Explain the health score
+
+Open **Coverage matters → How is the score calculated?** to inspect the saved score calculation. New audits record the raw rule points and capped penalty for each assessed page, the mean page penalty, site-rule points and their combined 20-point cap, the unrounded score, and page records excluded from the denominator. Expand a page to inspect its contributing rules; **Search this URL in findings** opens the Issues tab with the URL search applied. That search also matches descendants and grouped affected URLs.
+
+Critical/High/Medium/Low weights remain 20/10/5/2. Each rule counts once per affected page, page penalties cap at 100, and HTTP-error pages receive 100 regardless of their rule totals. The final score rounds to the nearest integer with ties to even, then clamps to 0–100. The dashboard displays intermediate numbers to at most four decimal places; saved JSON retains full numeric precision. No assessed pages means no score, and unknown/excluded pages do not improve the denominator. Exclusion details cover retained page records, while discovered but unfetched URLs remain in coverage counts.
+
+Markdown, CSV and JSON reports include the same calculation snapshot. CSV separates `score_breakdown`, `page_penalty`, `page_score_rule`, `site_score_rule` and `excluded_score_page` records. Existing scores without a breakdown remain explicitly **not recorded** and are never recalculated. Recommendation approvals and intentional/dismissed findings do not remove recorded deductions. A fresh audit is required to assess changes; this diagnostic arithmetic does not forecast rankings, traffic or gains from a proposed fix. The feature makes no extra crawl or AI requests and preserves rule/score versions.
+
 ## Checks
 
 Backend checks, from the repository root:

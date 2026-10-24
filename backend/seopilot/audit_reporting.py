@@ -317,6 +317,9 @@ def _report(audit: Audit, dispositions: list[dict] | None) -> dict[str, Any]:
         limitations.append("Discovery checks were not recorded for this audit; their outcomes remain unknown.")
     else:
         limitations.extend(audit.discovery.notes)
+    if audit.score.breakdown is None:
+        limitations.append("A score breakdown was not recorded; the historical score has not been recalculated.")
+    limitations.append("Score deductions are diagnostic inputs, not predicted gains. Review decisions do not change the recorded score.")
     if audit.status not in {"completed", "partial"}:
         limitations.append("The audit did not complete normally; retained observations may be incomplete.")
     if audit.mode == "demo":
@@ -373,10 +376,13 @@ def _markdown(report: dict[str, Any]) -> str:
         f"Rules version: {_md(report['rules_version'])}. Score version: {_md(score['version'])}.", "",
         f"Score formula: {_md(score['formula'])}", "",
         "; ".join(f"{field}: {_md(value)}" for field, value in coverage.items()) + ".", "",
+    ]
+    lines.extend(_score_markdown(score))
+    lines.extend([
         "## Human review", "", _md(report["human_review"]), "",
         f"Recommendation decisions: pending {counts['pending']}, approved {counts['approved']}, "
         f"rejected {counts['rejected']}.", "", "## Crawl discovery", "",
-    ]
+    ])
     discovery = report["discovery"]
     if discovery is not None:
         lines.extend([
@@ -426,6 +432,40 @@ def _markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _score_markdown(score: dict[str, Any]) -> list[str]:
+    lines = ["## Score breakdown", ""]
+    detail = score["breakdown"]
+    if detail is None:
+        return lines + ["A score breakdown was not recorded; the historical score has not been recalculated.", ""]
+    lines.extend([
+        f"Mean page penalty: {detail['mean_page_penalty'] if detail['mean_page_penalty'] is not None else 'unavailable'}; "
+        f"site rule points: {detail['site_rule_points']}; capped site penalty: {detail['site_penalty']} / 20.", "",
+        f"Unrounded score: {detail['unrounded_value'] if detail['unrounded_value'] is not None else 'unavailable'}. "
+        "Round to the nearest integer (ties to even), then clamp to 0–100. No assessed pages means no score.", "",
+    ])
+    for page in detail["pages"]:
+        lines.extend([f"### {_md(page['url'])}", "",
+                      f"Page penalty: {page['penalty']} / 100; raw rule points: {page['rule_points']}.", ""])
+        if page["outcome"] == "http_error":
+            lines.extend(["HTTP-error override: this page receives 100 penalty points regardless of rule totals.", ""])
+        for rule in page["rules"]:
+            lines.append(f"- {_md(rule['title'])}; {_md(rule['rule_id'])}; {_md(rule['severity'])}: {rule['points']} raw points.")
+        if not page["rules"]:
+            lines.append("No page-rule deductions recorded.")
+        lines.append("")
+    lines.extend(["### Site deductions", ""])
+    for rule in detail["site_rules"]:
+        lines.append(f"- {_md(rule['title'])}; {_md(rule['rule_id'])}; {_md(rule['severity'])}: {rule['points']} raw points.")
+    if not detail["site_rules"]:
+        lines.append("No site-rule deductions recorded.")
+    lines.extend(["", "### Excluded from the score denominator", ""])
+    for page in detail["excluded_pages"]:
+        lines.append(f"- {_md(page['url'])}: {_md(page['outcome'])}; HTTP {_md(page['status_code'] or 'not recorded')}.")
+    if not detail["excluded_pages"]:
+        lines.append("No fetched page records were excluded; this does not establish coverage of undiscovered URLs.")
+    return lines + [""]
+
+
 def _csv_cell(value: Any) -> str:
     cell = "" if value is None else str(value)
     # Leading whitespace can hide formula prefixes in spreadsheet applications.
@@ -452,7 +492,25 @@ def _csv(report: dict[str, Any]) -> str:
         write("audit", field=field, value=report[field])
     for section in ("score", "coverage", "recommendation_decision_counts"):
         for field, value in report[section].items():
-            write(section, field=field, value=value)
+            if field != "breakdown":
+                write(section, field=field, value=value)
+    detail = report["score"]["breakdown"]
+    if detail is not None:
+        for field in ("mean_page_penalty", "site_rule_points", "site_penalty", "unrounded_value"):
+            write("score_breakdown", field=field, value=detail[field])
+        for page in detail["pages"]:
+            for field in ("rule_points", "penalty"):
+                write("page_penalty", id=page["page_id"], url=page["url"], field=field, value=page[field],
+                      reason="HTTP-error override: 100" if page["outcome"] == "http_error" else "Page penalty cap: 100")
+            for rule in page["rules"]:
+                write("page_score_rule", id=page["page_id"], url=page["url"], rule_id=rule["rule_id"], title=rule["title"],
+                      severity=rule["severity"], field="raw_points", value=rule["points"], source="deterministic")
+        for rule in detail["site_rules"]:
+            write("site_score_rule", rule_id=rule["rule_id"], title=rule["title"], severity=rule["severity"],
+                  field="raw_points", value=rule["points"], source="deterministic", reason="Combined site cap: 20")
+        for page in detail["excluded_pages"]:
+            write("excluded_score_page", id=page["page_id"], url=page["url"], field="outcome", value=page["outcome"],
+                  status=page["status_code"], reason="Excluded from the assessed-page denominator")
     discovery = report["discovery"]
     if discovery is not None:
         for field in ("robots_state", "sitemap_state", "request_attempts", "effective_delay_seconds"):

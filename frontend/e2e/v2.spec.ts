@@ -36,7 +36,7 @@ function audit(): Audit {
       url: URL, page_id: PAGE_ID, issue_ids: [], evidence_ids: [], rationale: "Reviewed title wording.",
       suggested_value: TITLE, priority: "Medium", status: "approved", decided_at: DATE, basis: "observed" }],
     warnings: [], coverage: { attempted: 1, assessed: 1, blocked: 0, failed: 0, unchecked: 0, truncated: false },
-    score: { version: "1", value: 90, assessed_pages: 1, formula: "Documented deterministic score." },
+    score: { version: "1", value: 90, assessed_pages: 1, formula: "Documented deterministic score.", breakdown: null },
     ai_status: "unavailable", summary: "One page assessed.", rules_version: "1", verification_urls: [], discovery: null };
 }
 

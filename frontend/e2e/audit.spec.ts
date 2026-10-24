@@ -51,7 +51,7 @@ test("a blocked audit reports insufficient coverage instead of a clean result", 
   const blocked = {
     ...sample, id: "blocked-ui-fixture", mode: "live", status: "failed", ai_status: "unavailable",
     pages: [{ ...sample.pages[0], outcome: "blocked", status_code: null, error: "robots.txt disallows this URL." }],
-    issues: [], recommendations: [], score: { ...sample.score, value: null, assessed_pages: 0 },
+    issues: [], recommendations: [], score: { ...sample.score, value: null, assessed_pages: 0, breakdown: null },
     coverage: { attempted: 1, assessed: 0, blocked: 1, failed: 0, unchecked: 0, truncated: false },
     summary: "No pages could be assessed.", warnings: ["The website's crawl policy prevented access."],
   };

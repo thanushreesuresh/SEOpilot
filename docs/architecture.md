@@ -95,6 +95,10 @@ score = clamp(round(100 - mean(page penalties) - site penalty), 0, 100)
 
 Only successfully assessed HTML pages and confirmed HTTP-error responses enter the denominator. Excluded and unknown pages cannot improve it. No assessed pages means no score. Duplicate-title/description groups affect each page once; repeated instances of the same rule on a page do not multiply the penalty.
 
+New calculations attach an optional `Score.breakdown` snapshot, produced from the same rule aggregation that computes the score. It retains per-page raw rule points, capped penalties and contributing rules; unique site-rule inputs and their cap; the mean and unrounded result; and excluded page records. The calculation uses nearest-integer rounding with ties to even, followed by the 0–100 clamp. Zero assessed pages retains exclusions with null mean/unrounded value and a null score. This additive JSON payload requires no schema migration; older scores keep a null breakdown and are not recomputed. Decisions and dispositions do not rewrite the snapshot.
+
+The dashboard displays the saved breakdown inside the existing score disclosure and can apply a page URL to the finding search. Reports reuse the saved data: Markdown explains caps/overrides, JSON retains numeric precision, and CSV emits separate typed rows rather than a Python dictionary in a cell. Existing escaping, spreadsheet-formula protection and the 1 MiB export limits apply. No provider/network requests or new audit admissions are needed; weights, assessed denominator and rule/score versions remain unchanged.
+
 Title length defaults to a 15–60 character review range; descriptions use 50–160. These configurable editorial heuristics are not universal search-engine requirements. Multiple H1s, noindex, empty alt on decorative images, and canonical references require context. No rule guarantees traffic, ranking changes, or a penalty.
 
 ## AI evidence boundary
