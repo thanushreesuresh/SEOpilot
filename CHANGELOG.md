@@ -4,6 +4,13 @@ Record each meaningful project change during the event, newest first. Update thi
 
 ## Event build log
 
+## 2026-10-24T22:56:17+05:30 — Add the connected audit dashboard and human review
+
+- Changed: Added Next.js/React/Tailwind dashboard, generated OpenAPI types, URL/context/crawl controls, real progress polling, summary/severity/coverage views, evidence filters, recommendation decisions, copy actions, pages and persistent history. Added desktop/mobile browser test scenarios and design reference.
+- Why: Turn actual audit evidence into a cohesive workflow for small-business users while keeping all external website changes manual.
+- Validation: Frontend production build, TypeScript and ESLint passed. Static independent review found and fixed initialization races, filtering of grouped findings, and misleading zero-assessment states.
+- Limitations: Browser origin policy continues to deny localhost despite explicit user approval and a reported permission change. Browser scenarios and rendered fidelity remain unverified; no screenshot or responsive QA pass is claimed.
+
 ## 2026-10-24T22:49:40+05:30 — Safely crawl public websites and extract bounded evidence
 
 - Changed: Added public-address validation, DNS-pinned HTTPcore transport with verified TLS and bounded address fallback, redirects, response limits/decompression, Protego crawl policy, bounded breadth-first crawling, sitemap evidence, shared extraction, truncation-aware rules, and resilient queue integration.

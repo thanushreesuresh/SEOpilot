@@ -1,0 +1,1162 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SEOPilot",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audits": {
+      "get": {
+        "summary": "History",
+        "operationId": "history_api_audits_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AuditSummary"
+                  },
+                  "type": "array",
+                  "title": "Response History Api Audits Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Start Audit",
+        "operationId": "start_audit_api_audits_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuditRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Audit"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audits/{audit_id}": {
+      "get": {
+        "summary": "Get Audit",
+        "operationId": "get_audit_api_audits__audit_id__get",
+        "parameters": [
+          {
+            "name": "audit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Audit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Audit"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recommendations/{recommendation_id}/decision": {
+      "patch": {
+        "summary": "Decide",
+        "operationId": "decide_api_recommendations__recommendation_id__decision_patch",
+        "parameters": [
+          {
+            "name": "recommendation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Recommendation Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Recommendation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/demo-audits": {
+      "post": {
+        "summary": "Demo",
+        "operationId": "demo_api_demo_audits_post",
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Audit"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Audit": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin",
+            "default": ""
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "live",
+              "demo"
+            ],
+            "title": "Mode",
+            "default": "live"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "crawling",
+              "analyzing",
+              "reviewing",
+              "completed",
+              "partial",
+              "failed",
+              "interrupted"
+            ],
+            "title": "Status",
+            "default": "queued"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "business_context": {
+            "type": "string",
+            "title": "Business Context",
+            "default": ""
+          },
+          "options": {
+            "$ref": "#/components/schemas/CrawlOptions-Output"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/Progress"
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/Page"
+            },
+            "type": "array",
+            "title": "Pages"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            },
+            "type": "array",
+            "title": "Issues"
+          },
+          "recommendations": {
+            "items": {
+              "$ref": "#/components/schemas/Recommendation"
+            },
+            "type": "array",
+            "title": "Recommendations"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/Coverage"
+          },
+          "score": {
+            "$ref": "#/components/schemas/Score"
+          },
+          "ai_status": {
+            "type": "string",
+            "enum": [
+              "unavailable",
+              "pending",
+              "available",
+              "failed",
+              "demo"
+            ],
+            "title": "Ai Status",
+            "default": "unavailable"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "url",
+          "origin",
+          "mode",
+          "status",
+          "created_at",
+          "updated_at",
+          "completed_at",
+          "business_context",
+          "options",
+          "progress",
+          "pages",
+          "issues",
+          "recommendations",
+          "warnings",
+          "coverage",
+          "score",
+          "ai_status",
+          "summary"
+        ],
+        "title": "Audit"
+      },
+      "AuditRequest": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 8,
+            "title": "Url"
+          },
+          "business_context": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Business Context",
+            "default": ""
+          },
+          "options": {
+            "$ref": "#/components/schemas/CrawlOptions-Input"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "AuditRequest"
+      },
+      "AuditSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "live",
+              "demo"
+            ],
+            "title": "Mode"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "crawling",
+              "analyzing",
+              "reviewing",
+              "completed",
+              "partial",
+              "failed",
+              "interrupted"
+            ],
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "pages": {
+            "type": "integer",
+            "title": "Pages"
+          },
+          "issues": {
+            "type": "integer",
+            "title": "Issues"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "url",
+          "mode",
+          "status",
+          "created_at",
+          "score",
+          "pages",
+          "issues"
+        ],
+        "title": "AuditSummary"
+      },
+      "Coverage": {
+        "properties": {
+          "attempted": {
+            "type": "integer",
+            "title": "Attempted",
+            "default": 0
+          },
+          "assessed": {
+            "type": "integer",
+            "title": "Assessed",
+            "default": 0
+          },
+          "blocked": {
+            "type": "integer",
+            "title": "Blocked",
+            "default": 0
+          },
+          "failed": {
+            "type": "integer",
+            "title": "Failed",
+            "default": 0
+          },
+          "unchecked": {
+            "type": "integer",
+            "title": "Unchecked",
+            "default": 0
+          },
+          "truncated": {
+            "type": "boolean",
+            "title": "Truncated",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "attempted",
+          "assessed",
+          "blocked",
+          "failed",
+          "unchecked",
+          "truncated"
+        ],
+        "title": "Coverage"
+      },
+      "CrawlOptions-Input": {
+        "properties": {
+          "page_limit": {
+            "type": "integer",
+            "maximum": 30.0,
+            "minimum": 1.0,
+            "title": "Page Limit",
+            "default": 15
+          },
+          "max_depth": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Max Depth",
+            "default": 2
+          },
+          "delay_ms": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 750.0,
+            "title": "Delay Ms",
+            "default": 750
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Timeout Seconds",
+            "default": 10
+          },
+          "response_bytes": {
+            "type": "integer",
+            "maximum": 2097152.0,
+            "minimum": 1024.0,
+            "title": "Response Bytes",
+            "default": 2097152
+          },
+          "total_seconds": {
+            "type": "integer",
+            "maximum": 120.0,
+            "minimum": 5.0,
+            "title": "Total Seconds",
+            "default": 120
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CrawlOptions"
+      },
+      "CrawlOptions-Output": {
+        "properties": {
+          "page_limit": {
+            "type": "integer",
+            "maximum": 30.0,
+            "minimum": 1.0,
+            "title": "Page Limit",
+            "default": 15
+          },
+          "max_depth": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Max Depth",
+            "default": 2
+          },
+          "delay_ms": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 750.0,
+            "title": "Delay Ms",
+            "default": 750
+          },
+          "timeout_seconds": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Timeout Seconds",
+            "default": 10
+          },
+          "response_bytes": {
+            "type": "integer",
+            "maximum": 2097152.0,
+            "minimum": 1024.0,
+            "title": "Response Bytes",
+            "default": 2097152
+          },
+          "total_seconds": {
+            "type": "integer",
+            "maximum": 120.0,
+            "minimum": 5.0,
+            "title": "Total Seconds",
+            "default": 120
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "page_limit",
+          "max_depth",
+          "delay_ms",
+          "timeout_seconds",
+          "response_bytes",
+          "total_seconds"
+        ],
+        "title": "CrawlOptions"
+      },
+      "DecisionRequest": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "DecisionRequest"
+      },
+      "Evidence": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "field",
+          "value"
+        ],
+        "title": "Evidence"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Heading": {
+        "properties": {
+          "level": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 1.0,
+            "title": "Level"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "level",
+          "text"
+        ],
+        "title": "Heading"
+      },
+      "ImageInfo": {
+        "properties": {
+          "src": {
+            "type": "string",
+            "title": "Src"
+          },
+          "alt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alt"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "src",
+          "alt"
+        ],
+        "title": "ImageInfo"
+      },
+      "Issue": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "page_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Page Ids"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "Critical",
+              "High",
+              "Medium",
+              "Low"
+            ],
+            "title": "Severity"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "recommended_fix": {
+            "type": "string",
+            "title": "Recommended Fix"
+          },
+          "estimated_impact": {
+            "type": "string",
+            "title": "Estimated Impact",
+            "default": "Estimated improvement to clarity or crawlability; ranking outcomes are not guaranteed."
+          },
+          "source": {
+            "type": "string",
+            "const": "deterministic",
+            "title": "Source",
+            "default": "deterministic"
+          },
+          "is_site": {
+            "type": "boolean",
+            "title": "Is Site",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "rule_id",
+          "title",
+          "url",
+          "page_ids",
+          "severity",
+          "category",
+          "explanation",
+          "evidence",
+          "recommended_fix",
+          "estimated_impact",
+          "source",
+          "is_site"
+        ],
+        "title": "Issue"
+      },
+      "Page": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "depth": {
+            "type": "integer",
+            "title": "Depth",
+            "default": 0
+          },
+          "status_code": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Code"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "html",
+              "http_error",
+              "non_html",
+              "blocked",
+              "error"
+            ],
+            "title": "Outcome",
+            "default": "html"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type",
+            "default": "text/html"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "headings": {
+            "items": {
+              "$ref": "#/components/schemas/Heading"
+            },
+            "type": "array",
+            "title": "Headings"
+          },
+          "canonicals": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Canonicals"
+          },
+          "robots": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Robots"
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/ImageInfo"
+            },
+            "type": "array",
+            "title": "Images"
+          },
+          "links": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Links"
+          },
+          "text_excerpt": {
+            "type": "string",
+            "title": "Text Excerpt",
+            "default": ""
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "truncated_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Truncated Fields"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "url",
+          "depth",
+          "status_code",
+          "outcome",
+          "content_type",
+          "title",
+          "description",
+          "headings",
+          "canonicals",
+          "robots",
+          "images",
+          "links",
+          "text_excerpt",
+          "error",
+          "truncated_fields"
+        ],
+        "title": "Page"
+      },
+      "Progress": {
+        "properties": {
+          "stage": {
+            "type": "string",
+            "title": "Stage",
+            "default": "queued"
+          },
+          "visited": {
+            "type": "integer",
+            "title": "Visited",
+            "default": 0
+          },
+          "discovered": {
+            "type": "integer",
+            "title": "Discovered",
+            "default": 0
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 15
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Waiting to start"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "stage",
+          "visited",
+          "discovered",
+          "limit",
+          "message"
+        ],
+        "title": "Progress"
+      },
+      "Recommendation": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "rule",
+              "ai",
+              "demo"
+            ],
+            "title": "Source",
+            "default": "rule"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "technical",
+              "title",
+              "description",
+              "heading",
+              "content",
+              "keyword",
+              "internal_link"
+            ],
+            "title": "Kind",
+            "default": "technical"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "page_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Id"
+          },
+          "issue_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Issue Ids"
+          },
+          "evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Ids"
+          },
+          "rationale": {
+            "type": "string",
+            "title": "Rationale"
+          },
+          "suggested_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Value"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "Critical",
+              "High",
+              "Medium",
+              "Low"
+            ],
+            "title": "Priority"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected"
+            ],
+            "title": "Status",
+            "default": "pending"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "basis": {
+            "type": "string",
+            "enum": [
+              "observed",
+              "inferred"
+            ],
+            "title": "Basis",
+            "default": "observed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "source",
+          "kind",
+          "title",
+          "url",
+          "page_id",
+          "issue_ids",
+          "evidence_ids",
+          "rationale",
+          "suggested_value",
+          "priority",
+          "status",
+          "decided_at",
+          "basis"
+        ],
+        "title": "Recommendation"
+      },
+      "Score": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "assessed_pages": {
+            "type": "integer",
+            "title": "Assessed Pages",
+            "default": 0
+          },
+          "formula": {
+            "type": "string",
+            "title": "Formula",
+            "default": "100 \u2212 mean(capped page penalties) \u2212 capped site penalties. Critical=20, High=10, Medium=5, Low=2; HTTP error pages=100. Site cap=20. Unknown pages excluded."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "value",
+          "assessed_pages",
+          "formula"
+        ],
+        "title": "Score"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

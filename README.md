@@ -60,7 +60,7 @@ npm --prefix frontend run generate:types
 
 ## Status
 
-Implementation is in progress. Validation results and the full demo workflow are recorded in subsequent milestone documentation; no live AI or deployment is claimed.
+The connected dashboard is implemented and its production build, TypeScript and ESLint checks pass. Rendered browser/E2E verification is blocked by the local browser origin permission policy; no browser or visual-fidelity pass is claimed. No deployment is claimed.
 
 The real crawler and API are implemented and verified against a one-page example.com audit. Crawl limits, policy failures and extraction truncation remain visible as coverage information. The server uses validated-IP connections with normal TLS hostname verification and never follows links outside the submitted origin.
 
