@@ -1,56 +1,69 @@
-# DevDay Exchange Community Hackathon: Kochi
+# SEOPilot
 
-A repository template for participants at the 10–11 October 2026 hackathon. It contains event rules and documentation scaffolding; build your project from scratch at the event.
+Evidence-based SEO audits for small businesses. Enter a public website URL, inspect actual page findings, and review practical recommendations. Optional OpenAI analysis adds contextual suggestions; the crawler and rules work without paid services.
 
-**[Event and registration on Luma](https://luma.com/z10nz8gp)** · **[Event rules](RULES.md)** · **[Agent instructions](AGENTS.md)**
+## Local setup (Windows PowerShell)
 
-## Event details
+Requires Node.js 22+ and Python 3.13+. Run from the repository root:
 
-| Detail | Information |
-| --- | --- |
-| Venue | JAIN University, Kochi |
-| Location | [Open the venue map](https://maps.app.goo.gl/Eme7gR7NDXSNRANu5) |
-| Rooms | 2008 and 2009 |
-| Check-in | 10 October 2026, 6:00 PM IST |
-| Kick-off | 10 October 2026, 6:30 PM IST |
-| Wrap-up | 11 October 2026, by 10:00 AM IST |
-| Participation | Solo or a team of up to 4 participants |
-| Theme | Open — build anything you like |
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e "backend[dev]"
+npm --prefix frontend install
+```
 
-Keep your approved Luma QR code ready for entry, and bring your laptop and charger. Eligible checked-in participants will receive Codex credits and OpenAI API credits.
+Start the API in one terminal:
 
-## Use this template
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn seopilot.app:app --app-dir backend --host 127.0.0.1 --port 8000
+```
 
-1. Select **Use this template → Create a new repository** on GitHub. Create your own project repository and clone it.
-2. Read [RULES.md](RULES.md) and [AGENTS.md](AGENTS.md) before building. Begin project implementation at the event.
-3. Fill in the project overview below as you build. Use any suitable language or framework, keeping the implementation simple.
-4. Record meaningful changes in [CHANGELOG.md](CHANGELOG.md) and your Codex usage in [AI_USAGE.md](AI_USAGE.md). Commit after completed milestones; aim for a meaningful checkpoint about every 30 minutes.
-5. Complete [SUBMISSION.md](SUBMISSION.md) with your code repository, short project description, and working demo. Follow submission instructions announced by the organizers.
+Start the dashboard in a second terminal:
 
-This template has no application code or required technology stack. The documentation and commit cadence are repository workflow guidance; the event participation rules are in [RULES.md](RULES.md).
+```powershell
+npm --prefix frontend run dev
+```
 
-## Project overview — complete during the event
+Open [SEOPilot](http://localhost:3000). Keep both services on loopback. Use one API worker; this release is a single-user, single-computer application.
 
-- **Project name:** TODO
-- **Short description:** TODO — what it does, who it helps, and why it matters.
-- **Team:** TODO — participant names and GitHub handles; maximum 4 members.
-- **Working demo:** TODO — link or local demo instructions.
-- **Technology stack:** TODO
+## Configuration
 
-### Run the project
+The backend reads process environment variables and an optional ignored `backend/.env`. `backend/.env.example` lists names without secrets:
 
-Replace these placeholders with commands that actually work for your project:
+- `OPENAI_API_KEY` and `OPENAI_MODEL`: both required to enable live AI. Leave unset for deterministic auditing. Supply credentials through your local environment; never put them in frontend variables or commits.
+- `SEOPILOT_DB`: optional SQLite path, default `backend/.data/seopilot.db`.
 
-1. Prerequisites and versions: TODO
-2. Dependency installation: TODO
-3. Environment setup: TODO — list required variable names and provide a sanitized `.env.example` if needed.
-4. Start the project: TODO
-5. Run checks or tests: TODO
+No credentials are required for the labelled sample demo. The app never modifies or publishes to the audited website.
 
-### Current status
+## Architecture
 
-- Working features: TODO
-- Known limitations: TODO
-- Libraries, APIs, and public datasets used: TODO — include source links and applicable attribution.
+Next.js proxies `/api/*` to FastAPI. A lifespan-managed asynchronous worker claims jobs from SQLite. Crawling, extraction, deterministic rules, AI analysis/review, and storage are separate Python modules. Pydantic defines the API contracts; frontend types are generated from OpenAPI. SQLite stores projects, audit runs, page metadata, findings, recommendations, and append-only review decisions.
 
-See [AI_USAGE.md](AI_USAGE.md) for AI assistance and [CHANGELOG.md](CHANGELOG.md) for the development record.
+Queued jobs survive restarts. Active jobs become interrupted, retain collected evidence, and can be rerun as a new audit. Network requests never hold database transactions. Audit history is local data and is ignored by Git.
+
+## Checks
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest backend/tests -q
+.\.venv\Scripts\python.exe -m ruff check backend scripts
+npm --prefix frontend run lint
+npm --prefix frontend run typecheck
+npm --prefix frontend run build
+```
+
+Regenerate shared API types after contract changes:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/export_openapi.py
+npm --prefix frontend run generate:types
+```
+
+## Status
+
+Implementation is in progress. Validation results and the full demo workflow are recorded in subsequent milestone documentation; no live AI or deployment is claimed.
+
+## Sources and project record
+
+Purposeful libraries: [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/), [FastAPI](https://fastapi.tiangolo.com/), [Pydantic](https://docs.pydantic.dev/), [HTTPcore](https://www.encode.io/httpcore/), [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/), [Protego](https://github.com/scrapy/protego), [OpenAI Python SDK](https://github.com/openai/openai-python), [pytest](https://docs.pytest.org/), and [Ruff](https://docs.astral.sh/ruff/). SQLite uses Python's standard library. No external SEO dataset is used.
+
+This repository began with the DevDay Exchange Kochi documentation template. Original [event rules](RULES.md) and [agent guidance](AGENTS.md) are preserved. Current development uses actual timestamps and makes no claim about event eligibility or organizer submission. See [CHANGELOG.md](CHANGELOG.md), [AI_USAGE.md](AI_USAGE.md), and [SUBMISSION.md](SUBMISSION.md).

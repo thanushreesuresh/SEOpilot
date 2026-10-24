@@ -22,3 +22,14 @@ Thumbs.db
 *.log
 
 # Add entries appropriate to your chosen language or framework.
+.data/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite*
+*.egg-info/
+.ruff_cache/
+.tmp/
+test-results/
+playwright-report/
+*.tsbuildinfo
