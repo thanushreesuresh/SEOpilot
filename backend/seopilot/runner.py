@@ -4,7 +4,6 @@ import asyncio
 import logging
 import sqlite3
 from collections.abc import Awaitable, Callable
-from contextlib import suppress
 
 from .models import Audit, Page, now
 from .settings import Settings
@@ -68,6 +67,7 @@ async def execute(audit: Audit, store: Store, *, settings: Settings | None = Non
 
 async def _process_audit(audit: Audit, store: Store, processor):
     task = asyncio.ensure_future(processor(audit, store))
+    observed = False
     try:
         while not task.done():
             if store.is_cancelled(audit.id):
@@ -75,16 +75,28 @@ async def _process_audit(audit: Audit, store: Store, processor):
                 break
             await asyncio.wait({task}, timeout=0.3)
         try:
+            observed = True
             await task
         except asyncio.CancelledError:
             # Cancelling this child must not swallow lifespan/server shutdown.
             if asyncio.current_task().cancelling() or not store.is_cancelled(audit.id):
                 raise
+    except Exception:
+        if asyncio.current_task().cancelling():
+            log.warning("Audit %s cleanup failed while stopping its task", audit.id)
+            raise asyncio.CancelledError from None
+        raise
     finally:
-        if not task.done():
+        if not observed:
+            # Drain even an already-failed child so exceptions cannot leak from
+            # an unobserved task or replace the original shutdown exception.
             task.cancel()
-            with suppress(asyncio.CancelledError):
+            try:
                 await task
+            except asyncio.CancelledError:
+                pass
+            except Exception:
+                log.warning("Audit %s cleanup failed while stopping its task", audit.id)
 
 
 async def run_queue(store: Store, processor: Callable[[Audit, Store], Awaitable[None]] = execute, fix_tick=None):

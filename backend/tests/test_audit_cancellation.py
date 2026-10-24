@@ -149,6 +149,61 @@ async def test_server_shutdown_cancels_active_child_and_never_restarts_cancelled
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("user_cancelled", [False, True])
+async def test_cleanup_failure_cannot_replace_server_shutdown_cancellation(tmp_path, user_cancelled, caplog):
+    store = Store(tmp_path / "cancel.db")
+    audit = Audit(url="https://example.com/")
+    store.enqueue(audit)
+    started = asyncio.Event()
+
+    async def processor(item, repository):
+        started.set()
+        try:
+            await asyncio.Event().wait()
+        finally:
+            raise RuntimeError("private-transport-cleanup-canary")
+
+    worker = asyncio.create_task(run_queue(store, processor))
+    await asyncio.wait_for(started.wait(), 3)
+    if user_cancelled:
+        store.cancel_audit(audit.id)
+    worker.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await asyncio.wait_for(worker, 1)
+    assert store.get(audit.id).status == ("cancelled" if user_cancelled else "interrupted")
+    assert "cleanup" in caplog.text.lower() and "private-transport-cleanup-canary" not in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_shutdown_during_user_cancellation_cleanup_still_exits_the_worker(tmp_path, caplog):
+    store = Store(tmp_path / "cancel.db")
+    audit = Audit(url="https://example.com/")
+    store.enqueue(audit)
+    started, cleaning = asyncio.Event(), asyncio.Event()
+
+    async def processor(item, repository):
+        started.set()
+        try:
+            await asyncio.Event().wait()
+        finally:
+            cleaning.set()
+            try:
+                await asyncio.Event().wait()
+            finally:
+                raise RuntimeError("private-cleanup-race-canary")
+
+    worker = asyncio.create_task(run_queue(store, processor))
+    await asyncio.wait_for(started.wait(), 3)
+    store.cancel_audit(audit.id)
+    await asyncio.wait_for(cleaning.wait(), 3)
+    worker.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await asyncio.wait_for(worker, 1)
+    assert store.get(audit.id).status == "cancelled"
+    assert "cleanup" in caplog.text.lower() and "private-cleanup-race-canary" not in caplog.text
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize("blocking_stage", ["generate", "review"])
 async def test_cancel_during_ai_stops_the_provider_and_retains_every_reservation(tmp_path, blocking_stage):
     from seopilot.ai import AnalysisBundle, Candidate, EvidenceQuote, enrich

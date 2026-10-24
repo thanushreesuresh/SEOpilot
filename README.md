@@ -82,7 +82,7 @@ Cancellation keeps the accepted audit admission and all existing AI reservations
 
 `POST /api/audits/{audit_id}/cancel` with JSON `{}` returns the retained `Audit`. Repeating it for an already cancelled run returns the same saved state; an ordinarily finished run returns `409`, an unknown UUID `404`, and a forged ID `422`. Existing origin, host and proxy protections apply. Queued cancellation and restart recovery are durable; the SQLite schema remains version 3, with no counter reset.
 
-The cancellation milestone passes **495 offline backend tests**, frontend lint/type/proxy checks and production build locally. Three new browser scenarios bring the suite to **26**; hosted execution is pending. Restart both local services to load the new code. The existing dashboard restart was previously blocked by automatic approval review, so the old local processes are not acceptance evidence for this milestone.
+The cancellation milestone passes **498 offline backend tests**, frontend lint/type/proxy checks and production build locally. All **26 browser scenarios** passed on source `f9368c9`; the shutdown-cleanup follow-up awaits a complete hosted rerun. Cleanup failures are logged without private exception text and cannot swallow server shutdown. Restart both local services to load the new code. The existing dashboard restart was previously blocked by automatic approval review, so the old local processes are not acceptance evidence for this milestone.
 
 ## Architecture
 

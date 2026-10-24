@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T03:18:12+05:30 — Preserve shutdown when child cleanup fails
+
+- Changed: Drain unobserved audit tasks even if already failed; preserve parent cancellation when child cleanup raises and log a generic warning without private exception bodies.
+- Why: Two reproduced cases replaced server cancellation with a cleanup exception, leaving the worker running and incorrectly marking active work failed. A third regression covers shutdown during user-cancellation cleanup.
+- Validation: All 498 backend tests passed locally in 70.58 seconds; Ruff and both independent review axes passed. Source f9368c9 passed 495 backend tests and all 26 hosted browser scenarios, and its mobile screenshot was inspected. The final backend follow-up awaits a complete hosted rerun.
+- Limitations: Existing local processes still need manual restart after the earlier automatic approval rejection. No live providers, user-counter resets or website writes; human review and owned-pilot acceptance remain pending.
+
 ## 2026-10-25T03:10:42+05:30 — Match cancellation tests to accessible markup
 
 - Changed: New browser cases select the progress panel's explicit `status` role and locate retained page evidence within its table cell.

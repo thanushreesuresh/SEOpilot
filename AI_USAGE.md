@@ -1,5 +1,7 @@
 # AI usage record
 
+| 2026-10-25T03:18:12+05:30 | Codex | Shutdown cleanup reliability | Reproduced cleanup errors swallowing worker shutdown, preserved parent cancellation, drained failed children and added three race/error tests with private-message canaries | Pending human review; standards/spec reviews found no actionable issues | 498 backend tests and Ruff passed locally; prior source f9368c9 passed 495 backend/26 hosted browser cases, mobile screenshot inspected; final hosted follow-up pending; zero paid calls |
+
 | 2026-10-25T03:10:42+05:30 | Codex | Cancellation browser selectors | Corrected progress-role and retained-evidence locators against the component's accessible markup before accepting hosted results | Pending human review | Static markup review and frontend lint/type checks; hosted result pending; no product changes or paid calls |
 
 | 2026-10-25T03:06:28+05:30 | Codex | Audit cancellation and deployment evidence | Added durable cancellation/worker cleanup, quota guards, API/contracts/UI and offline/browser fixtures; reproduced and corrected live verification's incomplete-evidence and score-comparability gaps using the existing comparison service | Pending human review; independent standards/spec reviews found no actionable issues | 495 backend tests, Ruff, seven proxy tests, ESLint, TypeScript and production build passed; 26 hosted browser cases pending; no live AI calls, counter resets or website writes |
