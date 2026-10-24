@@ -75,3 +75,17 @@ def test_declared_encoding_is_respected():
     page = extract_page("https://example.com/", "<title>Café</title>".encode("windows-1252"),
                         headers={"Content-Type": "text/html; charset=windows-1252"})
     assert page.title == "Café"
+
+
+def test_extra_indexing_directives_cannot_silently_disappear():
+    html = '<meta name="robots" content="index, follow">' * 10
+    page = extract_page("https://example.com/", html+'<meta name="googlebot" content="noindex">')
+    assert len(page.robots) == 10
+    assert "robots" in page.truncated_fields
+
+
+def test_header_overflow_also_marks_indexing_evidence_incomplete():
+    html = '<meta name="robots" content="index, follow">' * 10
+    page = extract_page("https://example.com/", html, headers={"X-Robots-Tag": "noindex"})
+    assert len(page.robots) == 10
+    assert "robots" in page.truncated_fields

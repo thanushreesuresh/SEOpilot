@@ -1,5 +1,7 @@
 # AI usage record
 
+| 2026-10-25T01:56:07+05:30 | Codex | Indexing evidence reliability | Reproduced silently omitted directives and centralized the metadata/header bound with explicit truncation | Pending human review | 41 focused tests and Ruff passed; separate standards/spec reviews passed; no paid calls |
+
 | 2026-10-25T01:47:01+05:30 | Codex | V2 hosted acceptance record | Recorded passing source SHA and CI evidence, inspected hosted mobile screenshot and confirmed local runtime/counter preservation | Pending human review | 356 backend and 15 hosted Chromium scenarios passed with static/build/contract checks; pilot App/manual deployment remains pending; zero additional AI calls |
 
 | 2026-10-25T01:42:32+05:30 | Codex | Hosted browser acceptance | Corrected accessible-role/alert selectors and opt-out initialization wait from Chromium logs | Pending human review | Hosted backend 356 passed, browser 10 passed/5 failed before fixes; corrected suite submitted for rerun; no live credentials |

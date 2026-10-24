@@ -75,17 +75,23 @@ def extract_page(
     title = soup.find("title")
     page.title = limited(title.get_text(" ", strip=True) if title else "", 512, "title")
 
+    def record_robots(value: str):
+        if len(page.robots) < 10:
+            page.robots.append(limited(value, 1000, "robots"))
+        elif "robots" not in page.truncated_fields:
+            page.truncated_fields.append("robots")
+
     for meta in soup.find_all("meta"):
         name = str(meta.get("name", "")).casefold()
         if name == "description" and not page.description:
             page.description = limited(str(meta.get("content", "")), 2048, "description")
-        if name in {"robots", "googlebot", "bingbot"} and len(page.robots) < 10:
+        if name in {"robots", "googlebot", "bingbot"}:
             value = str(meta.get("content", "")).strip()
             if value:
-                page.robots.append(limited(f"{name}: {value}", 1000, "robots"))
+                record_robots(f"{name}: {value}")
     header_robots = headers.get("x-robots-tag", "").strip()
     if header_robots:
-        page.robots.append(limited(f"X-Robots-Tag: {header_robots}", 1000, "robots"))
+        record_robots(f"X-Robots-Tag: {header_robots}")
 
     base = normalized
     base_tag = soup.find("base", href=True)

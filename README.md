@@ -78,6 +78,8 @@ Optional AI now uses structured generation followed by a separate evidence revie
 
 Next.js proxies allowlisted `/api/*` routes to FastAPI. One lifespan-managed asynchronous worker processes persisted audit and fix stages. Crawling, extraction, deterministic rules, AI analysis/review, GitHub access, static AST patching and storage remain separate modules. Pydantic defines the API contracts; frontend types are generated from OpenAPI. SQLite schema v3 preserves existing audits and counters while adding project connections, immutable proposals, execution events, publication reservations and finding dispositions.
 
+Indexing evidence retains up to ten combined robots meta/header directives. Additional directives mark that field incomplete, so live verification cannot accept a matching prefix as the complete indexing policy.
+
 Queued jobs survive restarts. Active jobs become interrupted, retain collected evidence, and can be rerun as a new audit. Network requests never hold database transactions. Audit history is local data and is ignored by Git.
 
 ## Checks

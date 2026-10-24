@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T01:56:07+05:30 — Keep indexing evidence complete or explicitly unknown
+
+- Changed: Unified the ten-entry robots bound for HTML metadata and response headers; overflow now marks the field truncated instead of silently dropping extra directives.
+- Why: A later noindex directive could be omitted without warning, allowing the retained prefix to appear complete during live verification.
+- Validation: Reproduced both failures before the fix; 41 extraction/workflow tests and Ruff passed. Separate standards and functional reviews found no remaining issue.
+- Limitations: Evidence beyond the bound is intentionally unavailable and blocks metadata verification; no new network or AI requests. Human review pending.
+
 ## 2026-10-25T01:47:01+05:30 — Record passing hosted v2 validation
 
 - Changed: Updated README, verification and submission records for source `fbb94e2046212ce26469a46850d303bae92b387a`; all implementation and test corrections are pushed without rewriting history.
