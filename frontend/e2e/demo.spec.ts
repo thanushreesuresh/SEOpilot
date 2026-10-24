@@ -81,12 +81,16 @@ test("mobile sample upgrade failure can retry through the keyboard without losin
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`/?audit=${OLD_ID}`);
   const open = page.getByRole("button", { name: "Explore sample audit", exact: true });
+  await expect(open).toBeEnabled();
   await open.focus();
+  await expect(open).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("alert").filter({ hasText: "Current sample could not be opened" })).toBeVisible();
   await expect(page).toHaveURL(new RegExp(OLD_ID));
   await expect(page.locator(".sample-revision")).toContainText("Historical sample:");
+  await expect(open).toBeEnabled();
   await open.focus();
+  await expect(open).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(new RegExp(CURRENT_ID));
   await expect(page.locator(".sample-revision")).toContainText("Fixture revision");

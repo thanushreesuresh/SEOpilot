@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T04:36:31+05:30 — Wait for keyboard-ready sample controls
+
+- Changed: The mobile sample-upgrade browser scenario waits for the sample button to be enabled and confirms focus before each Enter activation.
+- Why: Source 8b80716 passed 549 backend tests and 35 browser scenarios, but the new mobile case did not send its sample request. Hosted trace inspection showed the test was attempting focus during workspace initialization without an enabled-state wait. Product behavior and assertions for errors/retry/history remain unchanged.
+- Validation: Corrected frontend lint and TypeScript passed; independent standards/specification reviews found no actionable issues; hosted rerun pending. No provider calls, counter resets or production changes; human review pending.
+
 ## 2026-10-25T04:28:07+05:30 — Keep the offline demonstration current without rewriting history
 
 - Changed: Added a server-owned fixture revision, explicit AI opt-out, atomic revision-aware demo reuse beyond the history window, an additive lookup index, dashboard provenance and revision-labelled Markdown/CSV/JSON exports. Updated setup/demo guidance and generated contracts.
