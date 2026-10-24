@@ -4,6 +4,13 @@ Record each meaningful project change during the event, newest first. Update thi
 
 ## Event build log
 
+## 2026-10-24T23:14:03+05:30 — Record the verified implementation revision
+
+- Changed: Recorded implementation SHA f66d76108a0f0fd3d11df2c2d0f9862f0be7f42d in SUBMISSION.md.
+- Why: Give the demonstration and validation record a stable source revision without rewriting history or implying organizer submission.
+- Validation: Resolved the SHA with Git; repository file/credential-pattern/link and diff checks passed before publication. Application source is unchanged.
+- Limitations: Previously documented browser and live-AI verification limits remain; human review and organizer submission are pending.
+
 ## 2026-10-24T23:13:00+05:30 — Verify the complete workflow and document reproducible delivery
 
 - Changed: Added API-to-storage integration tests, real bounded API smoke command, publishable-file/credential-pattern/Markdown-link checks, architecture/scoring/limitations documentation, exact Windows setup and demonstration commands, and an honest submission record. Removed trailing blank lines from crawler files.

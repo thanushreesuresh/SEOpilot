@@ -5,7 +5,7 @@
 - **Project name:** SEOPilot.
 - **Description:** A local SEO audit application for small businesses: secure website crawling, evidence-backed deterministic findings, contextual AI suggestions when configured, and human recommendation review.
 - **Code repository:** https://github.com/thanushreesuresh/SEOpilot
-- **Verified implementation commit:** Recorded after the final verification milestone; organizer submission has not been performed.
+- **Verified implementation commit:** [f66d76108a0f0fd3d11df2c2d0f9862f0be7f42d](https://github.com/thanushreesuresh/SEOpilot/commit/f66d76108a0f0fd3d11df2c2d0f9862f0be7f42d). This revision contains the completed implementation and verification record; this subsequent documentation commit records its identity. Organizer submission has not been performed.
 - **Working demo:** Follow the README's local setup and three-minute demonstration at http://localhost:3000.
 - **Access requirements:** Node.js 22+, Python 3.13+, local loopback services. No credentials required for deterministic audits or labelled sample mode.
 

@@ -4,6 +4,8 @@ Use Codex during the hackathon and briefly document its actual contribution here
 
 ## Event build log
 
+| 2026-10-24T23:14:03+05:30 | Codex | Release revision record | Recorded the verified implementation SHA in submission documentation without modifying application source | Pending human review | Git revision resolved; publication checks run before atomic push |
+
 | 2026-10-24T23:13:00+05:30 | Codex | Integration and delivery verification | Added real runner/API/history/decision regression tests, public-page smoke command, repository checks, setup/demo and limitation documentation | Pending human review | Final177backendtests, Ruff, ESLint, TypeScript, production build and contract drift checks passed; browser policy remained blocked |
 
 | 2026-10-24T22:58:22+05:30 | Codex | Optional AI and demo | Implemented grouped structured analysis, independent reviewer, evidence validation, bounded failure handling and production-parser sample fixtures | Pending human review | Full backend suite177passed; provider calls mocked, no live AI/key creation; SDK request contract verified |
