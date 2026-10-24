@@ -38,6 +38,7 @@ class Store:
                 CREATE TABLE IF NOT EXISTS decisions(id TEXT PRIMARY KEY, audit_id TEXT NOT NULL REFERENCES audits(id), recommendation_id TEXT NOT NULL,
                     status TEXT NOT NULL CHECK(status IN ('approved','rejected')), decided_at TEXT NOT NULL);
                 CREATE INDEX IF NOT EXISTS audits_status ON audits(status, created_at);
+                CREATE INDEX IF NOT EXISTS audits_mode_created ON audits(mode, created_at);
                 CREATE TABLE IF NOT EXISTS local_settings(name TEXT PRIMARY KEY, value TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS admissions(
                     audit_id TEXT PRIMARY KEY REFERENCES audits(id), identity TEXT NOT NULL,
@@ -92,6 +93,22 @@ class Store:
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
             self._write(db, audit)
+
+    def get_or_create_demo(self, candidate: Audit) -> Audit:
+        if (candidate.mode != "demo" or not candidate.demo_revision or candidate.status != "completed"
+                or candidate.allow_ai or candidate.ai_status != "demo"):
+            raise ValueError("Only a completed, explicit offline sample can be reused by revision.")
+        with self.connection() as db:
+            # Serialize lookup + insertion across requests and server instances.
+            # The bundled candidate is prepared before this short transaction.
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("""SELECT payload FROM audits WHERE mode='demo' AND status='completed'
+                AND json_extract(payload, '$.demo_revision')=? ORDER BY created_at DESC,id DESC LIMIT 1""",
+                             (candidate.demo_revision,)).fetchone()
+            if row:
+                return Audit.model_validate_json(row[0])
+            self._write(db, candidate)
+            return candidate
 
     def is_cancelled(self, audit_id: str) -> bool:
         with self.connection() as db:

@@ -402,6 +402,8 @@ export interface components {
              * @enum {string}
              */
             mode: "live" | "demo";
+            /** Demo Revision */
+            demo_revision: string | null;
             /**
              * Status
              * @default queued

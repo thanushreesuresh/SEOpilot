@@ -173,13 +173,9 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
         from .demo import build_demo
 
         admit()
-        # Sample data is public and deterministic; repeated clicks reuse it.
-        for previous in request.app.state.store.history():
-            if previous.mode == "demo":
-                return request.app.state.store.get(previous.id)
+        # Current fixtures are free/offline; old snapshots and decisions remain.
         audit = await build_demo()
-        request.app.state.store.save(audit)
-        return audit
+        return request.app.state.store.get_or_create_demo(audit)
 
     from .fix_api import router
 

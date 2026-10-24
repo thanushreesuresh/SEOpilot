@@ -5,6 +5,8 @@ from .models import Audit, Coverage, CrawlDiscovery, DiscoveryProbe, Page, Progr
 from .rules import analyze, calculate_score, rule_recommendations
 
 ORIGIN = "https://northstar-pottery.example"
+# Bump when fixtures or demonstrated evidence change; keep older snapshots intact.
+DEMO_REVISION = "2026-10-25.1"
 FIXTURES = {
     "/": """<!doctype html><html lang="en"><head>
     <title>Northstar Pottery | Handmade Ceramics</title>
@@ -35,7 +37,8 @@ async def build_demo() -> Audit:
     pages = [extract_page(ORIGIN + path, html, depth=0 if path == '/' else 1) for path, html in FIXTURES.items()]
     pages.append(Page(url=ORIGIN + "/old-collection", depth=1, status_code=404, outcome="http_error"))
     audit = Audit(
-        url=ORIGIN + "/", origin=ORIGIN, mode="demo", status="completed", ai_status="demo", pages=pages,
+        url=ORIGIN + "/", origin=ORIGIN, mode="demo", demo_revision=DEMO_REVISION,
+        status="completed", ai_status="demo", allow_ai=False, pages=pages,
         business_context="Sample business: a handmade ceramics studio and beginner pottery workshops in Kochi.",
         progress=Progress(stage="completed", visited=4, discovered=4, message="Sample fixture audit complete"),
         coverage=Coverage(attempted=4, assessed=4), completed_at=now(),

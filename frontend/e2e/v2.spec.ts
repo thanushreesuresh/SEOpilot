@@ -24,7 +24,7 @@ function project(): Project {
 }
 
 function audit(): Audit {
-  return { id: AUDIT_ID, url: URL, origin: ORIGIN, mode: "live", status: "completed", created_at: DATE,
+  return { id: AUDIT_ID, url: URL, origin: ORIGIN, mode: "live", demo_revision: null, status: "completed", created_at: DATE,
     updated_at: DATE, completed_at: DATE, business_context: "", allow_ai: false,
     options: { page_limit: 15, max_depth: 2, delay_ms: 750, timeout_seconds: 10, response_bytes: 2097152, total_seconds: 120 },
     progress: { stage: "completed", visited: 1, discovered: 1, limit: 15, message: "Audit completed." },

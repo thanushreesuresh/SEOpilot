@@ -324,6 +324,8 @@ def _report(audit: Audit, dispositions: list[dict] | None) -> dict[str, Any]:
         limitations.append("The audit did not complete normally; retained observations may be incomplete.")
     if audit.mode == "demo":
         limitations.append("Sample mode uses bundled fixtures; it does not describe a live website inspection.")
+        if audit.demo_revision is None:
+            limitations.append("The sample fixture revision was not recorded; this is a historical demonstration.")
     coverage = audit.coverage
     if coverage.blocked or coverage.failed or coverage.unchecked or coverage.truncated:
         limitations.append("Coverage is incomplete: blocked, failed, unchecked, or truncated evidence is not verified.")
@@ -341,7 +343,7 @@ def _report(audit: Audit, dispositions: list[dict] | None) -> dict[str, Any]:
         recommendations.append(recommendation.model_dump() | {"verification": verification})
     return {
         "report_version": "1", "audit_id": audit.id, "url": audit.url, "origin": audit.origin,
-        "mode": audit.mode, "status": audit.status, "created_at": audit.created_at,
+        "mode": audit.mode, "demo_revision": audit.demo_revision, "status": audit.status, "created_at": audit.created_at,
         "updated_at": audit.updated_at, "completed_at": audit.completed_at,
         "summary": audit.summary, "rules_version": audit.rules_version, "score": audit.score.model_dump(),
         "coverage": audit.coverage.model_dump(), "ai_status": audit.ai_status,
@@ -366,10 +368,13 @@ def _md(value: Any) -> str:
 def _markdown(report: dict[str, Any]) -> str:
     score, coverage = report["score"], report["coverage"]
     counts = report["recommendation_decision_counts"]
+    sample_revision = ([f"Sample fixture revision: {_md(report['demo_revision'] or 'not recorded')}.", ""]
+                       if report["mode"] == "demo" else [])
     lines = [
         "# SEOPilot audit report", "", f"Audit: {_md(report['audit_id'])}", "",
         f"Website: {_md(report['url'])}", "",
         f"Mode: {_md(report['mode'])}; status: {_md(report['status'])}; AI status: {_md(report['ai_status'])}.", "",
+        *sample_revision,
         f"Created: {_md(report['created_at'])}; completed: {_md(report['completed_at'] or 'not recorded')}.", "",
         _md(report["summary"]), "", "## Score and coverage", "",
         f"Score: {score['value'] if score['value'] is not None else 'unavailable'} / 100. "
@@ -487,7 +492,7 @@ def _csv(report: dict[str, Any]) -> str:
         writer.writerow([_csv_cell(record_type if column == "record_type" else values.get(column))
                          for column in columns])
 
-    for field in ("report_version", "audit_id", "url", "origin", "mode", "status", "created_at", "updated_at",
+    for field in ("report_version", "audit_id", "url", "origin", "mode", "demo_revision", "status", "created_at", "updated_at",
                   "completed_at", "summary", "rules_version", "ai_status", "human_review"):
         write("audit", field=field, value=report[field])
     for section in ("score", "coverage", "recommendation_decision_counts"):

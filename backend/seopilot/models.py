@@ -202,6 +202,7 @@ class Audit(Contract):
     url: str
     origin: str = ""
     mode: Literal["live", "demo"] = "live"
+    demo_revision: str | None = Field(default=None, min_length=1, max_length=40)
     status: AuditStatus = "queued"
     created_at: str = Field(default_factory=now)
     updated_at: str = Field(default_factory=now)

@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T04:28:07+05:30 — Keep the offline demonstration current without rewriting history
+
+- Changed: Added a server-owned fixture revision, explicit AI opt-out, atomic revision-aware demo reuse beyond the history window, an additive lookup index, dashboard provenance and revision-labelled Markdown/CSV/JSON exports. Updated setup/demo guidance and generated contracts.
+- Why: The old endpoint reused any demo among the latest 100 audits, so older installations could hide newly implemented evidence and score explanations. Upgrades now create one current fixture while preserving old raw payloads, scores and review decisions.
+- Validation: Baseline 534 and final full 549 backend tests passed. Ruff, frontend ESLint/TypeScript, 34 AST tests, seven validator/proxy tests each, production build and credential/history checks passed. Independent standards/specification reviews found no actionable issues; read-only original database counts are unchanged. Three new hosted browser cases are pending at this checkpoint.
+- Limitations: Samples remain explicitly simulated, with no website/provider requests or live-audit charges. They do not demonstrate an owned GitHub App deployment. Original database/counters are not modified by tests; human review, local manual restart and owned-pilot acceptance remain pending.
+
 ## 2026-10-25T04:12:30+05:30 — Record verified score explanations
 
 - Changed: Updated README, verification and submission records for source 11f46b4 and passing hosted run 40139477667. Inspected final desktop/mobile screenshots and confirmed preserved original database counts using read-only access.

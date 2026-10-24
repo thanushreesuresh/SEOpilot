@@ -4,7 +4,7 @@ Evidence-based SEO audits and reviewed metadata fixes for websites you own. Audi
 
 ## Local setup (Windows PowerShell)
 
-Requires Node.js 22+ and Python 3.13+. Run from the repository root:
+Requires Node.js 22+ and Python 3.13+ with SQLite JSON-function support (verified locally with bundled SQLite 3.50.4). Run from the repository root:
 
 ```powershell
 python -m venv .venv
@@ -168,10 +168,12 @@ For a separately authorized browser environment, install Chromium with `npx --no
 ## Three-minute demonstration
 
 1. Start both services and open [the local dashboard](http://localhost:3000).
-2. Select **Explore sample audit**. Confirm the visible sample disclosure; its bundled HTML includes a simulated missing page and curated optimization suggestions.
+2. Select **Explore sample audit**. Confirm the visible sample disclosure and fixture revision; its bundled HTML includes a simulated missing page and curated optimization suggestions. Open the score explanation and robots/sitemap checks to inspect the saved evidence.
 3. Filter **High** findings. Open the internal-link finding, inspect its URL/status evidence, then approve or reject its recommendation. Copy a suggestion; no website is changed.
-4. Open **Recommendations** and inspect the labelled sample title/description suggestions. Download a Markdown, CSV, or JSON report. Open **Pages** for the JSON-LD summaries, then **Audit history**, reopen the audit, and confirm the saved decision. If two compatible saved audits are available, use **Compare audits**; repeated sample requests reuse one audit and do not create a comparison pair.
+4. Open **Recommendations** and inspect the labelled sample title/description suggestions. Download a Markdown, CSV, or JSON report. Open **Pages** for the JSON-LD summaries, then **Audit history**, reopen the audit, and confirm the saved decision. If two compatible saved audits are available, use **Compare audits**; repeated sample requests reuse the current revision and do not create a comparison pair.
 5. For a real audit, enter `https://example.com/`, set link depth to **Starting page only**, and run the audit. Results and the score come from current fetched HTML. The AI panel reports unavailable until configured.
+
+The server owns the fixture revision. After an upgrade with changed fixtures, **Explore sample audit** creates one new current sample and preserves old sample results, scores and decisions. Repeated/concurrent requests reuse that revision, including after restart and when it falls outside the latest 100 history rows. Reopening an old sample keeps its old evidence and labels an unrecorded revision as historical; it never silently reanalyzes that record. Reports include the recorded fixture revision. Samples set `allow_ai=false`, make no website/provider requests and consume no live-audit allowance, including when that allowance is exhausted. The existing 10-request/minute burst guard still applies to sample-opening requests.
 
 For a bounded real API smoke test while the backend is running:
 

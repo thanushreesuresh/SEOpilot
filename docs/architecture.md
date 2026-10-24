@@ -19,6 +19,12 @@ flowchart LR
 
 Recommendation approval records content review. A separate GitHub App workflow publishes only an inspected, hash-bound metadata patch to a dedicated draft PR. Merge and deployment remain manual.
 
+## Versioned offline demonstration
+
+`demo.py` parses bundled HTML through extraction/rules/scoring, labels curated suggestions and sets `allow_ai=false`. `DEMO_REVISION` identifies the fixture/evidence revision; bump it when the sample or demonstrated evidence changes. The optional `Audit.demo_revision` defaults to null for older snapshots and live audits. Dashboard disclosures and report exports preserve this provenance without rewriting older records.
+
+`POST /api/demo-audits` prepares a bounded offline candidate before entering `Store.get_or_create_demo`. A short `BEGIN IMMEDIATE` transaction uses a parameterized native SQLite JSON lookup over completed demo records for that exact revision, then either returns the existing snapshot with its decisions or inserts the candidate. Lookup is independent of the 100-row history listing, and the existing schema gains an idempotent mode/creation-time index. No tables, counters, historical scores or decision records are migrated or reset. Concurrent callers share one saved revision; failed/live records do not qualify. SQLite JSON functions are required. The existing short burst guard applies, while live-audit admissions and AI reservations are untouched.
+
 ## Reviewed repository fixes
 
 The local operator configures a private GitHub App and owner allowlist, selects an installed repository and explicitly attests that it supplies the production origin. Projects bind numeric repository/installation IDs, base branch and application subdirectory. The App requests Metadata read, Contents write, Pull requests write and Actions read. Access is reauthorized before operations; repository-scoped installation tokens remain in server memory. The ignored server-side PEM key never enters API contracts, browser responses or reports.

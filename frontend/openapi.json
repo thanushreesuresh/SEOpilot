@@ -930,6 +930,19 @@
             "title": "Mode",
             "default": "live"
           },
+          "demo_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Revision"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -1065,6 +1078,7 @@
           "url",
           "origin",
           "mode",
+          "demo_revision",
           "status",
           "created_at",
           "updated_at",

@@ -22,7 +22,7 @@ const CONTEXT_MESSAGE = "Review JSON-LD context: a root object has no @context. 
 
 function audit(id: string, date: string, blocked = false): Audit {
   return {
-    id, url: ABOUT, origin: ORIGIN, mode: "demo", status: blocked ? "partial" : "completed",
+    id, url: ABOUT, origin: ORIGIN, mode: "demo", demo_revision: null, status: blocked ? "partial" : "completed",
     created_at: date, updated_at: date, completed_at: date, business_context: "", allow_ai: false,
     options: { page_limit: 15, max_depth: 2, delay_ms: 750, timeout_seconds: 10, response_bytes: 2097152, total_seconds: 120 },
     progress: { stage: "completed", visited: 3, discovered: 3, limit: 15, message: "Saved sample audit completed." },
