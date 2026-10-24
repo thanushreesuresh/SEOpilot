@@ -8,7 +8,7 @@ function number(value: number | null) {
 
 export function ScoreBreakdownDetails({ audit, onSearch }: { audit: Audit; onSearch: (url: string) => void }) {
   const detail = audit.score.breakdown;
-  if (!detail) return <p>A score breakdown was not recorded; the historical score has not been recalculated.</p>;
+  if (!detail) return <div className="score-breakdown"><p>A score breakdown was not recorded; the historical score has not been recalculated.</p></div>;
   return <section className="score-breakdown" aria-label="Score deductions">
     <h4>{audit.mode === "demo" ? "Sample score calculation" : "Recorded score calculation"}</h4>
     {audit.score.value === null ? <p>No assessed pages means no score. Excluded pages do not improve the denominator.</p> : <>

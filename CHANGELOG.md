@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T04:05:09+05:30 — Improve score-detail readability after hosted inspection
+
+- Changed: Increased new score explanations to 12-pixel text, used darker text colors and added hosted assertions for computed font size and text/background contrast, including legacy scores without a breakdown.
+- Why: The passing 534-backend/33-browser run on 47e2d1e produced screenshots showing inherited 10-pixel muted text. Existing colors measured 3.66–3.79:1 against white; the new paragraph color measures 7.38:1. This correction is limited to the new score details.
+- Validation: Prior hosted run 40138903220 passed all functional checks. Independent specification review identified the unwrapped legacy paragraph; it now shares the scoped styling and readability assertions. Corrected frontend lint/types/build and credential/link checks passed; both final independent review axes found no remaining actionable issues. Hosted verification pending. No scorer, provider, quota or persistence behavior changes; human review pending.
+
 ## 2026-10-25T03:58:30+05:30 — Reuse saved browser fixtures under the real burst limit
 
 - Changed: Shared browser sample setup now reads history/detail and creates a sample only when none exists; API failures include their HTTP status in assertions. Updated audit, cancellation, discovery and score scenarios to use it.

@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import type { Audit } from "../src/lib/api";
 import { sampleAudit } from "./fixtures";
 
@@ -11,6 +11,25 @@ async function openScore(page: Page, audit: Audit) {
   return page.getByRole("region", { name: "Score deductions", exact: true });
 }
 
+async function expectReadableScoreText(text: Locator) {
+  const readability = await text.evaluate((element) => {
+    const background = element.closest(".coverage-panel");
+    if (!background) throw new Error("The score's background panel was not found.");
+    const style = getComputedStyle(element);
+    function luminance(color: string) {
+      const channels = color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+      if (channels?.length !== 3) throw new Error("The rendered text color could not be measured.");
+      return channels.map((channel) => channel / 255)
+        .map((channel) => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)
+        .reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+    }
+    const ink = luminance(style.color), paper = luminance(getComputedStyle(background).backgroundColor);
+    return { fontSize: parseFloat(style.fontSize), contrast: (Math.max(ink, paper) + 0.05) / (Math.min(ink, paper) + 0.05) };
+  });
+  expect(readability.fontSize).toBeGreaterThanOrEqual(12);
+  expect(readability.contrast).toBeGreaterThanOrEqual(4.5);
+}
+
 test("sample score explains averaging and HTTP overrides then links back to evidence", async ({ page, request }, testInfo) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
@@ -18,6 +37,7 @@ test("sample score explains averaging and HTTP overrides then links back to evid
   const panel = await openScore(page, audit);
   await expect(panel.getByRole("heading", { name: "Sample score calculation", exact: true })).toBeVisible();
   await expect(panel.getByText(/Page penalties are averaged across 4 assessed pages/)).toBeVisible();
+  await expectReadableScoreText(panel.getByText(/Page penalties are averaged across 4 assessed pages/));
   await expect(panel.getByText(/with ties to even/)).toBeVisible();
   const broken = panel.locator("details").filter({ hasText: "/old-collection" });
   await broken.locator("summary").click();
@@ -61,6 +81,7 @@ test("historical score without a breakdown stays unchanged and explicitly unreco
   await page.goto(`/?audit=${audit.id}`);
   await page.getByText("How is the score calculated?", { exact: true }).click();
   await expect(page.getByText("A score breakdown was not recorded; the historical score has not been recalculated.", { exact: true })).toBeVisible();
+  await expectReadableScoreText(page.getByText("A score breakdown was not recorded; the historical score has not been recalculated.", { exact: true }));
   await expect(page.getByRole("region", { name: "Score deductions", exact: true })).toHaveCount(0);
   await expect(page.locator(".health-metric .metric-value")).toContainText(String(audit.score.value));
 });
