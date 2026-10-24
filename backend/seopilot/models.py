@@ -49,6 +49,20 @@ class ImageInfo(Contract):
     alt: str | None = None
 
 
+class StructuredObservation(Contract):
+    code: str
+    message: str
+    block_index: int
+    evidence: str
+
+
+class StructuredDataSummary(Contract):
+    blocks: int = Field(ge=0)
+    types: list[str] = Field(default_factory=list, max_length=20)
+    observations: list[StructuredObservation] = Field(default_factory=list, max_length=50)
+    truncated: bool = False
+
+
 class Page(Contract):
     id: str = Field(default_factory=new_id)
     url: str
@@ -66,6 +80,7 @@ class Page(Contract):
     text_excerpt: str = ""
     error: str | None = None
     truncated_fields: list[str] = Field(default_factory=list)
+    structured_data: StructuredDataSummary | None = None
 
 
 class Evidence(Contract):

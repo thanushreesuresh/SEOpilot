@@ -82,6 +82,23 @@ Indexing evidence retains up to ten combined robots meta/header directives. Addi
 
 Queued jobs survive restarts. Active jobs become interrupted, retain collected evidence, and can be rerun as a new audit. Network requests never hold database transactions. Audit history is local data and is ignored by Git.
 
+## Saved comparisons, reports, and JSON-LD checks
+
+Open **Audit history → Compare audits**, select **Earlier audit** and **Later audit**, then choose **Run comparison**. The selector uses the latest 100 saved audits. Both audits must be finished (`completed`, `partial`, `failed`, or `interrupted`), use the same mode (live or sample), and have the same normalized origin, including scheme, hostname, and port. They must be different audits, and the baseline must have an earlier creation time. Comparing saved results starts no crawl, consumes no live-audit admission, and makes no AI calls.
+
+Finding changes use rule ID, normalized URL, primary evidence field, and site/page scope rather than random finding IDs. The view separates added, persistent, resolved, and unresolved/unknown findings; filters by change status or URL; and shows shared, newly assessed, and removed URLs. Missing follow-up pages, blocked or unchecked evidence, truncated fields, unfinished analysis, or different rules cannot establish a fix. Newly assessed coverage is not reported as a regression. A score delta appears only when both audits have equal complete, untruncated coverage, matching rule/score versions and score formulas, available scores, and no unresolved/unknown findings. Historical scores stay unchanged; these comparisons do not measure rankings or traffic.
+
+In an audit overview, choose **Report format → Markdown, CSV, or JSON → Download report**. Reports use saved findings and evidence, score/formula/version information, coverage, recommendations and their review status, decision/disposition history, and limitations. AI and sample suggestions retain their hypothesis and human-review labels. Reports are available after the audit finishes and make no new crawl or AI calls. Report content and its JSON response envelope are each bounded to **1 MiB**; oversized exports return an error rather than a clipped report. CSV uses standard quoting and prefixes formula-like cells, including whitespace-hidden prefixes, with an apostrophe. Markdown escapes source text. Exports exclude credentials and private repository source.
+
+| Endpoint | Saved-data operation |
+| --- | --- |
+| `POST /api/audit-comparisons` | JSON body: `{"before_audit_id":"<earlier UUID>","after_audit_id":"<later UUID>"}`; returns finding changes, coverage, versions, and a nullable score delta |
+| `GET /api/audits/{audit_id}/report/{format}` | `format` is `markdown`, `csv`, or `json`; returns `filename`, `media_type`, and `content` for download |
+
+Open the **Pages** tab to inspect each page's JSON-LD summary. New HTML extraction retains declared type labels and bounded syntax/context observations; raw JSON-LD scripts are discarded. Inspection covers at most 10 blocks, 16 KiB per block, 64 KiB combined, nesting depth 32, 20 distinct type labels, and 50 observations. Limits and clipped HTML leave evidence incomplete; older saved pages without this inspection remain unknown. The checker does not fetch contexts, execute scripts, validate all Schema.org requirements, or establish rich-result eligibility. Missing or unfamiliar contexts receive review advice because custom vocabularies and fully qualified IRIs can be intentional.
+
+New deterministic analyses record **rules version 2** for the JSON-LD diagnostics. Existing saved audits keep rules version 1 and their original findings and scores; score version remains **1**. A fresh audit is needed to collect the new evidence. Comparisons disclose version differences and withhold conclusions that the retained evidence cannot support.
+
 ## Checks
 
 Backend checks, from the repository root:
@@ -118,7 +135,7 @@ cd frontend
 npm run generate:types
 ```
 
-Browser scenarios are in `frontend/e2e/`. GitHub Actions installs Chromium and runs `npm run test:e2e` with disabled live credentials and a disposable database. All **15 desktop/mobile, keyboard and error-state scenarios passed** in the [hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40128792918). The hosted mobile review screenshot was inspected. See the [verification record](docs/verification.md).
+Browser scenarios are in `frontend/e2e/`. GitHub Actions installs Chromium and runs `npm run test:e2e` with disabled live credentials and a disposable database. The **prior V2 baseline of 15 desktop/mobile, keyboard and error-state scenarios passed** in the [hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40128792918); its mobile review screenshot was inspected. The current suite contains **23 scenarios**, including eight new reporting/JSON-LD cases, and awaits hosted execution. The prior pass does not verify this iteration. See the [verification record](docs/verification.md).
 
 For a separately authorized browser environment, install Chromium with `npx --no-install playwright install chromium`, then run `npm run test:e2e` from `frontend/`. These commands start local services when needed. They were not used to obtain a local browser acceptance pass in this session.
 
@@ -127,7 +144,7 @@ For a separately authorized browser environment, install Chromium with `npx --no
 1. Start both services and open [the local dashboard](http://localhost:3000).
 2. Select **Explore sample audit**. Confirm the visible sample disclosure; its bundled HTML includes a simulated missing page and curated optimization suggestions.
 3. Filter **High** findings. Open the internal-link finding, inspect its URL/status evidence, then approve or reject its recommendation. Copy a suggestion; no website is changed.
-4. Open **Recommendations** and inspect the labelled sample title/description suggestions. Open **Audit history**, reopen the audit, and confirm the saved decision.
+4. Open **Recommendations** and inspect the labelled sample title/description suggestions. Download a Markdown, CSV, or JSON report. Open **Pages** for the JSON-LD summaries, then **Audit history**, reopen the audit, and confirm the saved decision. If two compatible saved audits are available, use **Compare audits**; repeated sample requests reuse one audit and do not create a comparison pair.
 5. For a real audit, enter `https://example.com/`, set link depth to **Starting page only**, and run the audit. Results and the score come from current fetched HTML. The AI panel reports unavailable until configured.
 
 For a bounded real API smoke test while the backend is running:
@@ -142,13 +159,15 @@ The smoke test sends `allow_ai=false`, even if the running API has live AI confi
 
 V2 implements project onboarding, source mapping, private patch review/download, explicit hash-bound draft-PR publication, recovery after uncertain writes, hosted validation reports, finding dispositions and fix-run history. It never merges or deploys changes. **PR opened**, **checks passed**, **merged**, **awaiting deployment** and **live verified** are separate states.
 
+This iteration adds saved audit comparisons, Markdown/CSV/JSON evidence reports, and bounded JSON-LD diagnostics. Browser acceptance for these additions is pending; the expanded 23-scenario suite has not yet passed hosted execution.
+
 Only TypeScript App Router server-page titles and descriptions are edited. The pinned AST parser in `repository-tools/` never executes target imports, configuration or scripts. Dynamic metadata, Client Components, ambiguous routes, percent-encoded route paths and uncertain inheritance/title templates require manual work. Shared layouts, canonicals, indexing directives, page content, dependencies and workflows are never automatically edited. Proposals are limited to three pages, five files and 100 changed lines; patch generation makes zero additional AI calls and private source stays outside OpenAI requests.
 
 Publication allows two draft PRs globally per rolling 24 hours and one active fix per project. Each branch is `seopilot/<fix-run-id>` with one approved commit; stale or conflicting edits are rejected. GitHub status checks pause after ten minutes and can resume through **Refresh status**. Source and patches expire after 24 hours; active-server cleanup purges them, expired exports fail closed, and immediate deletion/disconnection controls are available. GitHub Actions usage is separate from the OpenAI allowance.
 
 After manually merging and deploying, choose **Verify live**. It starts a fresh bounded audit of the recorded URLs with AI disabled and the existing three-audits/IP allowance. Missing, blocked, failed or truncated metadata cannot pass. Historical scores and rule/scoring versions are retained; reduced coverage is never reported as improvement. Dispositions record reasons without rewriting evidence or scores.
 
-Verified locally and on GitHub: 356 backend tests, 34 AST tests, seven validator tests, seven proxy tests, Ruff, ESLint, TypeScript, production build and all 15 hosted browser scenarios. See [verification](docs/verification.md). A copied-database migration and the local runtime upgrade preserved existing audit, decision and usage records; counters were never reset. Earlier real SEO/AI observations remain in the [live record](docs/live-validation-2026-10-25.md).
+The **prior V2 baseline** was verified locally and on GitHub with 356 backend tests, 34 AST tests, seven validator tests, seven proxy tests, Ruff, ESLint, TypeScript, a production build, and 15 hosted browser scenarios. These results precede the comparison/report/JSON-LD changes and are not acceptance evidence for this iteration. See [verification](docs/verification.md). A copied-database migration and the local runtime upgrade preserved existing audit, decision and usage records; counters were never reset. Earlier real SEO/AI observations remain in the [live record](docs/live-validation-2026-10-25.md).
 
 The selected owned pilot is [thanushree-portfolio](https://github.com/thanushreesuresh/thanushree-portfolio) at [thanushree-portfolio-six.vercel.app](https://thanushree-portfolio-six.vercel.app/). The three local GitHub App settings are not configured. Release acceptance still requires the App installation, owner-installed workflow, an inspected pilot draft PR, manual merge/deployment and successful live verification. No pilot deployment or end-to-end release acceptance is claimed; human review remains pending.
 

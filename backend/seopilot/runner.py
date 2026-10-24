@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 async def execute(audit: Audit, store: Store, *, settings: Settings | None = None):
     from .crawler import crawl
-    from .rules import analyze, calculate_score, rule_recommendations
+    from .rules import RULES_VERSION, analyze, calculate_score, rule_recommendations
 
     async def progress(pages: list[Page], discovered: int):
         audit.pages = list(pages)
@@ -36,6 +36,7 @@ async def execute(audit: Audit, store: Store, *, settings: Settings | None = Non
     store.save(audit)
     audit.issues = analyze(audit.pages, audit.origin, result.robots_state, result.sitemap_state,
                            discovery_evidence=result.discovery_evidence)
+    audit.rules_version = RULES_VERSION
     audit.score = calculate_score(audit.pages, audit.issues)
     audit.recommendations = rule_recommendations(audit.issues, audit.pages)
     audit.status = "reviewing"

@@ -1,11 +1,12 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, FileClock, GitPullRequest, House, LockKeyhole, RefreshCw } from "lucide-react";
+import { ArrowLeft, FileClock, GitCompareArrows, GitPullRequest, House, LockKeyhole, RefreshCw } from "lucide-react";
 import { api, dateTime, domain, isActive, type Audit, type AuditSummary, type Recommendation, type UsageStatus } from "@/lib/api";
 import { AuditForm } from "./audit-form";
 import { AuditResults } from "./audit-results";
 import { Brand, Notice, Spinner, Status } from "./ui";
 import { ProjectWorkspace } from "./project-workspace";
+import { AuditComparisonPanel } from "./audit-comparison";
 
 export default function Dashboard() {
   const [audit, setAudit] = useState<Audit | null>(null);
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const [error, setError] = useState("");
   const [pollError, setPollError] = useState("");
   const [notice, setNotice] = useState("");
+  const [comparing, setComparing] = useState(false);
 
   const refreshUsage = useCallback(async () => {
     try { setUsage(await api.usage()); }
@@ -112,8 +114,9 @@ export default function Dashboard() {
           {pollError ? <Notice variant="error">{pollError} Progress will reconnect automatically.</Notice> : null}
           {loading ? <div className="loading-surface" role="status"><Spinner />Loading your workspace…</div> : audit ? <AuditResults key={audit.id} audit={audit} onRecommendation={updateRecommendation} /> : <EmptyAudit onDemo={demo} disabled={!!submitting} />}
         </> : view === "projects" ? <ProjectWorkspace history={history} currentAudit={audit} /> : <>
-          <section className="page-heading history-heading"><div><h1>Audit history</h1><p>A clear record of your website, findings, and decisions.</p></div><button className="button button-secondary" onClick={() => switchView("overview")}><ArrowLeft size={15} />Back to overview</button></section>
+          <section className="page-heading history-heading"><div><h1>Audit history</h1><p>A clear record of your website, findings, and decisions.</p></div><div className="history-actions"><button className="button button-secondary" aria-expanded={comparing} aria-controls="audit-comparison" onClick={() => setComparing(!comparing)}><GitCompareArrows size={15} aria-hidden="true" />{comparing ? "Hide comparison" : "Compare audits"}</button><button className="button button-secondary" onClick={() => switchView("overview")}><ArrowLeft size={15} />Back to overview</button></div></section>
           {error ? <Notice variant="error">{error}</Notice> : null}
+          {comparing ? <AuditComparisonPanel history={history} /> : null}
           <section className="history-panel" aria-label="Previous audits"><div className="section-head"><h2>Your audits <span className="count">{history.length}</span></h2><button className="button button-small button-secondary" onClick={() => void refreshHistory().catch((cause) => setError(cause.message))}><RefreshCw size={14} />Refresh</button></div>
             {history.length ? <div className="table-scroll"><table className="history-table"><thead><tr><th>Website</th><th>Started</th><th>Status</th><th>Pages</th><th>Issues</th><th>Health</th><th><span className="sr-only">Open</span></th></tr></thead><tbody>{history.map((item) => <tr key={item.id}><td><button className="history-link" onClick={() => void selectAudit(item.id)}>{domain(item.url)}</button><div className="muted table-caption">{item.mode === "demo" ? "Sample audit" : "Live audit"}</div></td><td className="muted">{dateTime(item.created_at)}</td><td><Status value={item.status} /></td><td>{item.pages}</td><td>{item.issues}</td><td><strong>{item.score ?? "—"}</strong>{item.score !== null ? <span className="muted"> /100</span> : null}</td><td><button className="button button-small button-secondary" onClick={() => void selectAudit(item.id)}>Open audit</button></td></tr>)}</tbody></table></div> : <div className="history-empty"><FileClock size={30} strokeWidth={1.3} /><h3>Your first audit starts here.</h3><p>Run an audit or explore the sample to see it in your history.</p><button className="button button-primary" onClick={() => switchView("overview")}>Start an audit</button></div>}
           </section>

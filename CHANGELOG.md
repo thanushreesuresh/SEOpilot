@@ -1,5 +1,13 @@
 # Change log
 
+## 2026-10-25T02:08:47+05:30 — Compare saved evidence, export reports and inspect JSON-LD
+
+- Changed: Added free same-origin saved-audit comparisons, Markdown/CSV/JSON report downloads, bounded JSON-LD diagnostics and accessible dashboard controls. Generated API contracts and proxy routes include the new interfaces.
+- Why: Users need to inspect changes over time and share evidence without rerunning a crawl or paying for more AI. New analysis records rules version 2; historical snapshots and scoring version 1 remain intact.
+- Safeguards: Incomplete, blocked, truncated or unfinished analysis never proves resolution. Score changes require matching versions/formulas and identical complete assessed coverage. Reports omit private source/configuration, reject exports over 1 MiB and neutralize spreadsheet formulas. Raw JSON-LD is discarded; diagnostics do not establish rich-result eligibility.
+- Validation: 465 backend tests passed in 45.96 seconds; Ruff, frontend ESLint/TypeScript, seven proxy tests, production build and credential/history/link checks passed. Separate standards/spec reviews corrected unfinished-analysis absence and truncated JSON-LD UI evidence. Eight new browser cases await the authorized GitHub-hosted run.
+- Limitations: No new live audit or paid request was made; existing counters were preserved. Pilot App setup, exact-patch review, manual deployment and human review remain pending.
+
 ## 2026-10-25T01:56:07+05:30 — Keep indexing evidence complete or explicitly unknown
 
 - Changed: Unified the ten-entry robots bound for HTML metadata and response headers; overflow now marks the field truncated instead of silently dropping extra directives.

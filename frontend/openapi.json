@@ -770,6 +770,98 @@
           }
         }
       }
+    },
+    "/api/audit-comparisons": {
+      "post": {
+        "summary": "Compare",
+        "operationId": "compare_api_audit_comparisons_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComparisonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditComparison"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audits/{audit_id}/report/{format}": {
+      "get": {
+        "summary": "Report",
+        "operationId": "report_api_audits__audit_id__report__format__get",
+        "parameters": [
+          {
+            "name": "audit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Audit Id"
+            }
+          },
+          {
+            "name": "format",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "markdown",
+                "csv",
+                "json"
+              ],
+              "type": "string",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditReport"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -942,6 +1034,217 @@
         ],
         "title": "Audit"
       },
+      "AuditComparison": {
+        "properties": {
+          "before_audit_id": {
+            "type": "string",
+            "title": "Before Audit Id"
+          },
+          "after_audit_id": {
+            "type": "string",
+            "title": "After Audit Id"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin"
+          },
+          "rules_version_before": {
+            "type": "string",
+            "title": "Rules Version Before"
+          },
+          "rules_version_after": {
+            "type": "string",
+            "title": "Rules Version After"
+          },
+          "score_version_before": {
+            "type": "string",
+            "title": "Score Version Before"
+          },
+          "score_version_after": {
+            "type": "string",
+            "title": "Score Version After"
+          },
+          "versions_match": {
+            "type": "boolean",
+            "title": "Versions Match"
+          },
+          "assessed_urls_before": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assessed Urls Before"
+          },
+          "assessed_urls_after": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assessed Urls After"
+          },
+          "common_assessed_urls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Common Assessed Urls"
+          },
+          "added_assessed_urls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Added Assessed Urls"
+          },
+          "removed_assessed_urls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Removed Assessed Urls"
+          },
+          "coverage_before": {
+            "$ref": "#/components/schemas/Coverage"
+          },
+          "coverage_after": {
+            "$ref": "#/components/schemas/Coverage"
+          },
+          "coverage_comparable": {
+            "type": "boolean",
+            "title": "Coverage Comparable"
+          },
+          "score_before": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score Before"
+          },
+          "score_after": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score After"
+          },
+          "score_delta": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score Delta"
+          },
+          "score_delta_reason": {
+            "type": "string",
+            "title": "Score Delta Reason"
+          },
+          "added": {
+            "items": {
+              "$ref": "#/components/schemas/FindingChange"
+            },
+            "type": "array",
+            "title": "Added"
+          },
+          "persistent": {
+            "items": {
+              "$ref": "#/components/schemas/FindingChange"
+            },
+            "type": "array",
+            "title": "Persistent"
+          },
+          "resolved": {
+            "items": {
+              "$ref": "#/components/schemas/FindingChange"
+            },
+            "type": "array",
+            "title": "Resolved"
+          },
+          "unresolved_unknown": {
+            "items": {
+              "$ref": "#/components/schemas/FindingChange"
+            },
+            "type": "array",
+            "title": "Unresolved Unknown"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/ChangeCounts"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limitations"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "before_audit_id",
+          "after_audit_id",
+          "origin",
+          "rules_version_before",
+          "rules_version_after",
+          "score_version_before",
+          "score_version_after",
+          "versions_match",
+          "assessed_urls_before",
+          "assessed_urls_after",
+          "common_assessed_urls",
+          "added_assessed_urls",
+          "removed_assessed_urls",
+          "coverage_before",
+          "coverage_after",
+          "coverage_comparable",
+          "score_before",
+          "score_after",
+          "score_delta",
+          "score_delta_reason",
+          "added",
+          "persistent",
+          "resolved",
+          "unresolved_unknown",
+          "counts",
+          "limitations"
+        ],
+        "title": "AuditComparison"
+      },
+      "AuditReport": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "media_type": {
+            "type": "string",
+            "title": "Media Type"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "filename",
+          "media_type",
+          "content"
+        ],
+        "title": "AuditReport"
+      },
       "AuditRequest": {
         "properties": {
           "url": {
@@ -1041,6 +1344,56 @@
           "issues"
         ],
         "title": "AuditSummary"
+      },
+      "ChangeCounts": {
+        "properties": {
+          "added": {
+            "type": "integer",
+            "title": "Added"
+          },
+          "persistent": {
+            "type": "integer",
+            "title": "Persistent"
+          },
+          "resolved": {
+            "type": "integer",
+            "title": "Resolved"
+          },
+          "unresolved_unknown": {
+            "type": "integer",
+            "title": "Unresolved Unknown"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "added",
+          "persistent",
+          "resolved",
+          "unresolved_unknown"
+        ],
+        "title": "ChangeCounts"
+      },
+      "ComparisonRequest": {
+        "properties": {
+          "before_audit_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Before Audit Id"
+          },
+          "after_audit_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "After Audit Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "before_audit_id",
+          "after_audit_id"
+        ],
+        "title": "ComparisonRequest"
       },
       "ConnectionStatus": {
         "properties": {
@@ -1305,6 +1658,93 @@
           "value"
         ],
         "title": "Evidence"
+      },
+      "FindingChange": {
+        "properties": {
+          "stable_id": {
+            "type": "string",
+            "title": "Stable Id"
+          },
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "is_site": {
+            "type": "boolean",
+            "title": "Is Site"
+          },
+          "before_issue_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Before Issue Ids"
+          },
+          "after_issue_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "After Issue Ids"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "added",
+              "persistent",
+              "resolved",
+              "unresolved_unknown"
+            ],
+            "title": "Status"
+          },
+          "after_state": {
+            "type": "string",
+            "enum": [
+              "assessed",
+              "blocked",
+              "unchecked",
+              "unknown"
+            ],
+            "title": "After State"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "stable_id",
+          "rule_id",
+          "url",
+          "field",
+          "title",
+          "severity",
+          "reason",
+          "is_site",
+          "before_issue_ids",
+          "after_issue_ids",
+          "status",
+          "after_state"
+        ],
+        "title": "FindingChange"
       },
       "FindingDisposition": {
         "properties": {
@@ -1960,6 +2400,16 @@
             },
             "type": "array",
             "title": "Truncated Fields"
+          },
+          "structured_data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredDataSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -1980,7 +2430,8 @@
           "links",
           "text_excerpt",
           "error",
-          "truncated_fields"
+          "truncated_fields",
+          "structured_data"
         ],
         "title": "Page"
       },
@@ -2411,6 +2862,74 @@
           "formula"
         ],
         "title": "Score"
+      },
+      "StructuredDataSummary": {
+        "properties": {
+          "blocks": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Blocks"
+          },
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Types"
+          },
+          "observations": {
+            "items": {
+              "$ref": "#/components/schemas/StructuredObservation"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Observations"
+          },
+          "truncated": {
+            "type": "boolean",
+            "title": "Truncated",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "blocks",
+          "types",
+          "observations",
+          "truncated"
+        ],
+        "title": "StructuredDataSummary"
+      },
+      "StructuredObservation": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "block_index": {
+            "type": "integer",
+            "title": "Block Index"
+          },
+          "evidence": {
+            "type": "string",
+            "title": "Evidence"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "block_index",
+          "evidence"
+        ],
+        "title": "StructuredObservation"
       },
       "UsageStatus": {
         "properties": {

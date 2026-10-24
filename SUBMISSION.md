@@ -9,6 +9,7 @@
 - **Verified security/allowance implementation:** [3a90c3cd24662eb11bd6ea1067ea7a07a6c754f9](https://github.com/thanushreesuresh/SEOpilot/commit/3a90c3cd24662eb11bd6ea1067ea7a07a6c754f9), including [passing hosted checks](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40120505329). This later documentation checkpoint records the result.
 - **Verified v2 source:** [fbb94e2046212ce26469a46850d303bae92b387a](https://github.com/thanushreesuresh/SEOpilot/commit/fbb94e2046212ce26469a46850d303bae92b387a), with [passing hosted checks](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40128792918). Four feature milestones and subsequent test corrections are preserved as separate commits. This documentation checkpoint contains no later implementation changes.
 - **Working demo:** Follow the README's local setup and three-minute demonstration at http://localhost:3000.
+- **Current improvement checkpoint:** Saved-evidence comparisons, Markdown/CSV/JSON downloads and bounded JSON-LD diagnostics have 465 passing backend tests and passing static/build checks as of 2026-10-25T02:08:47+05:30. Eight additional browser cases await GitHub-hosted execution; this checkpoint does not claim the earlier v2 SHA contains these changes. Human review remains pending.
 - **Access requirements:** Node.js 22+, Python 3.13+, local loopback services. Deterministic audits/samples need no credentials. Repository publication requires the private GitHub App and owner-installed workflow.
 
 ## Participants and event status

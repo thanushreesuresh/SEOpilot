@@ -6,7 +6,8 @@ from urllib.parse import quote, urljoin, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
 
-from .models import Heading, ImageInfo, Page
+from .models import Heading, ImageInfo, Page, StructuredDataSummary
+from .structured_data import inspect_jsonld
 
 MAX_INPUT = 2 * 1024 * 1024
 MAX_HEADINGS = 60
@@ -72,6 +73,13 @@ def extract_page(
     soup = BeautifulSoup(
         body, "html.parser", from_encoding=charset.group(1) if charset and isinstance(body, bytes) else None,
     )
+    if "body" in page.truncated_fields:
+        # A clipped script is not evidence of broken website JSON-LD.
+        page.structured_data = StructuredDataSummary(blocks=0, truncated=True)
+    else:
+        page.structured_data = StructuredDataSummary.model_validate(inspect_jsonld(soup))
+    if page.structured_data.truncated:
+        page.truncated_fields.append("structured_data")
     title = soup.find("title")
     page.title = limited(title.get_text(" ", strip=True) if title else "", 512, "title")
 

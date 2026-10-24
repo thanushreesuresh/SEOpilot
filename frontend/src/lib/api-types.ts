@@ -330,6 +330,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/audit-comparisons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Compare */
+        post: operations["compare_api_audit_comparisons_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/audits/{audit_id}/report/{format}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Report */
+        get: operations["report_api_audits__audit_id__report__format__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -404,6 +438,67 @@ export interface components {
             /** Verification Urls */
             verification_urls: string[];
         };
+        /** AuditComparison */
+        AuditComparison: {
+            /** Before Audit Id */
+            before_audit_id: string;
+            /** After Audit Id */
+            after_audit_id: string;
+            /** Origin */
+            origin: string;
+            /** Rules Version Before */
+            rules_version_before: string;
+            /** Rules Version After */
+            rules_version_after: string;
+            /** Score Version Before */
+            score_version_before: string;
+            /** Score Version After */
+            score_version_after: string;
+            /** Versions Match */
+            versions_match: boolean;
+            /** Assessed Urls Before */
+            assessed_urls_before: string[];
+            /** Assessed Urls After */
+            assessed_urls_after: string[];
+            /** Common Assessed Urls */
+            common_assessed_urls: string[];
+            /** Added Assessed Urls */
+            added_assessed_urls: string[];
+            /** Removed Assessed Urls */
+            removed_assessed_urls: string[];
+            coverage_before: components["schemas"]["Coverage"];
+            coverage_after: components["schemas"]["Coverage"];
+            /** Coverage Comparable */
+            coverage_comparable: boolean;
+            /** Score Before */
+            score_before: number | null;
+            /** Score After */
+            score_after: number | null;
+            /** Score Delta */
+            score_delta: number | null;
+            /** Score Delta Reason */
+            score_delta_reason: string;
+            /** Added */
+            added: components["schemas"]["FindingChange"][];
+            /** Persistent */
+            persistent: components["schemas"]["FindingChange"][];
+            /** Resolved */
+            resolved: components["schemas"]["FindingChange"][];
+            /** Unresolved Unknown */
+            unresolved_unknown: components["schemas"]["FindingChange"][];
+            counts: components["schemas"]["ChangeCounts"];
+            /** Limitations */
+            limitations: string[];
+        };
+        /** AuditReport */
+        AuditReport: {
+            /** Filename */
+            filename: string;
+            /** Media Type */
+            media_type: string;
+            /** Content */
+            content: string;
+        };
         /** AuditRequest */
         AuditRequest: {
             /** Url */
@@ -444,6 +539,30 @@ export interface components {
             pages: number;
             /** Issues */
             issues: number;
+        };
+        /** ChangeCounts */
+        ChangeCounts: {
+            /** Added */
+            added: number;
+            /** Persistent */
+            persistent: number;
+            /** Resolved */
+            resolved: number;
+            /** Unresolved Unknown */
+            unresolved_unknown: number;
+        };
+        /** ComparisonRequest */
+        ComparisonRequest: {
+            /**
+             * Before Audit Id
+             * Format: uuid
+             */
+            before_audit_id: string;
+            /**
+             * After Audit Id
+             * Format: uuid
+             */
+            after_audit_id: string;
         };
         /** ConnectionStatus */
         ConnectionStatus: {
@@ -594,6 +713,39 @@ export interface components {
             field: string;
             /** Value */
             value: string;
+        };
+        /** FindingChange */
+        FindingChange: {
+            /** Stable Id */
+            stable_id: string;
+            /** Rule Id */
+            rule_id: string;
+            /** Url */
+            url: string;
+            /** Field */
+            field: string;
+            /** Title */
+            title: string;
+            /** Severity */
+            severity: string;
+            /** Reason */
+            reason: string;
+            /** Is Site */
+            is_site: boolean;
+            /** Before Issue Ids */
+            before_issue_ids: string[];
+            /** After Issue Ids */
+            after_issue_ids: string[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "added" | "persistent" | "resolved" | "unresolved_unknown";
+            /**
+             * After State
+             * @enum {string}
+             */
+            after_state: "assessed" | "blocked" | "unchecked" | "unknown";
         };
         /** FindingDisposition */
         FindingDisposition: {
@@ -832,6 +984,7 @@ export interface components {
             error: string | null;
             /** Truncated Fields */
             truncated_fields: string[];
+            structured_data: components["schemas"]["StructuredDataSummary"] | null;
         };
         /** PatchExport */
         PatchExport: {
@@ -1026,6 +1179,31 @@ export interface components {
              * @default 100 − mean(capped page penalties) − capped site penalties. Critical=20, High=10, Medium=5, Low=2; HTTP error pages=100. Site cap=20. Unknown pages excluded.
              */
             formula: string;
+        };
+        /** StructuredDataSummary */
+        StructuredDataSummary: {
+            /** Blocks */
+            blocks: number;
+            /** Types */
+            types: string[];
+            /** Observations */
+            observations: components["schemas"]["StructuredObservation"][];
+            /**
+             * Truncated
+             * @default false
+             */
+            truncated: boolean;
+        };
+        /** StructuredObservation */
+        StructuredObservation: {
+            /** Code */
+            code: string;
+            /** Message */
+            message: string;
+            /** Block Index */
+            block_index: number;
+            /** Evidence */
+            evidence: string;
         };
         /** UsageStatus */
         UsageStatus: {
@@ -1704,6 +1882,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FixRun"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    compare_api_audit_comparisons_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ComparisonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditComparison"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_api_audits__audit_id__report__format__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                audit_id: string;
+                format: "markdown" | "csv" | "json";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditReport"];
                 };
             };
             /** @description Validation Error */

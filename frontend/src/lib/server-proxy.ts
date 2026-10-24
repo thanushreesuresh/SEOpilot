@@ -14,6 +14,7 @@ const FIX_ACTION = new RegExp(`^fix-runs/${UUID}/(publish|cancel|delete-source|v
 const DISPOSITION = new RegExp(`^audits/${UUID}/issues/${UUID}/disposition$`, "i");
 const DISPOSITIONS = new RegExp(`^audits/${UUID}/dispositions$`, "i");
 const DISCONNECT = new RegExp(`^projects/${UUID}/disconnect$`, "i");
+const AUDIT_REPORT = new RegExp(`^audits/${UUID}/report/(markdown|csv|json)$`, "i");
 const RESPONSE_HEADERS = ["retry-after", "ratelimit-limit", "ratelimit-remaining", "ratelimit-reset", "x-audit-reused"];
 
 type Dependencies = {
@@ -38,6 +39,8 @@ function allowedMethod(route: string) {
   if (["projects", "fix-runs"].includes(route)) return "GET, POST";
   if (FIX_ACTION.test(route) || DISCONNECT.test(route)) return "POST";
   if (DISPOSITION.test(route)) return "PATCH";
+  if (route === "audit-comparisons") return "POST";
+  if (AUDIT_REPORT.test(route)) return "GET";
   return "";
 }
 

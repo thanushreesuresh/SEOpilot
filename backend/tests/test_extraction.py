@@ -89,3 +89,19 @@ def test_header_overflow_also_marks_indexing_evidence_incomplete():
     page = extract_page("https://example.com/", html, headers={"X-Robots-Tag": "noindex"})
     assert len(page.robots) == 10
     assert "robots" in page.truncated_fields
+
+
+def test_jsonld_extraction_is_a_projection_without_raw_source():
+    body = '<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","privateDetail":"SOURCE_CANARY"}</script><p>Body</p>'
+    page = extract_page("https://example.com/", body)
+    assert page.structured_data.blocks == 1
+    assert page.structured_data.types == ["LocalBusiness"]
+    assert "SOURCE_CANARY" not in page.model_dump_json()
+
+
+def test_clipped_html_does_not_prove_malformed_jsonld(monkeypatch):
+    monkeypatch.setattr("seopilot.extraction.MAX_INPUT", 55)
+    page = extract_page("https://example.com/", '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Thing"}</script>')
+    assert page.structured_data.truncated
+    assert page.structured_data.observations == []
+    assert "structured_data" in page.truncated_fields

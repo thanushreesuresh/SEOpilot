@@ -35,7 +35,25 @@ The owner installs the workflow/harness from `validation/`; SEOPilot cannot writ
 
 Chromium checks affected routes for success, meaningful content, approved metadata, console/page errors and preserved canonical/robots directives. JSON/screenshots have size and entry bounds. The backend accepts reports only from the configured workflow and matching repository, commit, run and proposal. Missing/invalid evidence remains a failure; no automatic repairs or reruns occur.
 
-PR creation, checks, merge, awaiting deployment and live verification remain separate states. After manual deployment, Verify live starts a fresh frozen-URL audit with AI disabled and the existing DNS/SSRF/robots/resource safeguards and daily admission limit. Missing, blocked, failed or truncated metadata cannot pass. Findings compare by rule ID, normalized URL and evidence field. Historical scores remain unchanged; rule/scoring versions are `1`, and reduced coverage cannot establish score improvement.
+PR creation, checks, merge, awaiting deployment and live verification remain separate states. After manual deployment, Verify live starts a fresh frozen-URL audit with AI disabled and the existing DNS/SSRF/robots/resource safeguards and daily admission limit. Missing, blocked, failed or truncated metadata cannot pass. Findings compare by rule ID, normalized URL and evidence field. Historical scores remain unchanged. New deterministic analyses record rules version `2`; legacy audits retain rules version `1`, and scoring remains version `1`. Reduced coverage cannot establish score improvement.
+
+## Saved audit comparisons and report exports
+
+`reporting_api.py` exposes read-only operations over saved audit evidence, implemented in `audit_reporting.py`. Neither operation enqueues jobs, reserves live-audit admissions, calls AI providers, or writes findings or historical scores. The Next proxy allowlists the routes and methods; the local, single-user access boundary remains unchanged.
+
+`POST /api/audit-comparisons` accepts `before_audit_id` and `after_audit_id` UUIDs. It requires two different saved audits with strictly increasing creation times, the same normalized origin (scheme, host, and port), and the same live/sample mode. Both must be in `completed`, `partial`, `failed`, or `interrupted` status. Unknown IDs return `404`; incompatible pairs return `409`. The dashboard exposes the latest 100 history entries through **Audit history → Compare audits**, and performs the request only after **Run comparison**.
+
+Finding identity is `(rule_id, normalized_url, primary_evidence_field, is_site)`, with a stable hash for display and original before/after issue IDs retained. Group findings expand to their affected URLs so a changed group representative or regenerated random ID does not manufacture a new finding. The result separates `added`, `persistent`, `resolved`, and `unresolved_unknown`, with reasons and later-evidence states, and lists common, newly assessed, and removed assessed URLs.
+
+Comparison evidence is conservative. Matching findings can persist within the common assessed scope. Added/resolved classifications require the same rules, completed deterministic analysis in the relevant audit, and complete required evidence on every affected URL. Blocked, unchecked, missing, HTTP-error HTML evidence, truncated fields, missing diagnostic fields, and unverified site-policy checks can leave an observation unknown. Rules-version differences withhold added/resolved classifications. Findings only on newly assessed URLs are coverage changes rather than regressions. Resolving a finding means the recorded check no longer observes it within that evidence; it does not establish a search-performance outcome.
+
+A score delta is nullable. It requires both audits to be `completed`, equal nonempty assessed URL sets, internally consistent coverage/page/score counts, no blocked/failed/unchecked pages or crawl/extraction limits, matching rule and score versions, identical score formulas, two available scores, and no unresolved/unknown findings. Otherwise the response retains both historical scores and supplies a reason for withholding the delta. The dashboard shows versions, coverage exclusions, limitations, and a sample disclosure when appropriate. Serialized comparison output is bounded to 1 MiB.
+
+`GET /api/audits/{audit_id}/report/{format}` supports `markdown`, `csv`, and `json` after any finished audit status. It returns `{filename, media_type, content}`; **Report format → Download report** prepares a plain browser download. Exports contain public saved evidence, score/formula/versions, coverage, recommendation source/basis/review status, applicable decision and finding-disposition history, and unresolved limitations. Review history is restricted to IDs belonging to that audit. AI and sample suggestions are labelled hypotheses requiring human review; approval never becomes proof of implementation. Credentials, provider responses, and private repository source are not included.
+
+Report text and the serialized response envelope are each limited to 1 MiB of UTF-8; an oversized result returns `409` instead of silently truncating evidence. Filenames derive from a sanitized audit ID. Markdown escapes source HTML and syntax characters. CSV uses the standard library's quoting and prefixes cells with an apostrophe when their first significant character is `=`, `+`, `-`, `@`, tab, or carriage return, including prefixes hidden by leading whitespace. No report format executes page content.
+
+The prior hosted V2 baseline covered 356 backend tests and 15 browser scenarios. Those results precede these additions. The current expanded suite has 23 browser scenarios, including eight reporting/JSON-LD cases, and awaits hosted execution; no new hosted pass is claimed here.
 
 ## Crawl boundaries
 
@@ -48,6 +66,16 @@ Crawling is sequential and bounded: 15 pages by default (maximum 30), depth 2 (m
 Protego interprets robots rules. Confirmed missing robots files are distinguished from denied or unavailable policies. Robots failures stop crawling conservatively. All redirects and auxiliary probes remain subject to the same destination policy and budgets.
 
 HTML is parsed without executing scripts. JavaScript-only content, logged-in pages, external resources, and private networks are unsupported. Unsupported responses, blocked pages, timeouts, and unvisited links remain unknown rather than fabricated findings. Only observed 404/410 targets are labelled broken links. Ordinary link discovery cannot establish orphan pages.
+
+## Bounded JSON-LD diagnostics
+
+Before discarding scripts from extracted HTML, `structured_data.py` inspects inline `application/ld+json` blocks without fetching contexts or expanding remote vocabularies. The persisted `Page.structured_data` projection contains a block count, declared type labels, fixed diagnostic messages with one-based block indexes and sanitized evidence, and a truncation flag. Raw JSON-LD and source-bearing decoder exception text are not persisted or returned. A legacy `null` summary means inspection was not recorded; zero blocks indicates absence only when inspection was complete. A clipped HTML body leaves JSON-LD presence and syntax unknown.
+
+Inspection is bounded to 10 blocks, 16 KiB per block, 64 KiB combined, nesting depth 32, 20 distinct type labels of at most 120 characters, and 50 observations. Oversized or deep blocks are omitted whole; a clipped prefix does not produce a fabricated syntax error. Limits mark structured-data evidence incomplete and do not themselves create a scored finding. The existing 2 MiB HTML-body limit still applies.
+
+Diagnostics cover invalid JSON, duplicate keys, unsupported non-finite numeric constants, unsuitable root/@graph structures, and context review. Missing or unfamiliar contexts are low-severity review advice because fully qualified IRIs and custom vocabularies can be valid. Syntax/structure problems produce medium-severity observations. This shallow inspector does not implement full JSON-LD processing, Schema.org validation, required-property validation, or rich-result eligibility. The **Pages** tab exposes the bounded summary and its limits; JSON-LD findings enter the ordinary evidence/recommendation workflow.
+
+Newly analyzed live and sample audits record rules version `2`. Existing snapshots keep rules version `1`, original evidence, and historical scores; they are not silently reanalyzed. The score algorithm remains version `1`, although additional rules can change a newly computed value. Cross-version comparisons therefore disclose the mismatch and withhold a comparable score delta and unsupported added/resolved conclusions.
 
 ## Health score
 

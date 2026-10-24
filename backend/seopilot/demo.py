@@ -41,6 +41,9 @@ async def build_demo() -> Audit:
         coverage=Coverage(attempted=4, assessed=4), completed_at=now(),
         warnings=["Sample data: bundled HTML fixtures, including a simulated 404. No website or AI provider was contacted."],
     )
+    from .rules import RULES_VERSION
+
+    audit.rules_version = RULES_VERSION
     audit.issues = analyze(pages, ORIGIN, robots_state="present", sitemap_state="absent",
                            discovery_evidence={"sitemap": [(ORIGIN + "/sitemap.xml", 404)]})
     audit.score = calculate_score(pages, audit.issues)

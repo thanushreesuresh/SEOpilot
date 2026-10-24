@@ -173,6 +173,9 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
     from .fix_api import router
 
     app.include_router(router())
+    from .reporting_api import reporting_router
+
+    app.include_router(reporting_router())
     return app
 
 

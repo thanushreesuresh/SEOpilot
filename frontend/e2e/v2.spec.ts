@@ -31,7 +31,7 @@ function audit(): Audit {
     pages: [{ id: PAGE_ID, url: URL, depth: 0, status_code: 200, outcome: "html", content_type: "text/html",
       title: "About", description: DESCRIPTION, headings: [{ level: 1, text: "About Café Works" }],
       canonicals: [URL], robots: ["robots: index, follow"], images: [], links: [],
-      text_excerpt: DESCRIPTION, error: null, truncated_fields: [] }], issues: [],
+      text_excerpt: DESCRIPTION, error: null, truncated_fields: [], structured_data: null }], issues: [],
     recommendations: [{ id: RECOMMENDATION_ID, source: "rule", kind: "title", title: "Clarify the page title",
       url: URL, page_id: PAGE_ID, issue_ids: [], evidence_ids: [], rationale: "Reviewed title wording.",
       suggested_value: TITLE, priority: "Medium", status: "approved", decided_at: DATE, basis: "observed" }],

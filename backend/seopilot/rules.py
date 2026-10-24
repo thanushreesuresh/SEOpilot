@@ -8,6 +8,7 @@ from urllib.parse import urldefrag, urljoin, urlsplit
 from .models import Evidence, Issue, Page, Recommendation, Score
 
 POINTS = {"Critical": 20, "High": 10, "Medium": 5, "Low": 2}
+RULES_VERSION = "2"
 
 
 @dataclass(frozen=True)
@@ -61,6 +62,19 @@ def analyze(
                 "Restore the intended page, update links, or return a suitable intentional status.",
                 [("status_code", page.status_code)])
             continue
+        if page.structured_data is not None:
+            grouped = defaultdict(list)
+            for observation in page.structured_data.observations:
+                if observation.code != "json_ld_inspection_limited":
+                    grouped[observation.code].append(observation)
+            for code, observations in grouped.items():
+                contextual = code in {"json_ld_missing_context", "json_ld_nonstandard_context"}
+                add(page, code, "Review JSON-LD context" if contextual else "JSON-LD needs correction",
+                    "Low" if contextual else "Medium", "Structured data",
+                    observations[0].message + " This bounded inspection does not establish Schema.org validity or rich-result eligibility.",
+                    "Review the intended vocabulary and context; custom contexts and fully qualified IRIs can be valid."
+                    if contextual else "Correct the JSON-LD syntax or object structure and validate the intended markup before publishing.",
+                    [("structured_data", f"Block {observation.block_index}: {observation.evidence}") for observation in observations])
         if urlsplit(page.url).scheme == "http":
             add(page, "non_https", "Page uses HTTP", "Medium", "Security",
                 "This response used an unencrypted connection.",

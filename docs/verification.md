@@ -2,6 +2,12 @@
 
 Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and committed lockfiles. Historical real SEO/AI observations remain in the [bounded live record](live-validation-2026-10-25.md).
 
+## Saved-evidence improvement checkpoint
+
+At 2026-10-25T02:08:47+05:30, **465 backend tests passed** in 45.96 seconds, with the existing upstream TestClient warning. Ruff, frontend ESLint, TypeScript, seven proxy tests, production build, credential/history and Markdown-link checks passed. New offline cases cover same-origin and mode constraints, grouped findings, failed/interrupted analysis, truncated/unknown coverage, version/formula changes, bounded exports, spreadsheet injection, public-history filtering and JSON-LD limits/grammar. No production database, quota counter or live credential was used by these fixtures.
+
+Separate standards and specification reviews corrected two evidence gaps before this checkpoint: failed/interrupted analysis cannot supply negative evidence, and clipped HTML cannot establish absence of JSON-LD. Eight additional browser cases cover report downloads/retries, comparisons/filters/versions, incomplete data and mobile keyboard/escaping states. The resulting 23-scenario suite awaits GitHub-hosted execution; no local browser pass is claimed. Historical v2 results below remain tied to their original source SHA.
+
 | Check | Result at the v2 product checkpoint |
 | --- | --- |
 | Complete backend pytest suite | **356 passed** locally in 42.59 seconds and on GitHub in 23.45 seconds; one upstream TestClient deprecation warning |
