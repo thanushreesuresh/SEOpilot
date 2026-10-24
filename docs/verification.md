@@ -6,7 +6,7 @@ Checked on 24 October 2026, using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 an
 | --- | --- |
 | Complete backend pytest suite | 205 passed |
 | Node authenticated-proxy tests | 6 passed |
-| GitHub Actions offline workflow | Added for push/PR; hosted result not yet observed at this documentation revision |
+| GitHub Actions offline workflow | [Passed](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40120505329) on Linux for implementation commit `3a90c3c` |
 | Ruff, backend and scripts | Passed |
 | Frontend ESLint | Passed without warnings |
 | TypeScript | Passed |
@@ -32,6 +32,7 @@ Independent review found and fixed validated-address fallback, worker claim reco
 ## Limitations and resolved environment failures
 
 - Starlette emits one upstream deprecation warning for its HTTPX TestClient integration. Tests pass; the warning is not suppressed.
+- The first successful hosted run also reports upstream action-runtime deprecation and runner-image migration notices; these did not fail the checks. No paid credentials are supplied to the workflow.
 - Sandbox restrictions initially blocked virtual-environment bootstrap, npm registry access, temporary/event-loop resources and Turbopack's CSS child process. Scoped retries outside the sandbox completed installation, tests and build successfully.
 - The in-app browser origin gate first reported declined permission, then a saved or managed deny for `http://localhost:3000`. It remained denied after explicit user approval and a reported permission change. No alternate browser or Playwright execution was attempted to bypass it. Browser test code is present for an environment with authorized access.
 - Six browser scenarios are present, including allowance exhaustion and AI opt-out/duplicate reuse. They remain unexecuted under that same policy. UI additions passed static checks and the production build.

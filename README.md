@@ -95,7 +95,7 @@ npm run build
 
 The committed lockfiles record tested dependencies. For a fully constrained Python install, add `-c backend/requirements.lock` to the installation command. A production dashboard starts with `npm run start` after building, alongside the same API service.
 
-Run the repository check before commits and pushes. It checks working files, staged bytes, reachable history, ignored private paths and obvious credential patterns without printing potential secret values. GitHub Actions repeats the offline checks on pushes and pull requests, including contract drift, proxy tests, lint/type checks and a production build. No live key is supplied to CI. CI configuration is committed; its first hosted result is separate from the local results recorded here.
+Run the repository check before commits and pushes. It checks working files, staged bytes, reachable history, ignored private paths and obvious credential patterns without printing potential secret values. GitHub Actions repeats the offline checks on pushes and pull requests, including contract drift, proxy tests, lint/type checks and a production build. No live key is supplied to CI. The [first hosted run passed](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40120505329) for implementation commit `3a90c3c`.
 
 Regenerate shared API types after contract changes:
 

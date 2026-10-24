@@ -4,6 +4,13 @@ Record each meaningful project change during the event, newest first. Update thi
 
 ## Event build log
 
+## 2026-10-24T18:25:46+00:00 — Record atomic publication and successful hosted verification
+
+- Changed: Recorded implementation commit `3a90c3cd24662eb11bd6ea1067ea7a07a6c754f9`, atomic publication of both security/UI commits, and successful GitHub Actions run 40120505329 in README, verification and submission notes.
+- Why: Preserve a stable implementation/CI reference and distinguish observed hosted results from the earlier pending record.
+- Validation: Atomic dry run and push succeeded; remote `main` matched local HEAD and the working tree was clean before this documentation checkpoint. GitHub reports hosted Checks success. Private environment files remain ignored/untracked. No application source changed here.
+- Limitations: Hosted action-runtime/runner migration notices remain non-blocking; previous browser, live-AI and public-hosting limits remain. Human review is pending.
+
 ## 2026-10-24T18:18:49+00:00 — Show audit allowances and automate offline checks
 
 - Changed: Added dashboard allowance/reset/shared-AI information, AI opt-out, exhausted-quota controls, duplicate-reuse notices and limited-AI state; extended browser scenario source and added a read-only GitHub Actions validation workflow.
