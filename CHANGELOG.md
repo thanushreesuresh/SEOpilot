@@ -4,6 +4,13 @@ Record each meaningful project change during the event, newest first. Update thi
 
 ## Event build log
 
+## 2026-10-24T22:30:24+05:30 — Audit extracted evidence and explain health scoring
+
+- Changed: Added reusable deterministic SEO rules, duplicate grouping, evidence-bearing findings, actionable rule recommendations, configurable editorial thresholds, and page-normalized scoring.
+- Why: Produce explainable observations without relying on AI or inventing unavailable coverage or performance data.
+- Validation: 18 focused rule tests passed; scoped Ruff passed; reviewed unknown-page exclusion, duplicate deduplication, HTTP-error handling, and context-sensitive advice.
+- Limitations: This milestone operates on extracted page models; crawler/API/dashboard integration follows. No orphan or search-performance claims are produced.
+
 ## 2026-10-24T22:16:33+05:30 — Add the local API and persistence foundation
 
 - Changed: Added typed Pydantic audit contracts, SQLite projects/audits/pages/issues/recommendations/decision records, queue recovery, loopback API guards, OpenAPI export, and backend dependency configuration. Added reproducible setup instructions and local-data ignore rules.
