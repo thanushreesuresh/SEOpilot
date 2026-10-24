@@ -3,16 +3,17 @@
 ## Project
 
 - **Project name:** SEOPilot.
-- **Description:** A local SEO audit application for small businesses: secure website crawling, evidence-backed deterministic findings, contextual AI suggestions when configured, and human recommendation review.
+- **Description:** Local evidence-based SEO auditing with optional reviewed AI suggestions and a GitHub App workflow for inspected Next.js metadata patches, draft PRs, hosted validation and explicit post-deployment verification. Human merge and deployment remain required.
 - **Code repository:** https://github.com/thanushreesuresh/SEOpilot
 - **Original verified MVP commit:** [f66d76108a0f0fd3d11df2c2d0f9862f0be7f42d](https://github.com/thanushreesuresh/SEOpilot/commit/f66d76108a0f0fd3d11df2c2d0f9862f0be7f42d). Later security/configuration and allowance-interface changes are recorded in CHANGELOG; this earlier SHA does not include them. Organizer submission has not been performed.
 - **Verified security/allowance implementation:** [3a90c3cd24662eb11bd6ea1067ea7a07a6c754f9](https://github.com/thanushreesuresh/SEOpilot/commit/3a90c3cd24662eb11bd6ea1067ea7a07a6c754f9), including [passing hosted checks](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40120505329). This later documentation checkpoint records the result.
+- **V2 milestones:** `6c10f58` connection/persistence, `2b0e212` static metadata adapter and `645c127` PR/recovery/verification. The final product/publication SHA will be recorded in a subsequent documentation checkpoint; no self-referential SHA is claimed here.
 - **Working demo:** Follow the README's local setup and three-minute demonstration at http://localhost:3000.
-- **Access requirements:** Node.js 22+, Python 3.13+, local loopback services. No credentials required for deterministic audits or labelled sample mode.
+- **Access requirements:** Node.js 22+, Python 3.13+, local loopback services. Deterministic audits/samples need no credentials. Repository publication requires the private GitHub App and owner-installed workflow.
 
 ## Participants and event status
 
-Participant names and event eligibility have not been supplied or verified. The repository owner is not automatically assumed to be the participant. Current implementation uses actual 24 October 2026 timestamps and does not claim development took place during the 10–11 October event.
+Participant names and event eligibility have not been supplied or verified. The repository owner is not automatically assumed to be the participant. Implementation uses actual 24–25 October 2026 timestamps and does not claim development took place during the 10–11 October event.
 
 ## Run and demonstrate
 
@@ -21,6 +22,7 @@ Install from the repository root:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -c backend/requirements.lock -e "backend[dev]"
+npm --prefix repository-tools ci --ignore-scripts
 cd frontend
 npm ci
 ```
@@ -37,13 +39,19 @@ Start Next.js from `frontend/` in another:
 npm run dev
 ```
 
-Demonstrate a labelled sample, inspect evidence and severity filters, approve/reject a recommendation, copy a suggestion, reopen history, then perform a real bounded audit. Approval never publishes changes.
+Demonstrate a labelled sample, inspect evidence/severity filters, approve/reject and copy a recommendation, reopen history, then perform a bounded real audit. Recommendation approval records content review without publication.
+
+For v2, follow [App setup](docs/github-app-setup.md) and [owner workflow installation](validation/README.md). Connect the owned repository/site, finish a live audit, select up to three static pages, prepare approved or entered metadata, inspect/download the diff, then separately approve **Create draft PR**. Review hosted checks, manually merge/deploy, acknowledge deployment and choose **Verify live**. Blocked/missing/truncated evidence stays unresolved; merge alone never proves deployment.
+
+The confirmed pilot is [thanushree-portfolio](https://github.com/thanushreesuresh/thanushree-portfolio) at [thanushree-portfolio-six.vercel.app](https://thanushree-portfolio-six.vercel.app/). The three GitHub App settings remain unconfigured. Pilot PR, owner workflow, manual merge/deployment and successful live verification remain required for end-to-end release acceptance.
 
 Use the blank `backend/.env.example` template and put your future key only in ignored `backend/.env`. Model: `gpt-6-luna`. The README lists the server kill switch, global call/output limits, database and private proxy-token configuration. Three accepted live audits per IP per rolling 24 hours, duplicate reuse and durable paid-call reservations protect local use. Samples and the smoke-test command make zero paid calls. Secrets are not included in this repository.
 
-**Validation:** 207 backend tests and Ruff passed; prior six Node proxy tests, ESLint, TypeScript/build and secret-marker checks passed. Live Python.org generation/review produced three grounded AI suggestions; raw HTML observations and both sites' scores were independently checked. Example transport failed, then passed verified TLS/model/generation checks; its review was withheld when the lifetime allowance was exhausted. Browser/E2E and screenshot fidelity remain unverified under local-origin policy. See [live verification](docs/live-validation-2026-10-25.md), [verification details](docs/verification.md), [architecture](docs/architecture.md), [README](README.md), [AI usage](AI_USAGE.md) and [change log](CHANGELOG.md).
+GitHub App credentials stay server-side; private source stays outside OpenAI requests. Patches add zero AI calls and are limited to three pages, five files and 100 changed lines. Two draft-PR publications are allowed per rolling 24 hours and one active fix per project. Private source expires after 24 hours with immediate deletion controls. GitHub Actions usage is separate from OpenAI usage; merge/deployment remain manual.
 
-**Deferred:** Search Console, public hosting/authentication, automatic publishing, recurring audits and reliable orphan detection. No traffic, ranking, search-volume or other unavailable measurements are fabricated. Sources and dependencies are linked in README.
+**Validation:** 355 backend tests passed, followed by six retention tests including a new regression; 34 AST, seven validator and seven proxy tests passed. Ruff, ESLint, TypeScript, production build and pre-documentation credential/history checks passed. A copied-database migration preserved all existing rows/counters. Fifteen hosted browser scenarios await CI after publication; no accepted local rendering/screenshot result is claimed. Earlier live HTML, scoring and AI observations remain documented separately. Human review is pending. See [live verification](docs/live-validation-2026-10-25.md), [verification details](docs/verification.md), [architecture](docs/architecture.md), [README](README.md), [AI usage](AI_USAGE.md) and [change log](CHANGELOG.md).
+
+**Deferred:** Search Console, public hosting/authentication, automatic merging/deployment, recurring audits, additional frameworks/sources and reliable orphan detection. No traffic, ranking, search-volume or other unavailable measurements are fabricated. Sources/dependencies are linked in README.
 
 ## Honest delivery checklist
 
@@ -52,6 +60,7 @@ Use the blank `backend/.env.example` template and put your future key only in ig
 - [x] Codex contributions recorded; human review pending.
 - [x] Secrets and local database files excluded from source control.
 - [ ] Rendered desktop/mobile browser verification completed.
+- [ ] Owned pilot completed through reviewed PR, hosted checks, manual deployment and live verification.
 - [x] Live AI integration verified with user-supplied credentials; bounded results and limits recorded.
 - [ ] Participant details and event eligibility verified.
 - [ ] Organizer submission performed through its announced method and timing.

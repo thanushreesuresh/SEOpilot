@@ -103,3 +103,15 @@ def test_proposals_are_frozen_and_retention_is_not_limited_to_ui_history(tmp_pat
     run.patch_hash = "0"*64
     with pytest.raises(ValueError, match="immutable"):
         store.fixes.save(run)
+
+
+def test_crash_leftover_temporary_source_obeys_retention(tmp_path):
+    import os
+
+    store, _, _ = setup(tmp_path)
+    store.fixes.artifacts.mkdir()
+    path = store.fixes.artifacts / "interrupted.tmp"
+    path.write_text("PRIVATE_SOURCE_CANARY", encoding="utf-8")
+    os.utime(path, (1, 1))
+    store.fixes.cleanup()
+    assert not path.exists()

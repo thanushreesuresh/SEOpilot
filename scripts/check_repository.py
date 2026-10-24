@@ -25,6 +25,8 @@ def content_failures(name: str, content: str) -> list[str]:
     failures = []
     if re.search(r"\bsk-[A-Za-z0-9_-]{24,}\b", content):
         failures.append(f"Possible API credential in {name}; value withheld")
+    if re.search(r"\bgh[pousr]_[A-Za-z0-9_.-]{20,}", content) or re.search(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----", content):
+        failures.append(f"Possible GitHub credential or private key in {name}; value withheld")
     if Path(name).name.startswith(".env"):
         for match in re.finditer(r"(?m)^\s*(?:export\s+)?OPENAI_API_KEY\s*=([^\r\n]*)", content):
             value = match[1].split("#", 1)[0].strip().strip("\"'")

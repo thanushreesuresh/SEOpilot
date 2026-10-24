@@ -1,5 +1,9 @@
 # AI usage record
 
+| Date and time with timezone | Tool / model, if known | Task | Assistance and affected files | Human review / corrections | Validation and result |
+| --- | --- | --- | --- | --- | --- |
+| 2026-10-25T01:33:36+05:30 | Codex | V2 product completion | Built onboarding, metadata/diff/publication/verification UI, dispositions, hosted browser scenarios and retention safeguards; reconciled setup/architecture/verification/submission records | Pending human review; independent reviews corrected null edits, truncation, stale verification, latest dispositions and source retention | 355 backend plus six later retention tests, 34 AST, seven validator/proxy tests each, Ruff, ESLint, TypeScript/build passed; copied migration preserved history/counters; hosted browser/pilot pending; zero additional AI calls |
+
 | 2026-10-25T01:26:56+05:30 | Codex | Draft PR and verification workflow | Implemented explicit approval, worker recovery, hosted report verification, source retention, stable live comparison and finding dispositions; independent reviewers corrected null edits, stale cache, truncation and retention gaps | Pending human review | 352 backend tests, seven proxy tests and Ruff passed before final safeguard checks; real App/deployment acceptance pending; zero additional OpenAI calls |
 
 | 2026-10-25T01:18:15+05:30 | Codex | Static metadata proposals | Built trusted TypeScript AST range editor and Python subprocess boundary; reviewed unsupported inheritance and source isolation | Pending human review | 34 Node and 21 Python tests passed, including secret environment and no-execution canaries; zero additional AI requests |
@@ -10,6 +14,8 @@ Use Codex during the hackathon and briefly document its actual contribution here
 
 ## Event build log
 
+| Date and time with timezone | Tool / model, if known | Task | Assistance and affected files | Human review / corrections | Validation and result |
+| --- | --- | --- | --- | --- | --- |
 | 2026-10-25T00:18:56+05:30 | Codex + live gpt-6-luna | Real-data verification and TLS correction | Ran bounded real audits, independently checked HTML and scoring, reproduced/fixed SDK trust using verified OS certificates, tested live spending controls and isolated pytest from real keys | Pending human review; all published AI decisions remain pending | 207 offline tests/Ruff passed; Python3pages/8findings/score89/3reviewedAI suggestions; Example score82 and post-fix generation passed, re-review withheld by budget; no key disclosure or quota resets |
 
 | 2026-10-24T18:25:46+00:00 | Codex | Publication and hosted verification record | Recorded atomic Git publication, verified remote SHA and passing hosted workflow for source commit 3a90c3c | Pending human review | Push/remote verification and GitHub Checks success observed; documentation-only checkpoint, no paid calls |
@@ -31,12 +37,6 @@ Use Codex during the hackathon and briefly document its actual contribution here
 | 2026-10-24T22:30:24+05:30 | Codex | Deterministic SEO analysis | Implemented rules, evidence, duplicate groups, rule recommendations and health-score calculation with focused fixtures | Pending human review | 18 rule tests and scoped Ruff passed; unknown coverage and intentional directives checked |
 
 | 2026-10-24T22:16:33+05:30 | Codex | Local runtime and storage | Implemented backend contracts, SQLite repository, API guards, queue lifecycle, tests, OpenAPI export, and setup documentation | Pending human review | 5 scoped tests passed; Ruff and diff whitespace checks passed; one upstream TestClient deprecation warning |
-
-No participant AI usage has been recorded yet. Replace the placeholder row as you build. Mark human review as pending until someone has reviewed the contribution.
-
-| Date and time with timezone | Tool / model, if known | Task | Assistance and affected files | Human review / corrections | Validation and result |
-| --- | --- | --- | --- | --- | --- |
-| TODO | Codex | TODO | TODO | Pending | TODO |
 
 ## Template preparation
 

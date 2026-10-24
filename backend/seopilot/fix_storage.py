@@ -167,6 +167,12 @@ class FixStore:
                     run.status = "expired"
                     run.message = "Private patch retention expired. Generate a new proposal."
                 self.purge(run)
+        # A process can die between writing an atomic temporary file and replacing
+        # its destination. These private remnants follow the same retention bound.
+        root = self.artifacts.resolve()
+        for temporary in self.artifacts.glob("*.tmp"):
+            if temporary.resolve().parent == root and temporary.stat().st_mtime <= time.time()-86400:
+                temporary.unlink(missing_ok=True)
 
     def disposition(self, value: FindingDisposition):
         with self.store.connection() as db:

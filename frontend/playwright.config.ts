@@ -2,7 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 import path from "node:path";
 
 const root = path.resolve(__dirname, "..");
-const python = path.join(root, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
+const python = process.env.CI ? "python" : path.join(root, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
+const safeEnvironment = { PYTHON_DOTENV_DISABLED: "1", OPENAI_API_KEY: "", GITHUB_APP_ID: "", GITHUB_APP_PRIVATE_KEY_PATH: "", GITHUB_APP_OWNERS: "", SEOPILOT_AI_ENABLED: "false", SEOPILOT_PROXY_TOKEN_FILE: path.join(root, ".tmp", "e2e-proxy-token") };
 
 export default defineConfig({
   testDir: "./e2e",
@@ -17,10 +18,11 @@ export default defineConfig({
       cwd: root,
       url: "http://127.0.0.1:8000/api/health",
       reuseExistingServer: !process.env.CI,
-      env: { SEOPILOT_DB: path.join(root, ".tmp", "e2e.db") },
+      env: { ...safeEnvironment, SEOPILOT_DB: path.join(root, ".tmp", "e2e.db") },
     },
     {
       command: "npm run dev",
+      env: safeEnvironment,
       url: "http://localhost:3000",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T01:33:36+05:30 — Complete the v2 dashboard and delivery documentation
+
+- Changed: Added project/App onboarding, audit/source mapping, metadata preparation, escaped diff/download, exact-hash draft-PR consent, checks/history, deployment acknowledgement, live verification, finding dispositions and immediate source deletion. Added 15 hosted browser scenarios, isolated credentials, pinned validation tooling and orphan temporary-file cleanup. Updated setup, architecture, verification and pilot/submission records.
+- Why: Make the reviewed-change workflow usable while preserving human publication/merge/deployment decisions, audit history and spending limits.
+- Validation: Full backend suite 355 passed in 42.60 seconds; six subsequent retention tests passed including the orphan-file regression. 34 AST, seven validator and seven proxy tests passed. Ruff, ESLint, TypeScript, production build and pre-documentation credential/history checks passed. Copied migration retained 5 audits, 7 pages, 26 findings, 29 recommendations, 0 decisions, 3 admissions and 6 AI reservations; original counters stayed unchanged. Independent reviews corrected stale/null edits, truncation, disposition selection and recovery/retention issues.
+- Limitations: Hosted 15-scenario browser result awaits push/CI. A scenario-listing invocation unexpectedly started the local runner and was immediately stopped; no accepted local browser result is claimed. The portfolio pilot still needs App settings, owner workflow, inspected draft PR, manual merge/deployment and live verification. Human review and organizer submission remain pending; no additional paid AI calls or counter resets.
+
 ## 2026-10-25T01:26:56+05:30 — PR publication, recovery and deployment verification
 
 - Changed: Added queued proposal/publication API and worker stages, precise patch binding/export, duplicate-safe branch/commit/PR reconciliation, bounded hosted artifact validation, manual post-deployment verification and stable rule/URL/field comparisons. Added finding dispositions without altering historical scores, targeted crawler mode, versioned scores, 10-minute polling windows and immediate cancellation/source deletion.
@@ -101,17 +108,6 @@ Record each meaningful project change during the event, newest first. Update thi
 - Why: Establish a durable, reviewable foundation for the approved website-to-audit workflow while preserving the original remote history.
 - Validation: Isolated backend dependencies installed; 5 storage/API contract tests passed; scoped Ruff checks and `git diff --check` passed. Reviewed parameterized queries, body/origin guards, queue transactions, and restart handling.
 - Limitations: Crawler, rules, AI, and dashboard are subsequent milestones. Starlette emits one upstream HTTPX TestClient deprecation warning. No live AI calls made. Human review pending.
-
-No project implementation has been recorded yet. Replace this sentence with entries as you build:
-
-```text
-## <actual timestamp> — <short change title>
-
-- Changed: <feature or files changed>
-- Why: <reason for the change>
-- Validation: <commands or manual checks actually run, with results>
-- Limitations: <known issues or "None identified in these checks">
-```
 
 ## Template setup — 10 October 2026
 

@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronRight, CircleCheck, FileSearch, Info, Search, X } from "lucide-react";
 import { api, dateTime, domain, isActive, pagePath, type Audit, type Issue, type Recommendation } from "@/lib/api";
 import { CopyButton, ExternalUrl, Notice, Severity, Spinner, Status, Verified } from "./ui";
+import { fixApi, type DispositionRequest, type FindingDisposition } from "@/lib/fix-api";
 
 type Props = { audit: Audit; onRecommendation: (recommendation: Recommendation) => void };
 type Tab = "issues" | "recommendations" | "pages";
@@ -70,7 +71,7 @@ function capitalize(text: string) { return text[0].toUpperCase() + text.slice(1)
 function FindingDetails({ issue, audit, onRecommendation }: { issue: Issue } & Props) {
   const recommendation = audit.recommendations.find((item) => item.issue_ids.includes(issue.id));
   const affectedPages = audit.pages.filter((page) => issue.page_ids.includes(page.id));
-  return <aside className="detail-panel" aria-label="Finding details"><div className="detail-title"><h3>{issue.title}</h3><div className="detail-badges"><Severity value={issue.severity} /><Verified sample={audit.mode === "demo"} /></div></div>{affectedPages.length > 1 ? <div className="detail-section"><h4>Affected pages</h4><ul className="affected-pages">{affectedPages.map((page) => <li key={page.id}><ExternalUrl url={page.url}>{pagePath(page.url)}</ExternalUrl></li>)}</ul></div> : null}<div className="detail-section"><h4>Evidence</h4>{issue.evidence.map((evidence) => <div className="evidence-block" key={evidence.id}><span>{evidence.field}</span><code>{evidence.value || "(empty)"}</code></div>)}</div><div className="detail-section"><h4>Why it matters</h4><p>{issue.explanation}</p></div><div className="detail-section"><h4>Suggested fix</h4><p>{recommendation?.suggested_value || issue.recommended_fix}</p><CopyButton text={recommendation?.suggested_value || issue.recommended_fix} /></div><div className="detail-section impact-section"><h4>Estimated impact</h4><p>{issue.estimated_impact}</p></div>{recommendation ? <DecisionControls recommendation={recommendation} onRecommendation={onRecommendation} /> : <p className="detail-note">Review this finding in the context of your website.</p>}</aside>;
+  return <aside className="detail-panel" aria-label="Finding details"><div className="detail-title"><h3>{issue.title}</h3><div className="detail-badges"><Severity value={issue.severity} /><Verified sample={audit.mode === "demo"} /></div></div>{affectedPages.length > 1 ? <div className="detail-section"><h4>Affected pages</h4><ul className="affected-pages">{affectedPages.map((page) => <li key={page.id}><ExternalUrl url={page.url}>{pagePath(page.url)}</ExternalUrl></li>)}</ul></div> : null}<div className="detail-section"><h4>Evidence</h4>{issue.evidence.map((evidence) => <div className="evidence-block" key={evidence.id}><span>{evidence.field}</span><code>{evidence.value || "(empty)"}</code></div>)}</div><div className="detail-section"><h4>Why it matters</h4><p>{issue.explanation}</p></div><div className="detail-section"><h4>Suggested fix</h4><p>{recommendation?.suggested_value || issue.recommended_fix}</p><CopyButton text={recommendation?.suggested_value || issue.recommended_fix} /></div><div className="detail-section impact-section"><h4>Estimated impact</h4><p>{issue.estimated_impact}</p></div>{recommendation ? <DecisionControls recommendation={recommendation} onRecommendation={onRecommendation} /> : <p className="detail-note">Review this finding in the context of your website.</p>}<FindingDispositionControls auditId={audit.id} issueId={issue.id} /></aside>;
 }
 function RecommendationDetails({ recommendation, audit, onRecommendation }: { recommendation: Recommendation } & Props) {
   const evidence = recommendation.evidence_ids.flatMap((id) => {
@@ -95,4 +96,29 @@ function DecisionControls({ recommendation, onRecommendation }: { recommendation
     finally { setPending(false); }
   }
   return <div className="decision-controls">{recommendation.status !== "pending" ? <div className={`saved-decision decision-${recommendation.status}`} role="status"><CircleCheck size={15} /><span><strong>{capitalize(recommendation.status)}</strong>{recommendation.decided_at ? <span>{dateTime(recommendation.decided_at)}</span> : null}</span></div> : null}{error ? <Notice variant="error">{error}</Notice> : null}<div className="decision-buttons"><button className={`button button-primary ${recommendation.status === "approved" ? "decision-selected" : ""}`} onClick={() => void decide("approved")} disabled={pending} aria-pressed={recommendation.status === "approved"}>{pending ? <Spinner size={14} /> : <Check size={14} />}Approve</button><button className={`button button-secondary ${recommendation.status === "rejected" ? "decision-selected" : ""}`} onClick={() => void decide("rejected")} disabled={pending} aria-pressed={recommendation.status === "rejected"}><X size={14} />Reject</button></div><p>Your decision is saved locally. Nothing is published to your website.</p></div>;
+}
+
+function FindingDispositionControls({auditId, issueId}: {auditId: string; issueId: string}) {
+  const [saved, setSaved] = useState<FindingDisposition | null>(null);
+  const [status, setStatus] = useState<DispositionRequest["status"]>("open");
+  const [reason, setReason] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    const abort = new AbortController();
+    void fixApi.dispositions(auditId, abort.signal).then((items) => {
+      if (abort.signal.aborted) return;
+      const found = [...items].reverse().find((item) => item.issue_id === issueId);
+      if (found) {setSaved(found); setStatus(found.status === "intentional" || found.status === "dismissed" ? found.status : "open"); setReason(found.reason);}
+    }).catch((cause) => {if (!abort.signal.aborted) setError(cause instanceof Error ? cause.message : "Could not load the finding disposition.");}).finally(() => {if (!abort.signal.aborted) setLoading(false);});
+    return () => abort.abort();
+  }, [auditId, issueId]);
+  async function save(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setPending(true); setError("");
+    try {setSaved(await fixApi.disposition(auditId, issueId, {status, reason}));}
+    catch(cause) {setError(cause instanceof Error ? cause.message : "Could not save the finding disposition.");}
+    finally {setPending(false);}
+  }
+  return <form className="disposition-controls" onSubmit={(event) => void save(event)} aria-label="Finding disposition"><h4>Record your assessment</h4>{loading ? <p role="status">Loading disposition…</p> : null}{saved ? <p className="project-footnote" role="status">Recorded as {saved.status} · {dateTime(saved.recorded_at)}</p> : null}<label>Finding status<select value={status} onChange={(event) => setStatus(event.target.value as DispositionRequest["status"])} disabled={loading || pending}><option value="open">Open / unresolved</option><option value="intentional">Intentional</option><option value="dismissed">Dismissed with reason</option></select></label><label>Reason<textarea required minLength={3} maxLength={1000} rows={3} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Explain your assessment" disabled={loading || pending} /></label>{error ? <Notice variant="error">{error}</Notice> : null}<button className="button button-small button-secondary" disabled={loading || pending || reason.trim().length < 3}>{pending ? <Spinner size={13} /> : <Check size={13} />}Save assessment</button><p className="project-footnote">Original evidence and historical scores stay unchanged.</p></form>;
 }

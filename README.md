@@ -1,6 +1,6 @@
 # SEOPilot
 
-Evidence-based SEO audits for small businesses. Enter a public website URL, inspect actual page findings, and review practical recommendations. Optional OpenAI analysis adds contextual suggestions; the crawler and rules work without paid services.
+Evidence-based SEO audits and reviewed metadata fixes for websites you own. Audit a public website, review findings, prepare a precise Next.js title/description patch, then explicitly approve a draft GitHub PR. GitHub-hosted checks and a separate live audit verify the change after you merge and deploy. Optional OpenAI analysis adds contextual suggestions; deterministic audits and patch generation work without paid services.
 
 ## Local setup (Windows PowerShell)
 
@@ -9,6 +9,7 @@ Requires Node.js 22+ and Python 3.13+. Run from the repository root:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e "backend[dev]"
+npm --prefix repository-tools ci --ignore-scripts
 cd frontend
 npm ci
 cd ..
@@ -48,6 +49,11 @@ Add your key only to `OPENAI_API_KEY` in **backend/.env** and restart the backen
 | `OPENAI_MAX_OUTPUT_TOKENS` | `2500`; per-call ceiling, allowed 512–2500, including reasoning |
 | `SEOPILOT_DB` | Optional SQLite path; default `backend/.data/seopilot.db` |
 | `SEOPILOT_PROXY_TOKEN_FILE` | Usually blank; optional private absolute token path, set identically in both server process environments |
+| `GITHUB_APP_ID` | Optional private App ID; required for repository connections |
+| `GITHUB_APP_PRIVATE_KEY_PATH` | Server-only path to an ignored PEM file; never the key contents |
+| `GITHUB_APP_OWNERS` | Comma-separated allowed repository owner logins |
+
+For repository fixes, follow the [private GitHub App setup guide](docs/github-app-setup.md). Install the App on selected repositories with Metadata read, Contents write, Pull requests write and Actions read. Keep its private key outside Git. Repository-scoped installation tokens remain in server memory; neither credentials nor tokens are returned to the browser. Install the [validation workflow and harness](validation/README.md) yourself in the target repository before publishing.
 
 The safe API entry point binds loopback, disables forwarded-header trust and access logs, and starts one worker. If invoking Uvicorn directly, include **`--no-proxy-headers --no-access-log`** and keep `--host 127.0.0.1`. Do not run multiple workers.
 
@@ -64,13 +70,13 @@ Local browsers normally share one loopback allowance. A reverse proxy in front o
 
 This release remains **local and single-user**. IP limits cannot stop a botnet by themselves; the global AI cap provides the additional spending boundary. Before public hosting, add authentication, audit ownership checks and a trusted edge with rate limits. For a monetary ceiling, also configure a dedicated OpenAI project with a restricted key and [project spend limits](https://developers.openai.com/api/docs/guides/spend-limits); application request counts are not billing telemetry. Provider spend-limit enforcement may have a short delay. Live `gpt-6-luna` access and a complete generation/review workflow have been tested; see the [bounded live verification record](docs/live-validation-2026-10-25.md).
 
-No credentials are required for the labelled sample demo. The app never modifies or publishes to the audited website.
+No credentials are required for the labelled sample demo. Recommendation approval records content review. A separate **Create draft PR** action authorizes the exact inspected patch; merge and deployment remain manual.
 
 Optional AI now uses structured generation followed by a separate evidence review. Invalid, unsupported or contradictory suggestions are withheld. Missing credentials, rate limits, timeouts and provider errors preserve deterministic findings. The sample audit parses bundled HTML through the production extractor and rules and clearly identifies curated suggestions as sample data.
 
 ## Architecture
 
-Next.js proxies `/api/*` to FastAPI. A lifespan-managed asynchronous worker claims jobs from SQLite. Crawling, extraction, deterministic rules, AI analysis/review, and storage are separate Python modules. Pydantic defines the API contracts; frontend types are generated from OpenAPI. SQLite stores projects, audit runs, page metadata, findings, recommendations, and append-only review decisions.
+Next.js proxies allowlisted `/api/*` routes to FastAPI. One lifespan-managed asynchronous worker processes persisted audit and fix stages. Crawling, extraction, deterministic rules, AI analysis/review, GitHub access, static AST patching and storage remain separate modules. Pydantic defines the API contracts; frontend types are generated from OpenAPI. SQLite schema v3 preserves existing audits and counters while adding project connections, immutable proposals, execution events, publication reservations and finding dispositions.
 
 Queued jobs survive restarts. Active jobs become interrupted, retain collected evidence, and can be rerun as a new audit. Network requests never hold database transactions. Audit history is local data and is ignored by Git.
 
@@ -82,6 +88,9 @@ Backend checks, from the repository root:
 .\.venv\Scripts\python.exe -m pytest backend/tests -q
 .\.venv\Scripts\python.exe -m ruff check backend scripts
 .\.venv\Scripts\python.exe scripts/check_repository.py --history
+npm --prefix repository-tools test
+npm --prefix validation ci --ignore-scripts
+npm --prefix validation test
 ```
 
 pytest deliberately ignores local dotenv files and masks inherited API keys. It uses offline fixtures and harmless SDK fakes. Live paid testing is separate and requires explicit authorization; configuring `backend/.env` does not make routine tests billable. The AI client uses the verified system certificate store, with hostname validation enabled, just like the crawler. For connection errors, check the network and trusted OS certificate configuration; never disable TLS verification.
@@ -107,7 +116,9 @@ cd frontend
 npm run generate:types
 ```
 
-Browser scenarios are in `frontend/e2e/`. With browser access permitted, `npm run test:e2e` from `frontend/` uses Playwright and starts missing local services. These scenarios were **not executed here** because the browser origin policy denied localhost, including after explicit approval and retry. See the [verification record](docs/verification.md).
+Browser scenarios are in `frontend/e2e/`. The GitHub Actions workflow installs Chromium and runs `npm run test:e2e` in `frontend/` with disabled live credentials and a disposable database. Fifteen desktop/mobile and error-state scenarios are prepared; their hosted result remains pending at this checkpoint. Local browser-origin access remained denied; no accepted local rendered-browser result is claimed. See the [verification record](docs/verification.md).
+
+For a separately authorized browser environment, install Chromium with `npx --no-install playwright install chromium`, then run `npm run test:e2e` from `frontend/`. These commands start local services when needed. They were not used to obtain a local browser acceptance pass in this session.
 
 ## Three-minute demonstration
 
@@ -127,27 +138,25 @@ The smoke test sends `allow_ai=false`, even if the running API has live AI confi
 
 ## Status
 
-The v2 backend now supports project connection management, immutable patch review/export, explicit hash-bound draft-PR publication, restart reconciliation, trusted hosted-check reports and post-deployment verification. Live verification disables AI, retains the three-audits/IP allowance, and checks the frozen page set; missing, blocked or truncated evidence cannot pass. Two PR publications are allowed globally per rolling 24 hours and one active fix run per project. [Install the owner-managed validation workflow](validation/README.md); the App does not write workflows or merge/deploy changes.
+V2 implements project onboarding, source mapping, private patch review/download, explicit hash-bound draft-PR publication, recovery after uncertain writes, hosted validation reports, finding dispositions and fix-run history. It never merges or deploys changes. **PR opened**, **checks passed**, **merged**, **awaiting deployment** and **live verified** are separate states.
 
-The static metadata adapter is available in `repository-tools/`. Install its pinned parser with `cd repository-tools; npm ci` and run `npm test` there. It edits only TypeScript App Router server-page titles/descriptions and refuses dynamic metadata, Client Components, uncertain inheritance, unsupported title templates and ambiguous routes. It parses source without executing target imports, configuration or scripts. Patch review and publication are separate steps in the v2 dashboard integration.
+Only TypeScript App Router server-page titles and descriptions are edited. The pinned AST parser in `repository-tools/` never executes target imports, configuration or scripts. Dynamic metadata, Client Components, ambiguous routes, percent-encoded route paths and uncertain inheritance/title templates require manual work. Shared layouts, canonicals, indexing directives, page content, dependencies and workflows are never automatically edited. Proposals are limited to three pages, five files and 100 changed lines; patch generation makes zero additional AI calls and private source stays outside OpenAI requests.
 
-V2 development adds a private GitHub App boundary, selected-repository authorization and versioned project/fix persistence while retaining audit and AI quotas. See [App setup](docs/github-app-setup.md). The draft-PR workflow is being integrated; no pilot PR or deployed change is claimed at this checkpoint.
+Publication allows two draft PRs globally per rolling 24 hours and one active fix per project. Each branch is `seopilot/<fix-run-id>` with one approved commit; stale or conflicting edits are rejected. GitHub status checks pause after ten minutes and can resume through **Refresh status**. Source and patches expire after 24 hours; active-server cleanup purges them, expired exports fail closed, and immediate deletion/disconnection controls are available. GitHub Actions usage is separate from the OpenAI allowance.
 
-The connected dashboard is implemented and its production build, TypeScript and ESLint checks pass. Rendered browser/E2E verification is blocked by the local browser origin permission policy; no browser or visual-fidelity pass is claimed. No deployment is claimed.
+After manually merging and deploying, choose **Verify live**. It starts a fresh bounded audit of the recorded URLs with AI disabled and the existing three-audits/IP allowance. Missing, blocked, failed or truncated metadata cannot pass. Historical scores and rule/scoring versions are retained; reduced coverage is never reported as improvement. Dispositions record reasons without rewriting evidence or scores.
 
-The real crawler and API are implemented and verified against a one-page example.com audit. Crawl limits, policy failures and extraction truncation remain visible as coverage information. The server uses validated-IP connections with normal TLS hostname verification and never follows links outside the submitted origin.
+Local checks passed: 355 backend tests, six later retention tests including a new orphan-file regression, 34 AST tests, seven validator tests, seven proxy tests, Ruff, ESLint, TypeScript and the production build. Hosted browser results remain pending; see [verification](docs/verification.md). A copied-database migration preserved all existing audit, decision and usage records; live counters were never reset. Earlier real SEO/AI observations remain in the [live record](docs/live-validation-2026-10-25.md).
 
-The deterministic rules now evaluate extracted metadata, heading structure, image alt presence, canonicals, indexing directives, confirmed internal-link failures, HTTP errors, duplicate titles/descriptions, and evidence-backed site discovery observations. Character ranges are configurable review heuristics, not ranking rules. The internal health score subtracts mean capped page penalties (Critical 20, High 10, Medium 5, Low 2; HTTP errors 100) and site penalties capped at 20. Unknown pages do not enter its denominator; insufficient data produces no score.
+The selected owned pilot is [thanushree-portfolio](https://github.com/thanushreesuresh/thanushree-portfolio) at [thanushree-portfolio-six.vercel.app](https://thanushree-portfolio-six.vercel.app/). The three local GitHub App settings are not configured. Release acceptance still requires the App installation, owner-installed workflow, an inspected pilot draft PR, manual merge/deployment and successful live verification. No pilot deployment or end-to-end release acceptance is claimed; human review remains pending.
 
-Verified: 207 backend tests and Ruff; prior frontend ESLint/TypeScript/build, six proxy tests and browser-bundle canary checks passed. Live Python.org sampling assessed three pages, verified eight observations and produced three evidence-reviewed AI suggestions; independent HTML checks and score arithmetic matched. Example.com scored 82; a TLS trust failure was reproduced and corrected, and a post-fix generation succeeded while the exhausted per-audit review allowance withheld its suggestions. See [actual results and limits](docs/live-validation-2026-10-25.md). Browser rendering, mobile interaction and screenshot fidelity remain unverified because of the origin permission block.
-
-This MVP parses fetched HTML without JavaScript execution, stays on the exact submitted origin, and is local/single-user. Search Console, authentication/hosting, orphan detection, recurring audits and automatic publishing are deferred. Full details: [architecture and scoring](docs/architecture.md), [verification](docs/verification.md), and [submission record](SUBMISSION.md).
+The app remains local/single-user. The crawler parses fetched HTML without JavaScript and stays on the exact submitted origin. Search Console, public hosting/authentication, additional frameworks, local/ZIP imports, recurring audits, orphan detection and automatic merging/deployment are deferred. Full details: [architecture and scoring](docs/architecture.md), [verification](docs/verification.md), and [submission record](SUBMISSION.md).
 
 ## Sources and project record
 
 Purposeful libraries: [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/), [FastAPI](https://fastapi.tiangolo.com/), [Pydantic](https://docs.pydantic.dev/), [HTTPcore](https://www.encode.io/httpcore/), [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/), [Protego](https://github.com/scrapy/protego), [OpenAI Python SDK](https://github.com/openai/openai-python), [pytest](https://docs.pytest.org/), and [Ruff](https://docs.astral.sh/ruff/). SQLite uses Python's standard library. No external SEO dataset is used.
 
-Next.js/React/Tailwind and Lucide provide the interface; FastAPI/Uvicorn/Pydantic provide the typed local API; HTTPcore exposes the public transport hook needed for DNS pinning; Beautiful Soup and Protego handle HTML and robots parsing; the OpenAI SDK supplies optional structured output; python-dotenv loads local server configuration. OpenAPI TypeScript prevents contract drift. pytest/pytest-asyncio, HTTPX, Ruff, ESLint, TypeScript and Playwright support validation. No agent framework, external database service or native database package is required.
+Next.js/React/Tailwind and Lucide provide the interface; FastAPI/Uvicorn/Pydantic provide the typed local API; HTTPcore exposes the public transport hook needed for DNS pinning; Beautiful Soup and Protego handle HTML and robots parsing; the OpenAI SDK supplies optional structured output; python-dotenv loads local server configuration. HTTPX calls GitHub with verified TLS; [PyJWT](https://pyjwt.readthedocs.io/) and [cryptography](https://cryptography.io/) sign App JWTs. The [TypeScript compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API) parses source without executing it. OpenAPI TypeScript prevents contract drift. pytest/pytest-asyncio, Ruff, ESLint and Playwright support validation. No agent framework or external database service is required.
 
 Important implementation areas are `backend/seopilot/network.py` and `crawler.py` (network/crawl policy), `extraction.py` and `rules.py` (page evidence and findings), `ai.py` (structured analysis/review), `storage.py`/`runner.py`/`app.py` (persistence and orchestration), and `frontend/src/components/` (dashboard). Generated frontend types are in `frontend/src/lib/api-types.ts`.
 
