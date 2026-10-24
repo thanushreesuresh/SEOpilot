@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T04:12:30+05:30 — Record verified score explanations
+
+- Changed: Updated README, verification and submission records for source 11f46b4 and passing hosted run 40139477667. Inspected final desktop/mobile screenshots and confirmed preserved original database counts using read-only access.
+- Validation: Hosted 534 backend tests, 34 AST tests, seven validator/proxy tests each, 33 browser scenarios, lint/type/build and contract/credential/history checks passed. New and legacy score explanations passed computed font-size/contrast checks. Human review remains pending.
+- Limitations: Documentation-only checkpoint. No paid calls, extra probes, counter resets or website writes. Local manual restart and owned-pilot App/PR/deployment/live-verification acceptance remain pending; scores are diagnostic heuristics.
+
 ## 2026-10-25T04:05:09+05:30 — Improve score-detail readability after hosted inspection
 
 - Changed: Increased new score explanations to 12-pixel text, used darker text colors and added hosted assertions for computed font size and text/background contrast, including legacy scores without a breakdown.

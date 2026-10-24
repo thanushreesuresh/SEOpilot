@@ -2,6 +2,26 @@
 
 Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and committed lockfiles. Historical real SEO/AI observations remain in the [bounded live record](live-validation-2026-10-25.md).
 
+## Explainable-score checkpoint
+
+At 2026-10-25T04:12:30+05:30, source **`11f46b401b6ec84df8422bec8545890c737363c5`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40139477667). This later documentation checkpoint changes no implementation.
+
+| Score explanation check | Observed result |
+| --- | --- |
+| Complete backend suite | **534 passed**, 44.82 seconds locally and 27.62 seconds on GitHub; existing upstream TestClient warning remains |
+| AST / hosted-validator / authenticated-proxy checks | **34 / 7 / 7 passed** locally and on GitHub |
+| Ruff, ESLint, TypeScript, production build | Passed locally and on GitHub |
+| Generated-contract drift and credential/history checks | Passed on GitHub; local working/staged/history and ignored-private-path checks passed |
+| Hosted Chromium | **33 passed** in 37.5 seconds, including four new score scenarios and computed font-size/contrast checks for new and legacy explanations |
+| Original database, read-only | Still 5 audits, 7 pages, 26 issues, 29 recommendations, 0 decisions, 3 admissions and 6 AI reservations |
+| Additional live AI requests / website writes | **0 / 0** for this iteration |
+
+Offline tests verify raw/capped totals, repeated/group rule deduplication, HTTP-error overrides, assessed-only denominators, nearest-even rounding, empty scores, snapshot persistence, unchanged scores after review decisions and safe Markdown/CSV/JSON exports. Hosted tests verify expansion, per-page deductions, navigation back to matching findings, mobile keyboard/viewport behavior, escaped rule text, legacy scores and excluded pages without a score. The final desktop/mobile screenshots were inspected: the scoped 12-pixel explanations use darker text and wrap within the viewport. The HTML canary remains text; no framework error overlay was observed. Existing development indicators and full-page placement of fixed navigation remain capture artifacts.
+
+Source `270a6e5` passed 534 backend and 29 existing browser scenarios, but four new cases failed during sample setup. Static trace inspection confirmed HTTP 429 responses from redundant fixture-creation calls. Shared setup now reads existing sample history/detail and seeds only when absent, preserving the production burst limit. Source `47e2d1e` then passed all 33 browser cases. Screenshot inspection prompted the readability follow-up; independent specification review also caught the legacy paragraph's missing wrapper. Both final review axes found no remaining actionable issues, and the final run above passed the rendered size/contrast assertions for both branches.
+
+No live credentials were read or printed, no original counters reset, and tests used fresh databases with live credentials disabled. The existing local services were not restarted and do not verify the new code. Automatic approval previously rejected the dashboard restart as “blocked by policy”; manual restart remains required. Owned-pilot App setup, exact-patch approval, human merge/deployment, live verification and human review remain pending. Diagnostic scores do not forecast ranking or traffic gains.
+
 ## Crawl discovery checkpoint
 
 At 2026-10-25T03:40:59+05:30, source **`78dd569fb0a45b7afe7082b68afb8bece43500be`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40137186217). This later documentation checkpoint changes no implementation.
