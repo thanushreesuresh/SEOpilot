@@ -320,7 +320,13 @@ test("mobile keyboard flows expose bounded JSON-LD evidence and keep comparison 
       element.style.cssText = original;
       return { ...region, withoutRegion };
     });
-    return { viewport: window.innerWidth, document: documentWidth, regions,
+    const hiddenHeader = document.querySelector<HTMLElement>(".history-table th .sr-only")!;
+    const headerCell = hiddenHeader.parentElement!;
+    const headerStyle = headerCell.style.cssText;
+    headerCell.style.position = "static";
+    const withoutHeaderContainingBlock = document.documentElement.scrollWidth;
+    headerCell.style.cssText = headerStyle;
+    return { viewport: window.innerWidth, document: documentWidth, regions, withoutHeaderContainingBlock,
       elements: [...document.querySelectorAll("body *")].flatMap((element) => {
       const box = element.getBoundingClientRect();
       return box.width && (box.right > window.innerWidth + 1 || box.left < -1)
@@ -328,6 +334,7 @@ test("mobile keyboard flows expose bounded JSON-LD evidence and keep comparison 
       }).slice(0, 30),
     };
   });
+  await testInfo.attach("mobile-layout-diagnostics", { body: JSON.stringify(overflow), contentType: "application/json" });
   await page.screenshot({ path: testInfo.outputPath("reporting-mobile-before-coverage.png"), fullPage: true });
   expect(overflow.document, JSON.stringify(overflow)).toBeLessThanOrEqual(overflow.viewport + 1);
   const tableScroller = page.locator(".comparison-table-scroll");

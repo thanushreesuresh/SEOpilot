@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T02:34:08+05:30 — Anchor the hidden history column label
+
+- Changed: Positioned history header cells so their absolutely positioned accessible labels stay inside the table's scroll boundary. Removed the unsuccessful comparison paint-containment workaround. Browser evidence now includes a reversible static-header measurement.
+- Why: An independent review identified the offscreen “Open” column label as an uncontained absolute descendant; comparison-table descendants in the earlier diagnostic were clipped correctly.
+- Validation: Local ESLint, TypeScript and production build passed. The unchanged mobile width assertion and keyboard table-scroll check remain required in the hosted rerun.
+- Limitations: The causal width measurement and final mobile acceptance are pending hosted execution. Local dashboard restart remains blocked by automatic approval review. No AI calls or user-counter changes; human review pending.
+
 ## 2026-10-25T02:32:41+05:30 — Isolate remaining hosted scroll overflow
 
 - Changed: Expanded the bounded mobile diagnostic with computed scroll-region styles and reversible region-isolation measurements. The page is restored before the unchanged width assertion.
