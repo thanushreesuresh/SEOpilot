@@ -1,5 +1,7 @@
 # AI usage record
 
+| 2026-10-25T02:21:52+05:30 | Codex | Hosted mobile overflow diagnosis | Inspected authorized GitHub trace/screenshot evidence and added bounded layout diagnostics before the existing strict mobile assertion | Pending human review | Hosted backend465 and browser22 passed/1 failed; local lint/typecheck and saved-report runtime smoke passed with original counters preserved; no paid calls |
+
 | 2026-10-25T02:08:47+05:30 | Codex | Audit comparisons, evidence exports and JSON-LD diagnostics | Implemented bounded reporting/parser modules, contracts, dashboard controls, proxy routes and offline/browser fixtures; separate reviews corrected negative evidence from unfinished analysis and truncated-presence wording | Pending human review | 465 backend tests, Ruff, seven proxy tests, ESLint, TypeScript, production build and credential/history checks passed; eight new browser scenarios pending hosted execution; zero new paid calls or counter resets |
 
 | 2026-10-25T01:56:07+05:30 | Codex | Indexing evidence reliability | Reproduced silently omitted directives and centralized the metadata/header bound with explicit truncation | Pending human review | 41 focused tests and Ruff passed; separate standards/spec reviews passed; no paid calls |

@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T02:21:52+05:30 — Diagnose hosted mobile comparison overflow
+
+- Changed: The existing mobile browser assertion now records bounded element geometry and a full-page screenshot before checking viewport containment.
+- Why: Hosted run 40131342232 passed 465 backend tests and 22 browser cases, but exposed horizontal overflow in the comparison flow. The width assertion remains strict; the new evidence will identify the responsible element.
+- Validation: Frontend ESLint and TypeScript passed. Restarted local services served all three report formats from saved evidence; 5 audits, 3 admissions and 6 AI reservations were preserved.
+- Limitations: Mobile acceptance remains failed pending diagnosis/correction and a hosted rerun. No production data, quota or AI requests were changed; human review pending.
+
 ## 2026-10-25T02:08:47+05:30 — Compare saved evidence, export reports and inspect JSON-LD
 
 - Changed: Added free same-origin saved-audit comparisons, Markdown/CSV/JSON report downloads, bounded JSON-LD diagnostics and accessible dashboard controls. Generated API contracts and proxy routes include the new interfaces.
