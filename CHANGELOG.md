@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T04:42:07+05:30 — Record verified samples and guide the owned pilot setup
+
+- Changed: Recorded source `1482a5ca227acf9e3260fc3708b3a2d2d1a76ce2` and its passing hosted run in README, verification and submission records; expanded the GitHub App setup guide with exact fields, least permissions, selected repository installation, App ID/path configuration, manual restart and troubleshooting.
+- Why: Current samples need reproducible acceptance evidence, and the owner requested App setup guidance to unblock the real portfolio pilot.
+- Validation: Hosted 549 backend, 36 browser, 34 AST and seven validator/proxy tests each passed with static/build/contract/credential checks; final mobile screenshot inspected. Documentation links/working/staged/history credential checks passed; independent standards/specification documentation reviews found no actionable issues.
+- Limitations: No App configuration, pilot PR, merge/deployment or live verification performed. Existing local services need manual restart following the prior automatic approval rejection; human review pending. No paid calls or original counter changes.
+
 ## 2026-10-25T04:36:31+05:30 — Wait for keyboard-ready sample controls
 
 - Changed: The mobile sample-upgrade browser scenario waits for the sample button to be enabled and confirms focus before each Enter activation.

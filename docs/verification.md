@@ -2,6 +2,28 @@
 
 Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and committed lockfiles. Historical real SEO/AI observations remain in the [bounded live record](live-validation-2026-10-25.md).
 
+## Revision-aware sample checkpoint
+
+At 2026-10-25T04:42:07+05:30, source **`1482a5ca227acf9e3260fc3708b3a2d2d1a76ce2`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40141578038). This later documentation checkpoint changes no implementation and expands the owner-requested GitHub App setup instructions.
+
+| Sample check | Observed result |
+| --- | --- |
+| Complete backend suite | **549 passed**, 63.61 seconds locally and 26.03 seconds on GitHub; existing upstream TestClient warning remains |
+| AST / hosted-validator / authenticated-proxy checks | **34 / 7 / 7 passed** locally and on GitHub |
+| Ruff, ESLint, TypeScript, production build | Passed locally and on GitHub |
+| Generated-contract drift and credential/history checks | Passed on GitHub; local working/staged/history and ignored-private-path checks passed |
+| Hosted Chromium | **36 passed** in 29.4 seconds, including revision provenance, preserved historical decisions/allowances and mobile keyboard error/retry cases |
+| Original database, read-only | Still 5 audits, 7 pages, 26 issues, 29 recommendations, 0 decisions, 3 admissions and 6 AI reservations |
+| Additional live AI requests / website writes | **0 / 0** for this iteration |
+
+Offline cases verify legacy raw JSON is unchanged, revisions reuse samples beyond the history window and across concurrent stores/restarts, decisions survive reopening, forged revisions cannot select fixtures, invalid candidates fail closed, and the burst limit remains enforced without live quota or AI reservations. Markdown/CSV/JSON reports retain sample provenance. The final 390-pixel mobile screenshot was inspected: the revision disclosure wraps within the card, sample controls and evidence are visible, and viewport-containment and no-page-error assertions passed. The development indicator is an existing capture artifact.
+
+Source `8b80716` passed 549 backend and 35 browser cases; the new mobile case failed before sending its sample request. Static trace inspection showed focus was attempted during initialization without waiting for the button to be enabled. The follow-up waits for enabled state and asserts focus before both Enter activations; all error/retry/history assertions remain. Separate standards/specification reviews found no actionable issues in the feature or correction patches. The final source above passes all 36 scenarios.
+
+The owner requested GitHub App setup guidance. The expanded guide gives exact registration permissions, selected-repository installation, numeric App ID versus Client ID, a PEM path outside this OneDrive checkout, preserving the existing ignored dotenv, manual restart and sanitized troubleshooting. Registration and private-key screens were checked against official GitHub documentation; no App was created or configured by this documentation change.
+
+No live credentials were read or printed, no original counters reset, and tests used fresh databases with live credentials disabled. Local services were not restarted and are not acceptance evidence for this source. Automatic approval previously rejected dashboard restart as “blocked by policy”; manual restart remains required. Owned-pilot App setup, owner workflow, exact-patch approval, human merge/deployment, live verification and human review remain pending.
+
 ## Explainable-score checkpoint
 
 At 2026-10-25T04:12:30+05:30, source **`11f46b401b6ec84df8422bec8545890c737363c5`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40139477667). This later documentation checkpoint changes no implementation.
