@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T03:58:30+05:30 — Reuse saved browser fixtures under the real burst limit
+
+- Changed: Shared browser sample setup now reads history/detail and creates a sample only when none exists; API failures include their HTTP status in assertions. Updated audit, cancellation, discovery and score scenarios to use it.
+- Why: Hosted traces proved all four new score scenarios received HTTP 429 before reaching UI assertions because the suite made redundant sample-creation requests inside one minute. The production burst guard correctly remained active; its limits and behavior are unchanged.
+- Validation: Source 270a6e5 passed 534 backend tests, all static/build/contract checks and 29 existing hosted browser scenarios; the four new browser scenarios failed at setup. Frontend lint/type checks and credential/link checks passed for this correction; independent standards/specification reviews found no actionable issues. Hosted rerun and human review pending; no paid calls or user-counter changes.
+
 ## 2026-10-25T03:51:30+05:30 — Explain recorded health-score deductions
 
 - Changed: Added an optional persisted score breakdown from the existing scoring aggregation, page/site deductions and exclusions in the dashboard, URL search links to findings, generated contracts and Markdown/CSV/JSON report support. Older scores stay explicitly unrecorded and unchanged.

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { sampleAudit } from "./fixtures";
 
 test("sample audit, filters, evidence, decisions and history persist", async ({ page }) => {
   const errors: string[] = [];
@@ -46,8 +47,7 @@ test("mobile dashboard remains readable and operational", async ({ page }) => {
 });
 
 test("a blocked audit reports insufficient coverage instead of a clean result", async ({ page, request }) => {
-  const response = await request.post("/api/demo-audits", { data: {} });
-  const sample = await response.json();
+  const sample = await sampleAudit(request);
   const blocked = {
     ...sample, id: "blocked-ui-fixture", mode: "live", status: "failed", ai_status: "unavailable",
     pages: [{ ...sample.pages[0], outcome: "blocked", status_code: null, error: "robots.txt disallows this URL." }],
@@ -73,8 +73,7 @@ test("exhausted live allowance keeps samples available", async ({ page }) => {
 });
 
 test("AI can be switched off and duplicate audit reuse is explained", async ({ page, request }) => {
-  const response = await request.post("/api/demo-audits", { data: {} });
-  const sample = await response.json();
+  const sample = await sampleAudit(request);
   await page.route("**/api/usage", (route) => route.fulfill({ json: {
     limit: 3, used: 0, remaining: 3, reset_at: null, retry_after: 0, window_hours: 24, ai_enabled: true, ai_calls_remaining: 20,
   } }));

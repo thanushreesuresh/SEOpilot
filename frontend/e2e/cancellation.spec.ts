@@ -1,11 +1,11 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import type { Audit, AuditSummary } from "../src/lib/api";
+import { sampleAudit } from "./fixtures";
 
 const ID = "77777777-7777-4777-8777-777777777777";
 
 async function cancellationFixture(page: Page, request: APIRequestContext, status: "queued" | "crawling" | "reviewing") {
-  const sampleResponse = await request.post("/api/demo-audits", { data: {} });
-  const sample: Audit = await sampleResponse.json();
+  const sample = await sampleAudit(request);
   let current: Audit = { ...sample, id: ID, mode: "live", url: "https://cancel.example.com/", origin: "https://cancel.example.com",
     status, ai_status: status === "reviewing" ? "pending" : "unavailable", allow_ai: true, completed_at: null,
     progress: { stage: status, visited: status === "queued" ? 0 : 1, discovered: 1, limit: 15, message: "Audit fixture in progress" },

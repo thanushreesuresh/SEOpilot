@@ -1,13 +1,8 @@
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import type { Audit } from "../src/lib/api";
+import { sampleAudit } from "./fixtures";
 
 const CANARY = '<img src=x onerror="window.scoreCanary=true">';
-
-async function sampleAudit(request: APIRequestContext): Promise<Audit> {
-  const response = await request.post("/api/demo-audits", { data: {} });
-  expect(response.ok()).toBe(true);
-  return response.json();
-}
 
 async function openScore(page: Page, audit: Audit) {
   await page.goto(`/?audit=${audit.id}`);

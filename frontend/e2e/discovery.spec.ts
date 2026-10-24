@@ -1,14 +1,13 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import type { Audit, AuditSummary } from "../src/lib/api";
+import { sampleAudit } from "./fixtures";
 
 const ID = "88888888-8888-4888-8888-888888888888";
 const ORIGIN = "https://discovery.example.com";
 const CANARY = '<img src=x onerror="window.discoveryCanary=true">';
 
 async function discoveryFixture(page: Page, request: APIRequestContext, legacy = false) {
-  const sampleResponse = await request.post("/api/demo-audits", { data: {} });
-  expect(sampleResponse.ok()).toBe(true);
-  const sample: Audit = await sampleResponse.json();
+  const sample = await sampleAudit(request);
   const audit: Audit = { ...sample, id: ID, mode: "live", status: "partial", url: ORIGIN + "/", origin: ORIGIN,
     discovery: legacy ? null : { robots_state: "present", sitemap_state: "unknown", request_attempts: 5,
       effective_delay_seconds: 2, notes: ["An external-origin sitemap declaration was skipped."], probes: [
