@@ -48,10 +48,10 @@ async function cancellationFixture(page: Page, request: APIRequestContext, statu
 test("queued audit can be cancelled without refunding allowance and remains in history", async ({ page, request }) => {
   const state = await cancellationFixture(page, request, "queued");
   await page.goto(`/?audit=${ID}`);
-  await expect(page.getByRole("region", { name: "Audit progress", exact: true })).toBeVisible();
+  await expect(page.getByRole("status", { name: "Audit progress", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Cancel audit", exact: true }).click();
   await expect(page.getByText(/Audit cancelled\. These are retained, incomplete results/)).toBeVisible();
-  await expect(page.getByRole("region", { name: "Audit progress", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("status", { name: "Audit progress", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Cancel audit", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Download report", exact: true })).toBeEnabled();
   await expect(page.getByText("2 of 3 live audits left", { exact: true })).toBeVisible();
@@ -69,7 +69,7 @@ test("failed cancellation remains active and a retry confirms the stop", async (
   await page.goto(`/?audit=${ID}`);
   await page.getByRole("button", { name: "Cancel audit", exact: true }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Cancellation could not be confirmed" })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Audit progress", exact: true })).toBeVisible();
+  await expect(page.getByRole("status", { name: "Audit progress", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Cancel audit", exact: true }).click();
   await expect(page.getByText(/Audit cancelled\. These are retained, incomplete results/)).toBeVisible();
   await expect(page.getByRole("alert").filter({ hasText: "Cancellation could not be confirmed" })).toHaveCount(0);
@@ -90,7 +90,7 @@ test("mobile keyboard cancellation during AI review preserves collected pages", 
   await page.getByRole("tab", { name: "Recommendations", exact: true }).click();
   await expect(page.getByText(/AI processing was cancelled/)).toBeVisible();
   await page.getByRole("tab", { name: "Pages", exact: true }).click();
-  await expect(page.getByText("Collected page evidence", { exact: true })).toBeVisible();
+  await expect(page.getByRole("cell").filter({ hasText: "Collected page evidence" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath("audit-cancel-mobile.png"), fullPage: true });
   expect(state.cancelRequests).toBe(1);

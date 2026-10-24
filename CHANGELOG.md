@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T03:10:42+05:30 — Match cancellation tests to accessible markup
+
+- Changed: New browser cases select the progress panel's explicit `status` role and locate retained page evidence within its table cell.
+- Why: The component intentionally overrides the section's default region role; the previous locator would not find it. Page cells also contain diagnostic summary text.
+- Validation: Static comparison against the rendered component markup; frontend lint/type checks run for the correction. Hosted execution is pending; no product behavior or provider calls changed. Human review pending.
+
 ## 2026-10-25T03:06:28+05:30 — Cancel audits without resetting spending limits
 
 - Changed: Added durable queued/running audit cancellation, an allowlisted API action and accessible dashboard control. Retained evidence supports history, exports, comparisons and recommendation review; stale writes and new AI reservations cannot resurrect a cancelled run.
