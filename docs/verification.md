@@ -4,9 +4,23 @@ Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3
 
 ## Cancellation checkpoint
 
-At 2026-10-25T03:06:28+05:30, all **495 backend tests passed** locally in 51.58 seconds, with the existing upstream warning. Ruff, seven proxy tests, frontend ESLint/TypeScript and production build passed. Separate standards/spec reviews found no actionable issues in the immutable staged code patch. Tests cover every active cancellation stage, idempotency, origin/ID errors, restart durability, stale saves, worker continuation/shutdown, cancellation during fake AI generation/review, preserved reservations and fresh verification admissions. Thirteen reproduced live-verification evidence failures now pass.
+At 2026-10-25T03:22:10+05:30, source **`da67735cbc92945e383b6c092e1c59025f2daba0`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40135903810). This later documentation checkpoint changes no implementation.
 
-Three new desktop/mobile keyboard/error browser cases await GitHub-hosted execution, expanding the suite to 26. The earlier hosted 465/23 pass below does not verify this milestone. Local production processes have not been restarted and are not acceptance evidence for it; the earlier automatic approval rejection of the dashboard restart still applies. Fixtures use fresh databases and disabled live credentials. No original counter or private configuration was reset or printed. Human review remains pending.
+| Cancellation check | Observed result |
+| --- | --- |
+| Complete backend suite | **498 passed**, 70.58 seconds locally and 27.31 seconds on GitHub; existing upstream TestClient warning remains |
+| AST / hosted-validator / authenticated-proxy checks | **34 / 7 / 7 passed** on GitHub |
+| Ruff, ESLint, TypeScript, production build | Passed |
+| Generated-contract drift and credential/history checks | Passed |
+| Hosted Chromium | **26 passed** in 32.7 seconds, including desktop/mobile cancellation, error/retry, history, keyboard and retained-page states |
+| Original database, read-only | Still 5 audits, 7 pages, 26 issues, 29 recommendations, 0 decisions, 3 admissions and 6 AI reservations |
+| Additional live AI requests / website writes | **0 / 0** for this iteration |
+
+Separate standards/spec reviews found no actionable issues in the immutable feature and shutdown-follow-up patches. Tests cover every active cancellation stage, idempotency, origin/ID errors, restart durability, stale saves, worker continuation/shutdown, cancellation during fake AI generation/review, preserved reservations and fresh verification admissions. Thirteen reproduced live-verification evidence failures now pass. A later review reproduced cleanup errors swallowing server cancellation; three new cases verify shutdown and its cleanup race without leaking private exception-message canaries.
+
+The first hosted run passed 495 backend tests and 23 browser cases, with three new selector failures. Corrected status-role/table-cell selectors passed all 26 on `f9368c9`; the final shutdown follow-up passed the complete 498/26 run linked above. The final hosted mobile screenshot was inspected for the incomplete-result disclosure, retained pages, report controls and viewport containment. Fixtures use fresh databases and disabled live credentials.
+
+Local production processes have not been restarted for this milestone and are not acceptance evidence for it; the earlier automatic approval rejection of the dashboard restart still applies. Restart the backend and dashboard using README commands after stopping the old services. No original counter or private configuration was reset or printed. Human review and owned-pilot App/PR/manual-deployment acceptance remain pending.
 
 ## Saved-evidence improvement checkpoint
 

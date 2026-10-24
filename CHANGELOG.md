@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T03:22:10+05:30 — Record verified cancellation and shutdown recovery
+
+- Changed: Updated delivery records for source da67735 and successful hosted run 40135903810; documented the original database counts and remaining local/pilot setup steps.
+- Validation: Hosted 498 backend tests, 34 AST tests, seven validator/proxy tests each, 26 Chromium scenarios, lint/type/build and contract/credential checks all passed. Final mobile screenshot inspected. Local full suite also passed; read-only counts confirmed existing admissions and AI reservations were unchanged.
+- Limitations: No new live AI requests or website writes. Local services need manual restart after the prior automatic approval rejection; owned-pilot App setup, exact-patch approval, manual merge/deploy, live verification and human review remain pending. Documentation-only checkpoint; the verified implementation SHA remains da67735.
+
 ## 2026-10-25T03:18:12+05:30 — Preserve shutdown when child cleanup fails
 
 - Changed: Drain unobserved audit tasks even if already failed; preserve parent cancellation when child cleanup raises and log a generic warning without private exception bodies.

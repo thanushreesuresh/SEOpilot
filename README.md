@@ -82,7 +82,7 @@ Cancellation keeps the accepted audit admission and all existing AI reservations
 
 `POST /api/audits/{audit_id}/cancel` with JSON `{}` returns the retained `Audit`. Repeating it for an already cancelled run returns the same saved state; an ordinarily finished run returns `409`, an unknown UUID `404`, and a forged ID `422`. Existing origin, host and proxy protections apply. Queued cancellation and restart recovery are durable; the SQLite schema remains version 3, with no counter reset.
 
-The cancellation milestone passes **498 offline backend tests**, frontend lint/type/proxy checks and production build locally. All **26 browser scenarios** passed on source `f9368c9`; the shutdown-cleanup follow-up awaits a complete hosted rerun. Cleanup failures are logged without private exception text and cannot swallow server shutdown. Restart both local services to load the new code. The existing dashboard restart was previously blocked by automatic approval review, so the old local processes are not acceptance evidence for this milestone.
+The cancellation milestone passed **498 backend tests and all 26 hosted browser scenarios** on source `da67735`, with frontend lint/type/proxy, AST/validator, contract/credential and production-build checks in the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40135903810). Cleanup failures are logged without private exception text and cannot swallow server shutdown. Restart both local services to load the new code. The existing dashboard restart was previously blocked by automatic approval review, so the old local processes are not acceptance evidence for this milestone.
 
 ## Architecture
 
@@ -145,7 +145,7 @@ cd frontend
 npm run generate:types
 ```
 
-Browser scenarios are in `frontend/e2e/`. GitHub Actions installs Chromium and runs `npm run test:e2e` with disabled live credentials and a disposable database. All **23 desktop/mobile, keyboard and error-state scenarios passed** on source `39b31e5` in the [current hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40132659834), including eight reporting/JSON-LD cases and keyboard table scrolling. The hosted mobile screenshot was inspected. The earlier V2 baseline remains recorded separately in the [verification record](docs/verification.md).
+Browser scenarios are in `frontend/e2e/`. GitHub Actions installs Chromium and runs `npm run test:e2e` with disabled live credentials and a disposable database. All **26 desktop/mobile, keyboard and error-state scenarios passed** on source `da67735` in the [current hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40135903810), including reporting/JSON-LD, cancellation/retry/history, retained evidence and keyboard table scrolling. The hosted mobile screenshot was inspected. Earlier baselines remain recorded separately in the [verification record](docs/verification.md).
 
 For a separately authorized browser environment, install Chromium with `npx --no-install playwright install chromium`, then run `npm run test:e2e` from `frontend/`. These commands start local services when needed. They were not used to obtain a local browser acceptance pass in this session.
 
