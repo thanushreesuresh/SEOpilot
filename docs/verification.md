@@ -4,8 +4,8 @@ Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3
 
 | Check | Result at the v2 product checkpoint |
 | --- | --- |
-| Complete backend pytest suite | **355 passed** in 42.60 seconds; one upstream TestClient deprecation warning |
-| Later retention safeguard | Six storage tests passed, including the new orphan temporary-file regression; the next complete suite contains 356 cases |
+| Complete backend pytest suite | **356 passed** locally in 42.59 seconds and on GitHub in 23.45 seconds; one upstream TestClient deprecation warning |
+| Retention safeguards | Included in the complete suite; orphan temporary-file cleanup and history beyond 100 runs verified |
 | TypeScript AST helper | **34 Node tests passed** |
 | Hosted validation harness | **7 Node tests passed** |
 | Authenticated proxy | **7 Node tests passed** |
@@ -17,7 +17,7 @@ Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3
 | Credential/history/ignored-path checks | Passed without printing credentials before this documentation update |
 | Copied-database migration | Preserved 5 audits, 7 pages, 26 issues, 29 recommendations, 0 decisions, 3 admissions and 6 AI reservations |
 | Original user database | Read-only counts preserved 5 audits, 0 decisions, 3 admissions and 6 AI reservations; counters never reset |
-| Hosted browser coverage | 15 desktop/mobile, keyboard and error-state scenarios prepared; CI result pending after publication |
+| Hosted browser coverage | **15 passed** in 19.6 seconds; [successful full workflow](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40128792918) on source commit `fbb94e2046212ce26469a46850d303bae92b387a` |
 | Accepted local browser/screenshot result | None; local-origin policy remains denied |
 | Owned pilot through PR, deployment and live verification | Pending App setup, owner workflow and human actions |
 
@@ -29,7 +29,7 @@ Independent review corrected null metadata edits, reused verification results, t
 
 ## Browser and hosted validation status
 
-The repository Checks workflow installs Chromium and runs 15 scenarios on GitHub-hosted runners with disabled live credentials and a disposable database. Tests intercept external calls and cover ownership/onboarding, approved text, escaped diffs, exact publication consent, failed/missing CI, deployment acknowledgement, mobile keyboard/download/deletion, connection errors and existing audits. A build pass is not a rendered UI pass. Record the hosted result after completion.
+The repository Checks workflow passed all 15 Chromium scenarios on GitHub-hosted runners with disabled live credentials and a disposable database. Tests intercept external calls and cover ownership/onboarding, approved text, escaped diffs, exact publication consent, failed/missing CI, deployment acknowledgement, mobile keyboard/download/deletion, connection errors and existing audits. The hosted 390-pixel mobile review screenshot was inspected for readable controls, wrapped metadata and a contained diff. Browser checks use the Next development server; production compilation is checked separately.
 
 The origin gate previously denied `http://localhost:3000` despite user approval and a reported permission change. During v2 command discovery, an npm invocation intended to list scenarios unexpectedly started the local runner; it was stopped immediately. No accepted local browser execution, screenshot or visual-fidelity result is claimed. The authorized acceptance route is GitHub-hosted CI.
 

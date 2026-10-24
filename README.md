@@ -116,7 +116,7 @@ cd frontend
 npm run generate:types
 ```
 
-Browser scenarios are in `frontend/e2e/`. The GitHub Actions workflow installs Chromium and runs `npm run test:e2e` in `frontend/` with disabled live credentials and a disposable database. Fifteen desktop/mobile and error-state scenarios are prepared; their hosted result remains pending at this checkpoint. Local browser-origin access remained denied; no accepted local rendered-browser result is claimed. See the [verification record](docs/verification.md).
+Browser scenarios are in `frontend/e2e/`. GitHub Actions installs Chromium and runs `npm run test:e2e` with disabled live credentials and a disposable database. All **15 desktop/mobile, keyboard and error-state scenarios passed** in the [hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40128792918). The hosted mobile review screenshot was inspected. See the [verification record](docs/verification.md).
 
 For a separately authorized browser environment, install Chromium with `npx --no-install playwright install chromium`, then run `npm run test:e2e` from `frontend/`. These commands start local services when needed. They were not used to obtain a local browser acceptance pass in this session.
 
@@ -146,7 +146,7 @@ Publication allows two draft PRs globally per rolling 24 hours and one active fi
 
 After manually merging and deploying, choose **Verify live**. It starts a fresh bounded audit of the recorded URLs with AI disabled and the existing three-audits/IP allowance. Missing, blocked, failed or truncated metadata cannot pass. Historical scores and rule/scoring versions are retained; reduced coverage is never reported as improvement. Dispositions record reasons without rewriting evidence or scores.
 
-Local checks passed: 355 backend tests, six later retention tests including a new orphan-file regression, 34 AST tests, seven validator tests, seven proxy tests, Ruff, ESLint, TypeScript and the production build. Hosted browser results remain pending; see [verification](docs/verification.md). A copied-database migration preserved all existing audit, decision and usage records; live counters were never reset. Earlier real SEO/AI observations remain in the [live record](docs/live-validation-2026-10-25.md).
+Verified locally and on GitHub: 356 backend tests, 34 AST tests, seven validator tests, seven proxy tests, Ruff, ESLint, TypeScript, production build and all 15 hosted browser scenarios. See [verification](docs/verification.md). A copied-database migration and the local runtime upgrade preserved existing audit, decision and usage records; counters were never reset. Earlier real SEO/AI observations remain in the [live record](docs/live-validation-2026-10-25.md).
 
 The selected owned pilot is [thanushree-portfolio](https://github.com/thanushreesuresh/thanushree-portfolio) at [thanushree-portfolio-six.vercel.app](https://thanushree-portfolio-six.vercel.app/). The three local GitHub App settings are not configured. Release acceptance still requires the App installation, owner-installed workflow, an inspected pilot draft PR, manual merge/deployment and successful live verification. No pilot deployment or end-to-end release acceptance is claimed; human review remains pending.
 

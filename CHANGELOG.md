@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T01:47:01+05:30 — Record passing hosted v2 validation
+
+- Changed: Updated README, verification and submission records for source `fbb94e2046212ce26469a46850d303bae92b387a`; all implementation and test corrections are pushed without rewriting history.
+- Validation: GitHub run `40128792918` passed 356 backend tests, 34 AST tests, seven validator tests, seven proxy tests, 15 Chromium scenarios, lint/type/build and contract/credential checks. Hosted mobile review screenshot inspected. Restarted local API/dashboard serve v2; five audits, three admissions and six AI reservations remain preserved.
+- Limitations: The pilot App is not configured; owner workflow installation, exact-patch publication approval, manual merge/deploy and live verification remain required. Human review pending. This is a documentation-only checkpoint; no additional AI calls or counter resets.
+
 ## 2026-10-25T01:42:32+05:30 — Align hosted browser assertions with accessible controls
 
 - Changed: Browser scenarios select the URL searchbox, distinguish application errors from Next.js's route announcer, and wait for the AI control to finish initializing before opting out.

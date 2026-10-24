@@ -7,7 +7,7 @@
 - **Code repository:** https://github.com/thanushreesuresh/SEOpilot
 - **Original verified MVP commit:** [f66d76108a0f0fd3d11df2c2d0f9862f0be7f42d](https://github.com/thanushreesuresh/SEOpilot/commit/f66d76108a0f0fd3d11df2c2d0f9862f0be7f42d). Later security/configuration and allowance-interface changes are recorded in CHANGELOG; this earlier SHA does not include them. Organizer submission has not been performed.
 - **Verified security/allowance implementation:** [3a90c3cd24662eb11bd6ea1067ea7a07a6c754f9](https://github.com/thanushreesuresh/SEOpilot/commit/3a90c3cd24662eb11bd6ea1067ea7a07a6c754f9), including [passing hosted checks](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40120505329). This later documentation checkpoint records the result.
-- **V2 milestones:** `6c10f58` connection/persistence, `2b0e212` static metadata adapter and `645c127` PR/recovery/verification. The final product/publication SHA will be recorded in a subsequent documentation checkpoint; no self-referential SHA is claimed here.
+- **Verified v2 source:** [fbb94e2046212ce26469a46850d303bae92b387a](https://github.com/thanushreesuresh/SEOpilot/commit/fbb94e2046212ce26469a46850d303bae92b387a), with [passing hosted checks](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40128792918). Four feature milestones and subsequent test corrections are preserved as separate commits. This documentation checkpoint contains no later implementation changes.
 - **Working demo:** Follow the README's local setup and three-minute demonstration at http://localhost:3000.
 - **Access requirements:** Node.js 22+, Python 3.13+, local loopback services. Deterministic audits/samples need no credentials. Repository publication requires the private GitHub App and owner-installed workflow.
 
@@ -49,7 +49,7 @@ Use the blank `backend/.env.example` template and put your future key only in ig
 
 GitHub App credentials stay server-side; private source stays outside OpenAI requests. Patches add zero AI calls and are limited to three pages, five files and 100 changed lines. Two draft-PR publications are allowed per rolling 24 hours and one active fix per project. Private source expires after 24 hours with immediate deletion controls. GitHub Actions usage is separate from OpenAI usage; merge/deployment remain manual.
 
-**Validation:** 355 backend tests passed, followed by six retention tests including a new regression; 34 AST, seven validator and seven proxy tests passed. Ruff, ESLint, TypeScript, production build and pre-documentation credential/history checks passed. A copied-database migration preserved all existing rows/counters. Fifteen hosted browser scenarios await CI after publication; no accepted local rendering/screenshot result is claimed. Earlier live HTML, scoring and AI observations remain documented separately. Human review is pending. See [live verification](docs/live-validation-2026-10-25.md), [verification details](docs/verification.md), [architecture](docs/architecture.md), [README](README.md), [AI usage](AI_USAGE.md) and [change log](CHANGELOG.md).
+**Validation:** All 356 backend tests, 34 AST tests, seven validator tests, seven proxy tests and 15 hosted browser scenarios passed. Ruff, ESLint, TypeScript, production build, generated-contract drift and credential/history checks passed. The hosted mobile screenshot was inspected. Migration and runtime restart preserved existing rows/counters. Earlier live HTML, scoring and AI observations remain documented separately. Human review and the owned pilot's App/PR/deployment acceptance are pending. See [verification details](docs/verification.md), [architecture](docs/architecture.md), [README](README.md), [AI usage](AI_USAGE.md) and [change log](CHANGELOG.md).
 
 **Deferred:** Search Console, public hosting/authentication, automatic merging/deployment, recurring audits, additional frameworks/sources and reliable orphan detection. No traffic, ranking, search-volume or other unavailable measurements are fabricated. Sources/dependencies are linked in README.
 
@@ -59,7 +59,7 @@ GitHub App credentials stay server-side; private source stays outside OpenAI req
 - [x] Core implementation and actual validation documented.
 - [x] Codex contributions recorded; human review pending.
 - [x] Secrets and local database files excluded from source control.
-- [ ] Rendered desktop/mobile browser verification completed.
+- [x] Rendered desktop/mobile browser verification completed on GitHub-hosted Chromium.
 - [ ] Owned pilot completed through reviewed PR, hosted checks, manual deployment and live verification.
 - [x] Live AI integration verified with user-supplied credentials; bounded results and limits recorded.
 - [ ] Participant details and event eligibility verified.
