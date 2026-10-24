@@ -4,6 +4,13 @@ Record each meaningful project change during the event, newest first. Update thi
 
 ## Event build log
 
+## 2026-10-24T22:58:22+05:30 — Add optional evidence-reviewed AI and labelled demonstration
+
+- Changed: Added provider interface, bounded structured OpenAI Responses analysis/review, evidence ownership and quotation checks, unsupported-claim and conflict rejection, deterministic reporting/fallback, and a fixture demo using production extraction/rules with curated suggestions.
+- Why: Add useful contextual recommendations without inventing audit measurements or requiring paid credentials for the core product.
+- Validation: The full 177-test suite passed; offline provider tests cover missing credentials, malformed outputs, timeouts, evidence mismatches, reviewer decisions and SDK request configuration. No live AI calls or key creation occurred.
+- Limitations: Live provider/model/account compatibility awaits user-supplied OPENAI_API_KEY and OPENAI_MODEL. Demo suggestions are explicitly sample data, not live model output.
+
 ## 2026-10-24T22:56:17+05:30 — Add the connected audit dashboard and human review
 
 - Changed: Added Next.js/React/Tailwind dashboard, generated OpenAPI types, URL/context/crawl controls, real progress polling, summary/severity/coverage views, evidence filters, recommendation decisions, copy actions, pages and persistent history. Added desktop/mobile browser test scenarios and design reference.
