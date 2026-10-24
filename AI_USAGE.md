@@ -1,5 +1,7 @@
 # AI usage record
 
+| 2026-10-25T02:38:32+05:30 | Codex | Verified saved-evidence delivery | Recorded the passing source SHA and hosted checks, inspected the mobile screenshot and documented safe production rebuild/restart behavior | Pending human review | Hosted465 backend,34 AST,7 validator/proxy each,23 browser passed with static/build/contract/credential checks; zero paid calls/counter resets; local restart blocked by automatic approval review; owned pilot remains pending |
+
 | 2026-10-25T02:34:08+05:30 | Codex | Accessible history header containment | Independent review identified an unpositioned parent for the offscreen hidden column label; anchored headers, removed ineffective workaround and added a reversible causal layout measurement | Pending human review | Local lint/typecheck/build passed; hosted result pending; strict mobile/keyboard assertions preserved; no paid calls |
 
 | 2026-10-25T02:32:41+05:30 | Codex | Isolate hosted scroll geometry | Added computed-style and reversible region diagnostics after paint containment alone failed the strict mobile width check | Pending human review | Hosted465 backend/22 browser passed, one layout failure persists; local lint/typecheck passed; local process restart rejected by automatic approval review, no bypass; no paid calls |

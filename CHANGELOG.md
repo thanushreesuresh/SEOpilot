@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T02:38:32+05:30 — Record verified saved-evidence improvements
+
+- Changed: Updated README, architecture, verification and submission records for source 39b31e5 and hosted run 40132659834; documented stopping the dashboard before rebuilding.
+- Validation: Hosted465 backend tests,34 AST tests,7 validator/proxy tests each,23 Chromium scenarios, lint/type/build, contract drift and credential/history checks all passed. Hosted mobile screenshot inspected. Saved-report API smoke preserved all existing records/counters and made zero AI calls.
+- Corrections: Independent reviews corrected unfinished-analysis absence, clipped JSON-LD presence and the mobile hidden-header overflow. Intermediate failures and unsuccessful containment remain in commit history.
+- Limitations: Automatic approval review blocked the final local dashboard restart with only “blocked by policy”; a read-only check found a stale stylesheet404, so manual restart is required. Pilot App setup, exact patch approval, manual merge/deploy, live verification and human review remain pending. This checkpoint changes documentation only.
+
 ## 2026-10-25T02:34:08+05:30 — Anchor the hidden history column label
 
 - Changed: Positioned history header cells so their absolutely positioned accessible labels stay inside the table's scroll boundary. Removed the unsuccessful comparison paint-containment workaround. Browser evidence now includes a reversible static-header measurement.

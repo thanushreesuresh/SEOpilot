@@ -53,7 +53,7 @@ A score delta is nullable. It requires both audits to be `completed`, equal none
 
 Report text and the serialized response envelope are each limited to 1 MiB of UTF-8; an oversized result returns `409` instead of silently truncating evidence. Filenames derive from a sanitized audit ID. Markdown escapes source HTML and syntax characters. CSV uses the standard library's quoting and prefixes cells with an apostrophe when their first significant character is `=`, `+`, `-`, `@`, tab, or carriage return, including prefixes hidden by leading whitespace. No report format executes page content.
 
-The prior hosted V2 baseline covered 356 backend tests and 15 browser scenarios. Those results precede these additions. The current expanded suite has 23 browser scenarios, including eight reporting/JSON-LD cases, and awaits hosted execution; no new hosted pass is claimed here.
+The prior hosted V2 baseline covered 356 backend tests and 15 browser scenarios. The [current hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40132659834) passed 465 backend tests and all 23 browser scenarios on source `39b31e5`, including eight reporting/JSON-LD cases and keyboard table scrolling. The history table positions header cells so the absolute hidden “Open” label remains within its horizontal scroll boundary; the page stays within the 390-pixel mobile viewport.
 
 ## Crawl boundaries
 
@@ -76,6 +76,8 @@ Inspection is bounded to 10 blocks, 16 KiB per block, 64 KiB combined, nesting d
 Diagnostics cover invalid JSON, duplicate keys, unsupported non-finite numeric constants, unsuitable root/@graph structures, and context review. Missing or unfamiliar contexts are low-severity review advice because fully qualified IRIs and custom vocabularies can be valid. Syntax/structure problems produce medium-severity observations. This shallow inspector does not implement full JSON-LD processing, Schema.org validation, required-property validation, or rich-result eligibility. The **Pages** tab exposes the bounded summary and its limits; JSON-LD findings enter the ordinary evidence/recommendation workflow.
 
 Newly analyzed live and sample audits record rules version `2`. Existing snapshots keep rules version `1`, original evidence, and historical scores; they are not silently reanalyzed. The score algorithm remains version `1`, although additional rules can change a newly computed value. Cross-version comparisons therefore disclose the mismatch and withhold a comparable score delta and unsupported added/resolved conclusions.
+
+The bounded checks refer to the W3C [JSON-LD grammar](https://www.w3.org/TR/json-ld11/#json-ld-grammar) and [HTML embedding rules](https://www.w3.org/TR/json-ld11/#embedding-json-ld-in-html-documents). They deliberately implement only the diagnostics described above.
 
 ## Health score
 

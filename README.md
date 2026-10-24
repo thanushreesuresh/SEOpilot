@@ -123,7 +123,7 @@ npm run test:proxy
 npm run build
 ```
 
-The committed lockfiles record tested dependencies. For a fully constrained Python install, add `-c backend/requirements.lock` to the installation command. A production dashboard starts with `npm run start` after building, alongside the same API service.
+The committed lockfiles record tested dependencies. For a fully constrained Python install, add `-c backend/requirements.lock` to the installation command. A production dashboard starts with `npm run start` after building, alongside the same API service. Stop the existing dashboard process before rebuilding, then start it again: a running production process can retain asset paths from the previous build. From the repository root, use `npm --prefix frontend run build`, then `npm --prefix frontend run start` after the old process has stopped.
 
 Run the repository check before commits and pushes. It checks working files, staged bytes, reachable history, ignored private paths and obvious credential patterns without printing potential secret values. GitHub Actions repeats the offline checks on pushes and pull requests, including contract drift, proxy tests, lint/type checks and a production build. No live key is supplied to CI. The [first hosted run passed](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40120505329) for implementation commit `3a90c3c`.
 
@@ -135,7 +135,7 @@ cd frontend
 npm run generate:types
 ```
 
-Browser scenarios are in `frontend/e2e/`. GitHub Actions installs Chromium and runs `npm run test:e2e` with disabled live credentials and a disposable database. The **prior V2 baseline of 15 desktop/mobile, keyboard and error-state scenarios passed** in the [hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40128792918); its mobile review screenshot was inspected. The current suite contains **23 scenarios**, including eight new reporting/JSON-LD cases, and awaits hosted execution. The prior pass does not verify this iteration. See the [verification record](docs/verification.md).
+Browser scenarios are in `frontend/e2e/`. GitHub Actions installs Chromium and runs `npm run test:e2e` with disabled live credentials and a disposable database. All **23 desktop/mobile, keyboard and error-state scenarios passed** on source `39b31e5` in the [current hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40132659834), including eight reporting/JSON-LD cases and keyboard table scrolling. The hosted mobile screenshot was inspected. The earlier V2 baseline remains recorded separately in the [verification record](docs/verification.md).
 
 For a separately authorized browser environment, install Chromium with `npx --no-install playwright install chromium`, then run `npm run test:e2e` from `frontend/`. These commands start local services when needed. They were not used to obtain a local browser acceptance pass in this session.
 
@@ -159,7 +159,7 @@ The smoke test sends `allow_ai=false`, even if the running API has live AI confi
 
 V2 implements project onboarding, source mapping, private patch review/download, explicit hash-bound draft-PR publication, recovery after uncertain writes, hosted validation reports, finding dispositions and fix-run history. It never merges or deploys changes. **PR opened**, **checks passed**, **merged**, **awaiting deployment** and **live verified** are separate states.
 
-This iteration adds saved audit comparisons, Markdown/CSV/JSON evidence reports, and bounded JSON-LD diagnostics. Hosted checks pass 465 backend tests and 22 of 23 browser cases; a scoped fix for the history table's offscreen accessible header awaits hosted verification. All three report formats were verified through the local API while preserving existing counters. The dashboard process needs restarting after the latest build. Full browser acceptance remains pending.
+This iteration adds saved audit comparisons, Markdown/CSV/JSON evidence reports, and bounded JSON-LD diagnostics. [Hosted checks passed](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40132659834) all **465 backend tests and 23 browser scenarios**, plus AST/validator/proxy tests, linting, type checks, contract drift and production build. The mobile history-header overflow was fixed and keyboard table scrolling verified. All three report formats were also verified through the local API while preserving existing counters. The local dashboard process still needs restarting after the latest build; automatic approval review blocked that restart, so the hosted pass does not claim a refreshed local runtime.
 
 Only TypeScript App Router server-page titles and descriptions are edited. The pinned AST parser in `repository-tools/` never executes target imports, configuration or scripts. Dynamic metadata, Client Components, ambiguous routes, percent-encoded route paths and uncertain inheritance/title templates require manual work. Shared layouts, canonicals, indexing directives, page content, dependencies and workflows are never automatically edited. Proposals are limited to three pages, five files and 100 changed lines; patch generation makes zero additional AI calls and private source stays outside OpenAI requests.
 

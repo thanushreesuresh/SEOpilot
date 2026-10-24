@@ -4,9 +4,24 @@ Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3
 
 ## Saved-evidence improvement checkpoint
 
-At 2026-10-25T02:08:47+05:30, **465 backend tests passed** in 45.96 seconds, with the existing upstream TestClient warning. Ruff, frontend ESLint, TypeScript, seven proxy tests, production build, credential/history and Markdown-link checks passed. New offline cases cover same-origin and mode constraints, grouped findings, failed/interrupted analysis, truncated/unknown coverage, version/formula changes, bounded exports, spreadsheet injection, public-history filtering and JSON-LD limits/grammar. No production database, quota counter or live credential was used by these fixtures.
+At 2026-10-25T02:38:32+05:30, source **`39b31e5dd58670b92b4bafcb83f2a995784323a9`** passed the [complete hosted workflow](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40132659834). This documentation checkpoint does not change the verified implementation.
 
-Separate standards and specification reviews corrected two evidence gaps before this checkpoint: failed/interrupted analysis cannot supply negative evidence, and clipped HTML cannot establish absence of JSON-LD. Eight additional browser cases cover report downloads/retries, comparisons/filters/versions, incomplete data and mobile keyboard/escaping states. The resulting 23-scenario suite awaits GitHub-hosted execution; no local browser pass is claimed. Historical v2 results below remain tied to their original source SHA.
+| Current check | Observed result |
+| --- | --- |
+| Complete backend suite | **465 passed**, 45.96 seconds locally and 24.32 seconds on GitHub; existing upstream warning remains |
+| AST / validator / proxy checks | **34 / 7 / 7 passed** on GitHub |
+| Ruff, ESLint, TypeScript, production build | Passed locally and on GitHub |
+| Generated-contract drift and credential/history checks | Passed on GitHub; local working/staged checks also passed |
+| Hosted Chromium | **23 passed** in 29.8 seconds, including desktop, 390-pixel mobile, keyboard and error states |
+| Saved-data runtime smoke | Markdown, CSV and JSON reports served through the Next proxy; 5 audits, 7 pages, 26 issues, 29 recommendations, 0 decisions, 3 admissions and 6 AI reservations unchanged |
+| Local rendered browser acceptance | None; origin policy remains denied |
+| Latest local production process | Restart still required after rebuilding; automatic approval review rejected restart with only “blocked by policy”; stale stylesheet returned 404 in a read-only resource check |
+
+New offline cases cover same-origin and mode constraints, grouped findings, failed/interrupted analysis, truncated/unknown coverage, version/formula changes, bounded exports, spreadsheet injection, public-history filtering and JSON-LD limits/grammar. Fixtures use fresh databases and disabled live credentials. No paid requests were made for this iteration.
+
+Separate standards and specification reviews corrected two evidence gaps: failed/interrupted analysis cannot supply negative evidence, and clipped HTML cannot establish absence of JSON-LD. The first hosted browser runs passed 22/23 and exposed a 629-pixel document in a 390-pixel viewport. Comparison containment alone failed; review identified the unpositioned accessible history-column label. Positioning header cells fixed the strict width check without hiding page overflow, and keyboard horizontal table scrolling passed. The final hosted mobile screenshot was inspected; its Next development indicator is expected, and production compilation is checked separately.
+
+Eight new browser cases cover report downloads/retries, comparisons/filters/versions, incomplete data and mobile keyboard/escaping states. No local browser pass is claimed. Historical v2 results below remain tied to their original source SHA. The API remains running; stop the existing Next process and run `npm --prefix frontend run start` to load the current production build. Human review and owned-pilot App/PR/manual-deployment acceptance remain pending.
 
 | Check | Result at the v2 product checkpoint |
 | --- | --- |
