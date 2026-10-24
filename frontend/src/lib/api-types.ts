@@ -605,7 +605,7 @@ export interface components {
              * @default unknown
              * @enum {string}
              */
-            state: "unknown" | "setup_required" | "ready" | "no_repositories" | "credentials_error" | "access_denied" | "rate_limited" | "unavailable";
+            state: "unknown" | "setup_required" | "invalid_settings" | "ready" | "no_repositories" | "credentials_error" | "access_denied" | "rate_limited" | "unavailable";
             /** Setup Checks */
             setup_checks: components["schemas"]["ConnectionCheck"][];
             /** Checked At */

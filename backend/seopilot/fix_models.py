@@ -28,7 +28,7 @@ class ConnectionCheck(Contract):
 class ConnectionStatus(Contract):
     configured: bool
     message: str
-    state: Literal["unknown", "setup_required", "ready", "no_repositories", "credentials_error",
+    state: Literal["unknown", "setup_required", "invalid_settings", "ready", "no_repositories", "credentials_error",
                    "access_denied", "rate_limited", "unavailable"] = "unknown"
     setup_checks: list[ConnectionCheck] = Field(default_factory=list, max_length=3)
     checked_at: str | None = None

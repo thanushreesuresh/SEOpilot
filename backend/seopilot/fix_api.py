@@ -46,7 +46,10 @@ def router() -> APIRouter:
         values = {"configured": status["configured"], "state": "setup_required",
                   "setup_checks": status.get("setup_checks", []), "checked_at": now(),
                   "message": "Add the missing GitHub App settings to backend/.env and restart the backend. Never enter credentials in this dashboard."}
-        if status["configured"]:
+        if status.get("invalid_settings"):
+            values["state"] = "invalid_settings"
+            values["message"] = "One or more GitHub App settings are invalid. Use a positive numeric App ID, comma-separated GitHub owner names and an absolute PEM file path in backend/.env, then restart the backend. Website auditing remains available."
+        elif status["configured"]:
             try:
                 repositories = await client.list_repositories()
                 values["repositories"] = [{key: getattr(repo, key) for key in ("id", "installation_id", "owner", "name", "default_branch")} for repo in repositories]
@@ -114,8 +117,8 @@ def router() -> APIRouter:
                     fixes.purge(run)
             # Installation tokens only live in memory; disconnect drops that cache too.
             await request.app.state.github.close()
-            from .github_app import GitHubClient, GithubConfig
-            request.app.state.github = GitHubClient(GithubConfig.from_env())
+            from .github_app import GitHubClient
+            request.app.state.github = GitHubClient.from_env()
             request.app.state.fix_engine.github = request.app.state.github
             return project
 
@@ -290,7 +293,7 @@ def router() -> APIRouter:
 
 
 def initialize(app, github_client=None):
-    from .github_app import GitHubClient, GithubConfig
+    from .github_app import GitHubClient
 
-    app.state.github = github_client or GitHubClient(GithubConfig.from_env())
+    app.state.github = github_client or GitHubClient.from_env()
     app.state.fix_lock = asyncio.Lock()

@@ -25,6 +25,7 @@ OWNER = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]{0,38}\Z")
 NAME = re.compile(r"[A-Za-z0-9_.-]{1,100}\Z")
 SHA = re.compile(r"[a-f0-9]{40}\Z")
 PERMISSIONS = {"metadata": "read", "contents": "write", "pull_requests": "write", "actions": "read"}
+APP_SETTINGS = ("GITHUB_APP_ID", "GITHUB_APP_PRIVATE_KEY_PATH", "GITHUB_APP_OWNERS")
 
 
 class GitHubError(Exception):
@@ -40,10 +41,12 @@ class GithubConfig:
     app_id: int | None = None
     private_key_path: Path | None = field(default=None, repr=False)
     owners: tuple[str, ...] = ()
+    invalid_settings: bool = False
+    setting_presence: tuple[bool, bool, bool] | None = field(default=None, repr=False)
 
     @property
     def configured(self) -> bool:
-        return bool(self.app_id and self.private_key_path and self.owners)
+        return bool(not self.invalid_settings and self.app_id and self.private_key_path and self.owners)
 
     @classmethod
     def from_env(cls):
@@ -106,6 +109,17 @@ def _path(value: str, *, empty: bool = False) -> str:
 
 
 class GitHubClient:
+    @classmethod
+    def from_env(cls):
+        try:
+            config = GithubConfig.from_env()
+        except (ValueError, RuntimeError):
+            # Optional integration errors must not stop auditing. Retain only presence,
+            # discard rejected values, and keep all repository access disabled.
+            presence = tuple(bool(os.environ.get(name, "").strip()) for name in APP_SETTINGS)
+            config = GithubConfig(invalid_settings=True, setting_presence=presence)
+        return cls(config)
+
     def __init__(self, config: GithubConfig, *, client: httpx.AsyncClient | None = None,
                  clock: Callable[[], datetime] | None = None):
         self.config = config
@@ -121,12 +135,11 @@ class GitHubClient:
             logging.getLogger(name).setLevel(logging.WARNING)
 
     def status(self) -> dict:
-        return {"configured": self.config.configured,
-                "setup_checks": [
-                    {"setting": "GITHUB_APP_ID", "present": bool(self.config.app_id)},
-                    {"setting": "GITHUB_APP_PRIVATE_KEY_PATH", "present": bool(self.config.private_key_path)},
-                    {"setting": "GITHUB_APP_OWNERS", "present": bool(self.config.owners)},
-                ],
+        presence = self.config.setting_presence or (bool(self.config.app_id),
+                   bool(self.config.private_key_path), bool(self.config.owners))
+        return {"configured": self.config.configured, "invalid_settings": self.config.invalid_settings,
+                "setup_checks": [{"setting": name, "present": present}
+                                 for name, present in zip(APP_SETTINGS, presence)],
                 "message": "GitHub App configured; connect an installed repository."
                 if self.config.configured else "Configure the server-side GitHub App to connect a repository."}
 

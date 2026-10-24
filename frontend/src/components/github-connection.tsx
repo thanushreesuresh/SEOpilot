@@ -6,7 +6,7 @@ import type { ConnectionStatus } from "@/lib/fix-api";
 
 const setupGuide = "https://github.com/thanushreesuresh/SEOpilot/blob/main/docs/github-app-setup.md";
 const states: Record<ConnectionStatus["state"], string> = {
-  unknown: "Not verified", setup_required: "Setup required", ready: "Repositories verified",
+  unknown: "Not verified", setup_required: "Setup required", invalid_settings: "Settings need correction", ready: "Repositories verified",
   no_repositories: "No repositories available", credentials_error: "Authentication failed",
   access_denied: "Access not verified", rate_limited: "GitHub rate limit", unavailable: "Verification unavailable",
 };
@@ -15,8 +15,9 @@ export function GitHubConnection({ connection, checking, onboarding, onConnect }
   connection: ConnectionStatus | null; checking: boolean; onboarding: boolean; onConnect: () => void;
 }) {
   const ready = connection?.state === "ready" && connection.configured && connection.repositories.length > 0;
-  const failed = connection && ["credentials_error", "access_denied", "rate_limited", "unavailable"].includes(connection.state);
+  const failed = connection && ["invalid_settings", "credentials_error", "access_denied", "rate_limited", "unavailable"].includes(connection.state);
   const heading = checking ? "Checking GitHub connection" : !connection ? "Connection status unavailable"
+    : connection.state === "invalid_settings" ? "GitHub settings need correction"
     : ready ? "GitHub connection verified" : connection.configured ? "GitHub connection needs attention" : "Connect your GitHub App";
   return <section className="project-card connection-card" aria-label="GitHub App connection" aria-busy={checking}>
     <div className="project-section-heading">

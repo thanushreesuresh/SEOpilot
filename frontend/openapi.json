@@ -1502,6 +1502,7 @@
             "enum": [
               "unknown",
               "setup_required",
+              "invalid_settings",
               "ready",
               "no_repositories",
               "credentials_error",

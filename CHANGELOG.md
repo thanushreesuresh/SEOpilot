@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T05:06:31+05:30 — Keep auditing available when optional GitHub setup is invalid
+
+- Changed: Added a runtime GitHub client factory that preserves strict configuration parsing but isolates expected parse/home-expansion failures. Rejected values are discarded; only presence flags remain and repository access stays disabled. Startup and disconnect use the same factory. Added an explicit invalid-settings API/UI state, refreshed generated contracts and corrected current setup/architecture guidance.
+- Why: A malformed optional App ID or owner prevented API startup, queue recovery and access to saved audits; the same validation could also fail after disconnect.
+- Validation: Initial ten regression cases failed before implementation; all 12 added cases now pass. Full backend suite 583 passed in 51.25 seconds with the existing upstream TestClient warning. Ruff, ESLint, TypeScript, production build, 34 AST and seven validator/proxy tests each passed. Credential/link checks passed; both independent review axes found no actionable issues. Two new hosted browser cases remain pending.
+- Limits: No live credentials read, provider calls, original counter resets or pilot repository changes. Corrected dotenv settings require manual backend restart; refresh does not reload the file. Core security/cost configuration errors remain fatal; only expected optional GitHub parsing failures are isolated. Live App/pilot/deployment acceptance and human review remain pending.
+
 ## 2026-10-25T04:57:18+05:30 — Record hosted connection-diagnostics acceptance
 
 - Changed: Recorded exact source `38158868473a40883d85ad84d1e43362cefe8a40` and hosted run in README, verification and submission records; documented diagnostic contract/security boundaries in architecture notes.

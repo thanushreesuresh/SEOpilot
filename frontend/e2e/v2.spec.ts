@@ -84,7 +84,8 @@ async function mockWorkspace(page: Page, options: Partial<MockState> = {}) {
         setup_checks: [{ setting: "GITHUB_APP_ID", present: true },
           { setting: "GITHUB_APP_PRIVATE_KEY_PATH", present: !state.missingKey },
           { setting: "GITHUB_APP_OWNERS", present: true }],
-        message: state.configured ? "Selected repositories verified." : "Configure the private GitHub App on this machine.",
+        message: state.connectionState === "invalid_settings" ? "GitHub App settings are invalid. Correct backend/.env and restart the backend. Website auditing remains available."
+          : state.configured ? "Selected repositories verified." : "Configure the private GitHub App on this machine.",
         repositories: state.configured && (state.connectionState === null || state.connectionState === "ready") ? [{ id: 5678, installation_id: 1234, owner: "owner", name: "pilot", default_branch: "main" }] : [],
         publication_limit: 2, publications_remaining: 2, actions_notice: "GitHub Actions usage is separate from OpenAI usage." };
       return fulfill(connection);
@@ -354,6 +355,40 @@ test("mobile connection refresh clears stale access, prevents repeat activation 
   await expect(page.getByRole("button", { name: "Close project setup", exact: true })).toBeEnabled();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath("connection-diagnostics-mobile.png"), fullPage: true });
+  expect(state.requests.filter((request) => request.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("invalid optional App settings keep website auditing accessible", async ({ page }) => {
+  const state = await mockWorkspace(page, { configured: false, connectionState: "invalid_settings", projects: [] });
+  await openProjects(page);
+  await expect(page.getByRole("heading", { name: "GitHub settings need correction", exact: true })).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: "Website auditing remains available" })).toBeVisible();
+  const checks = page.getByRole("list", { name: "Server-side App settings" });
+  await expect(checks.getByText("Present", { exact: true })).toHaveCount(3);
+  await expect(page.getByRole("button", { name: "Connect a project", exact: true })).toBeDisabled();
+  await page.getByRole("button", { name: "Overview", exact: true }).click();
+  await page.getByRole("textbox", { name: "Website URL", exact: true }).fill(ORIGIN);
+  await expect(page.getByRole("button", { name: "Run audit", exact: true })).toBeEnabled();
+  expect(state.requests.filter((request) => request.method !== "GET")).toEqual([]);
+});
+
+test("mobile invalid-setting guidance stays contained and recovers after corrected setup", async ({ page }, testInfo) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.setViewportSize({ width: 390, height: 844 });
+  const state = await mockWorkspace(page, { configured: false, connectionState: "invalid_settings", projects: [] });
+  await openProjects(page);
+  await expect(page.getByRole("heading", { name: "GitHub settings need correction", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Connect a project", exact: true })).toBeDisabled();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath("invalid-github-settings-mobile.png"), fullPage: true });
+  state.configured = true; state.connectionState = "ready";
+  const refresh = page.getByRole("button", { name: "Refresh connection", exact: true });
+  await expect(refresh).toBeEnabled(); await refresh.focus(); await expect(refresh).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("heading", { name: "GitHub connection verified", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Connect a project", exact: true })).toBeEnabled();
   expect(state.requests.filter((request) => request.method !== "GET")).toEqual([]);
   expect(errors).toEqual([]);
 });
