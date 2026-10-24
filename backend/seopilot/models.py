@@ -20,7 +20,7 @@ AuditStatus = Literal["queued", "crawling", "analyzing", "reviewing", "completed
 
 
 class Contract(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
 
 
 class CrawlOptions(Contract):
@@ -64,6 +64,7 @@ class Page(Contract):
     links: list[str] = Field(default_factory=list)
     text_excerpt: str = ""
     error: str | None = None
+    truncated_fields: list[str] = Field(default_factory=list)
 
 
 class Evidence(Contract):

@@ -70,19 +70,19 @@ def analyze(
             ("description", thresholds.description_min, thresholds.description_max, "meta description", "Medium"),
         ):
             value = getattr(page, field).strip()
-            if not value:
+            if not value and 'body' not in page.truncated_fields:
                 add(page, f"{field}_missing", f"Missing {label}", missing_severity, "Metadata",
                     f"No non-empty {label} was found in the fetched HTML.",
                     f"Write a unique, descriptive {label} that accurately reflects this page.", [(field, "(missing or empty)")])
-            elif len(value) < minimum or len(value) > maximum:
+            elif value and (len(value) < minimum or len(value) > maximum):
                 direction = "short" if len(value) < minimum else "long"
                 add(page, f"{field}_{direction}", f"Review {direction} {label}", "Low", "Metadata",
-                    f"The {label} has {len(value)} characters. The {minimum}–{maximum} range is an editorial heuristic; "
+                    f"The extracted {label} has {len(value)} characters. The {minimum}–{maximum} range is an editorial heuristic; "
                     "display lengths vary and this is not a Google ranking rule.",
                     f"Review the {label} for clarity and useful detail; change its length only if that improves it.",
                     [(field, value), ("character_count", len(value))])
         h1 = [h for h in page.headings if h.level == 1]
-        if not h1:
+        if not h1 and not {'headings', 'body'} & set(page.truncated_fields):
             add(page, "h1_missing", "No H1 heading found", "Medium", "Content",
                 "The fetched HTML has no H1 to identify the page's main subject.",
                 "Add a descriptive main heading if the page is intended to have one.", [("h1_count", 0)])
@@ -103,7 +103,7 @@ def analyze(
                 f"{len(missing_alt)} inspected images have no alt attribute. Empty alt text is allowed for decorative images.",
                 "Describe meaningful images; add an empty alt attribute to purely decorative images.",
                 [("image_src", src) for src in missing_alt[:10]])
-        if not page.canonicals:
+        if not page.canonicals and 'body' not in page.truncated_fields:
             add(page, "canonical_missing", "No canonical tag found", "Low", "Indexability",
                 "No canonical tag was found. A canonical can clarify the preferred URL when duplicate versions exist.",
                 "Consider a self-referencing canonical for the preferred public URL; it is not required for every page.",
@@ -113,7 +113,7 @@ def analyze(
                 "Multiple canonical tags can give conflicting preferred-URL signals.",
                 "Choose one appropriate preferred URL and emit a single canonical tag.",
                 [("canonical", c) for c in page.canonicals[:5]])
-        else:
+        elif page.canonicals:
             canonical = page.canonicals[0]
             try:
                 resolved = urljoin(page.url, canonical)
@@ -151,7 +151,7 @@ def analyze(
         groups = defaultdict(list)
         for page in html:
             value = _normalized(getattr(page, field))
-            if value:
+            if value and field not in page.truncated_fields and 'body' not in page.truncated_fields:
                 groups[value].append(page)
         for group in groups.values():
             if len(group) > 1:

@@ -4,6 +4,13 @@ Record each meaningful project change during the event, newest first. Update thi
 
 ## Event build log
 
+## 2026-10-24T22:49:40+05:30 — Safely crawl public websites and extract bounded evidence
+
+- Changed: Added public-address validation, DNS-pinned HTTPcore transport with verified TLS and bounded address fallback, redirects, response limits/decompression, Protego crawl policy, bounded breadth-first crawling, sitemap evidence, shared extraction, truncation-aware rules, and resilient queue integration.
+- Why: Make real website audits functional without allowing private-network access or treating unavailable coverage as verified findings.
+- Validation: 177 backend tests passed, including 126 network/crawler/extraction cases; Ruff passed. Live example.com API audit completed: one page assessed, six findings, score82, AI unavailable. Independent transport/lifecycle review findings were fixed and covered.
+- Limitations: Strict origin boundaries and server-rendered HTML only. One upstream Starlette TestClient deprecation warning. Browser verification is a later milestone.
+
 ## 2026-10-24T22:30:24+05:30 — Audit extracted evidence and explain health scoring
 
 - Changed: Added reusable deterministic SEO rules, duplicate grouping, evidence-bearing findings, actionable rule recommendations, configurable editorial thresholds, and page-normalized scoring.

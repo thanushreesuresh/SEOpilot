@@ -4,7 +4,7 @@ from seopilot.app import create_app
 
 
 def test_local_api_guards_and_health(tmp_path):
-    with TestClient(create_app(tmp_path / "audit.db", start_worker=False)) as client:
+    with TestClient(create_app(tmp_path / "audit.db", start_worker=False), base_url="http://localhost") as client:
         assert client.get("/api/health").status_code == 200
         assert client.get("/api/audits").json() == []
         assert client.get("/api/audits/missing").status_code == 404

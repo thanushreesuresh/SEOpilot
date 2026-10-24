@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import sqlite3
 from collections.abc import Awaitable, Callable
 
 from .models import Audit, Page, now
@@ -11,7 +12,6 @@ log = logging.getLogger(__name__)
 
 
 async def execute(audit: Audit, store: Store):
-    from .ai import enrich
     from .crawler import crawl
     from .rules import analyze, calculate_score, rule_recommendations
 
@@ -30,7 +30,8 @@ async def execute(audit: Audit, store: Store):
     audit.progress.stage = "analyzing"
     audit.progress.message = "Checking page evidence against SEO rules"
     store.save(audit)
-    audit.issues = analyze(audit.pages, audit.origin, result.robots_state, result.sitemap_state)
+    audit.issues = analyze(audit.pages, audit.origin, result.robots_state, result.sitemap_state,
+                           discovery_evidence=result.discovery_evidence)
     audit.score = calculate_score(audit.pages, audit.issues)
     audit.recommendations = rule_recommendations(audit.issues, audit.pages)
     audit.status = "reviewing"
@@ -38,6 +39,8 @@ async def execute(audit: Audit, store: Store):
     audit.progress.message = "Preparing and reviewing recommendations"
     store.save(audit)
     try:
+        from .ai import enrich
+
         await enrich(audit)
     except Exception:
         # Provider bugs must never discard a completed deterministic audit.
@@ -58,8 +61,18 @@ async def execute(audit: Audit, store: Store):
 
 
 async def run_queue(store: Store, processor: Callable[[Audit, Store], Awaitable[None]] = execute):
+    claim_failures = 0
     while True:
-        audit = store.claim()
+        try:
+            audit = store.claim()
+            claim_failures = 0
+        except sqlite3.OperationalError:
+            claim_failures += 1
+            log.warning("Audit queue temporarily unavailable; retrying claim")
+            if claim_failures >= 3:
+                raise RuntimeError("Audit queue storage unavailable") from None
+            await asyncio.sleep(0.5 * claim_failures)
+            continue
         if audit is None:
             await asyncio.sleep(0.3)
             continue

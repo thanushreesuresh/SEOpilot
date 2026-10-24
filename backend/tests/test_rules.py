@@ -131,3 +131,11 @@ def test_intentional_multiple_h1_is_low_priority_manual_review():
     assert len(issues) == 1
     assert issues[0].rule_id == "h1_multiple" and issues[0].severity == "Low"
     assert "intentional" in issues[0].explanation
+
+
+def test_truncated_metadata_cannot_prove_duplicates_or_absent_h1():
+    p = page(title="Prefix" * 100, headings=[Heading(level=2, text="Visible heading")],
+             truncated_fields=["title", "description", "headings"])
+    other = page("/other", title=p.title, truncated_fields=["title", "description"])
+    issues = analyze([p, other], "https://example.com")
+    assert not {issue.rule_id for issue in issues} & {"title_duplicate", "description_duplicate", "h1_missing"}

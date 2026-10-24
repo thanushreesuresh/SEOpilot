@@ -31,14 +31,15 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
         app.state.store = Store(path)
         app.state.store.recover()
         task = asyncio.create_task(run_queue(app.state.store, **({"processor": processor} if processor else {}))) if start_worker else None
+        app.state.worker = task
         yield
         if task:
             task.cancel()
-            with suppress(asyncio.CancelledError):
+            with suppress(asyncio.CancelledError, RuntimeError):
                 await task
 
     app = FastAPI(title="SEOPilot", version="0.1.0", lifespan=lifespan)
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "testserver"])
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1"])
 
     @app.middleware("http")
     async def guard(request: Request, call_next):
@@ -72,7 +73,13 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
         starts.append(tick)
 
     @app.get("/api/health")
-    async def health():
+    async def health(request: Request):
+        task = request.app.state.worker
+        if task is not None and task.done():
+            # Read the exception so failed background tasks never appear healthy.
+            if not task.cancelled():
+                task.exception()
+            raise HTTPException(503, "The audit worker stopped. Restart the local API.")
         return {"status": "ok", "mode": "local-single-user"}
 
     @app.post("/api/audits", response_model=Audit, status_code=202)
@@ -84,6 +91,8 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from None
         admit()
+        if request.app.state.worker is not None and request.app.state.worker.done():
+            raise HTTPException(503, "The audit worker stopped. Restart the local API.")
         audit = Audit(url=url, origin=origin_of(url), options=body.options,
                       business_context=body.business_context, progress=Progress(limit=body.options.page_limit))
         if not request.app.state.store.enqueue(audit):
