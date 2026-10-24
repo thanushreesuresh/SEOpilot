@@ -316,6 +316,9 @@ test("mobile keyboard flows expose bounded JSON-LD evidence and keep comparison 
   }));
   await page.screenshot({ path: testInfo.outputPath("reporting-mobile-before-coverage.png"), fullPage: true });
   expect(overflow.document, JSON.stringify(overflow)).toBeLessThanOrEqual(overflow.viewport + 1);
+  const tableScroller = page.locator(".comparison-table-scroll");
+  await tableScroller.focus(); await page.keyboard.press("ArrowRight");
+  await expect.poll(() => tableScroller.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
   await page.getByText("Coverage, versions, and excluded pages", { exact: true }).focus(); await page.keyboard.press("Enter");
   await expect(page.getByRole("table", { name: "Audit coverage and check versions", exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);

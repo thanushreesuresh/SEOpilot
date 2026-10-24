@@ -1,5 +1,7 @@
 # AI usage record
 
+| 2026-10-25T02:26:34+05:30 | Codex | Mobile comparison scroll containment | Used hosted geometry/full-page evidence to contain overflowing table descendants and added a keyboard horizontal-scroll assertion | Pending human review | Diagnostic run465 backend/22 browser passed with one isolated layout failure; corrected hosted browser result pending; no paid calls |
+
 | 2026-10-25T02:21:52+05:30 | Codex | Hosted mobile overflow diagnosis | Inspected authorized GitHub trace/screenshot evidence and added bounded layout diagnostics before the existing strict mobile assertion | Pending human review | Hosted backend465 and browser22 passed/1 failed; local lint/typecheck and saved-report runtime smoke passed with original counters preserved; no paid calls |
 
 | 2026-10-25T02:08:47+05:30 | Codex | Audit comparisons, evidence exports and JSON-LD diagnostics | Implemented bounded reporting/parser modules, contracts, dashboard controls, proxy routes and offline/browser fixtures; separate reviews corrected negative evidence from unfinished analysis and truncated-presence wording | Pending human review | 465 backend tests, Ruff, seven proxy tests, ESLint, TypeScript, production build and credential/history checks passed; eight new browser scenarios pending hosted execution; zero new paid calls or counter resets |

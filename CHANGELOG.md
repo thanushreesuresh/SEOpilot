@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T02:26:34+05:30 — Contain mobile comparison table scrolling
+
+- Changed: Added a containing block and paint containment to the comparison table scroller; the browser scenario also verifies horizontal scrolling by keyboard.
+- Why: Hosted geometry showed a 629-pixel document on a 390-pixel viewport, driven by offscreen table links despite visual clipping. Containment keeps those descendants within their dedicated scroll region.
+- Validation: The diagnostic run again passed 465 backend tests and 22 browser scenarios, isolating the same overflow. Local ESLint, TypeScript and production build passed for the fix; corrected hosted verification is pending.
+- Limitations: No global page clipping or weakened width assertion was introduced. Human review and owned-pilot App/deployment acceptance remain pending; zero additional AI calls.
+
 ## 2026-10-25T02:21:52+05:30 — Diagnose hosted mobile comparison overflow
 
 - Changed: The existing mobile browser assertion now records bounded element geometry and a full-page screenshot before checking viewport containment.
