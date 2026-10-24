@@ -57,6 +57,7 @@ The safe API entry point binds loopback, disables forwarded-header trust and acc
 - Identical requests from the same IP reuse an active audit, or a completed result admitted within 15 minutes, without consuming another admission or triggering another AI stage. Context, crawl options and the AI opt-out are part of the match.
 - At most two paid requests per audit: generation and review. Each must reserve a global allowance before calling OpenAI. Errors/timeouts retain their reservation, SDK retries are disabled, and unreviewed suggestions never publish. Output and UTF-8 input sizes are bounded. Reaching the cap preserves deterministic results.
 - `GET /api/usage` exposes allowance/reset information; `allow_ai=false` opts an audit out of paid calls. The labelled sample uses no live quota or paid calls and repeated sample requests reuse its result. The real smoke-test command explicitly opts out of AI.
+- The dashboard displays your remaining audits and next reset, the shared AI-call allowance, a no-AI option and duplicate-reuse notices. You can refresh the allowance after a reset; sample mode remains available when live quota is exhausted.
 - The Next server derives client identity from its socket and authenticates it to the fixed loopback backend using a private generated token. Incoming forwarding/IP/token headers are discarded. The backend stores HMAC identities, groups IPv6 addresses by `/64`, and accepts stamped identity only from an authenticated loopback proxy.
 
 Local browsers normally share one loopback allowance. A reverse proxy in front of Next also shares one conservative bucket; arbitrary forwarding headers are never trusted. Preserve the SQLite database and its quota salt when restarting: deleting/replacing it resets local counters. The proxy token is generated in ignored `backend/.data/proxy-token` and stays outside production bundles.
@@ -80,6 +81,7 @@ Backend checks, from the repository root:
 ```powershell
 .\.venv\Scripts\python.exe -m pytest backend/tests -q
 .\.venv\Scripts\python.exe -m ruff check backend scripts
+.\.venv\Scripts\python.exe scripts/check_repository.py --history
 ```
 
 Frontend checks, from `frontend/`:
@@ -92,6 +94,8 @@ npm run build
 ```
 
 The committed lockfiles record tested dependencies. For a fully constrained Python install, add `-c backend/requirements.lock` to the installation command. A production dashboard starts with `npm run start` after building, alongside the same API service.
+
+Run the repository check before commits and pushes. It checks working files, staged bytes, reachable history, ignored private paths and obvious credential patterns without printing potential secret values. GitHub Actions repeats the offline checks on pushes and pull requests, including contract drift, proxy tests, lint/type checks and a production build. No live key is supplied to CI. CI configuration is committed; its first hosted result is separate from the local results recorded here.
 
 Regenerate shared API types after contract changes:
 

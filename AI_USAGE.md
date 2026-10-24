@@ -4,6 +4,8 @@ Use Codex during the hackathon and briefly document its actual contribution here
 
 ## Event build log
 
+| 2026-10-24T18:18:49+00:00 | Codex | Allowance interface and CI | Added quota/reset/shared-call display, AI opt-out, duplicate-reuse notice, browser scenario source and offline GitHub Actions checks | Pending human review | ESLint, TypeScript/build and six Node proxy tests passed; browser execution blocked; hosted CI not yet observed |
+
 | 2026-10-24T18:17:15+00:00 | Codex | Spending and credential protection | Added persistent quotas/deduplication, authenticated proxy identity, GPT-6-Luna controls, server-only environment setup and repository credential checks; independent investigation/review corrected launch commands and malformed-token handling | Pending human review | 205 offline backend tests, six proxy tests, Ruff, ESLint, TypeScript/build and browser-bundle canary check passed; no paid calls or keys |
 
 | 2026-10-24T23:14:03+05:30 | Codex | Release revision record | Recorded the verified implementation SHA in submission documentation without modifying application source | Pending human review | Git revision resolved; publication checks run before atomic push |

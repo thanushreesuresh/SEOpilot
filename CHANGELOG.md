@@ -4,6 +4,13 @@ Record each meaningful project change during the event, newest first. Update thi
 
 ## Event build log
 
+## 2026-10-24T18:18:49+00:00 — Show audit allowances and automate offline checks
+
+- Changed: Added dashboard allowance/reset/shared-AI information, AI opt-out, exhausted-quota controls, duplicate-reuse notices and limited-AI state; extended browser scenario source and added a read-only GitHub Actions validation workflow.
+- Why: Make server spending protections understandable before submission and catch credential/contract/regression mistakes on future pushes without using paid AI.
+- Validation: ESLint, TypeScript and production build passed with the integrated UI; six Node proxy tests passed. Backend suite remains 205 passing. Repository working/staged/history checks passed before the server milestone commit. Browser scenarios were not executed and the hosted CI result has not yet been observed.
+- Limitations: Managed browser-origin denial still blocks desktop/mobile rendered verification. No live AI, hosting or human review is claimed. The server enforces quotas independently of UI controls.
+
 ## 2026-10-24T18:17:15+00:00 — Persist abuse limits and protect optional AI spending
 
 - Changed: Added blank-key GPT-6-Luna environment template and ignored local copy, durable three-audits/IP/rolling-24h admissions, HMAC identities, duplicate reuse, schema-2 migration, per-call global AI allowance, opt-out/kill switch, strict model/input/output bounds, fixed provider endpoint, and authenticated socket-derived proxy identity. Added safe local launcher, private-file/staged/history checks, offline regressions and updated setup/security documentation.

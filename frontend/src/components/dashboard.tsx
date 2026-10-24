@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, FileClock, House, LockKeyhole, RefreshCw } from "lucide-react";
-import { api, dateTime, domain, isActive, type Audit, type AuditSummary, type Recommendation } from "@/lib/api";
+import { api, dateTime, domain, isActive, type Audit, type AuditSummary, type Recommendation, type UsageStatus } from "@/lib/api";
 import { AuditForm } from "./audit-form";
 import { AuditResults } from "./audit-results";
 import { Brand, Notice, Spinner, Status } from "./ui";
@@ -9,11 +9,18 @@ import { Brand, Notice, Spinner, Status } from "./ui";
 export default function Dashboard() {
   const [audit, setAudit] = useState<Audit | null>(null);
   const [history, setHistory] = useState<AuditSummary[]>([]);
+  const [usage, setUsage] = useState<UsageStatus | null>(null);
   const [view, setView] = useState<"overview" | "history">("overview");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState<"live" | "demo" | null>(null);
   const [error, setError] = useState("");
   const [pollError, setPollError] = useState("");
+  const [notice, setNotice] = useState("");
+
+  const refreshUsage = useCallback(async () => {
+    try { setUsage(await api.usage()); }
+    catch (cause) { setUsage(null); setError(cause instanceof Error ? cause.message : "Could not refresh your audit allowance."); }
+  }, []);
 
   const refreshHistory = useCallback(async () => {
     const items = await api.history();
@@ -25,8 +32,8 @@ export default function Dashboard() {
     async function initialize() {
       const id = new URL(window.location.href).searchParams.get("audit");
       try {
-        const [items, selected] = await Promise.all([api.history(abort.signal), id ? api.audit(id, abort.signal) : Promise.resolve(null)]);
-        if (!abort.signal.aborted) { setHistory(items); setAudit(selected); }
+        const [items, selected, allowance] = await Promise.all([api.history(abort.signal), id ? api.audit(id, abort.signal) : Promise.resolve(null), api.usage(abort.signal)]);
+        if (!abort.signal.aborted) { setHistory(items); setAudit(selected); setUsage(allowance); }
       } catch (cause) { if (!abort.signal.aborted) setError(cause instanceof Error ? cause.message : "Could not load your workspace."); }
       finally { if (!abort.signal.aborted) setLoading(false); }
     }
@@ -46,24 +53,24 @@ export default function Dashboard() {
         if (abort.signal.aborted) return;
         setAudit(next); setPollError("");
         if (isActive(next)) timer = setTimeout(poll, 1000);
-        else void refreshHistory().catch(() => {});
+        else { void refreshHistory().catch(() => {}); void refreshUsage(); }
       } catch (cause) {
         if (!abort.signal.aborted) { setPollError(cause instanceof Error ? cause.message : "Connection interrupted. Retrying…"); timer = setTimeout(poll, 3000); }
       }
     }
     timer = setTimeout(poll, 1000);
     return () => { abort.abort(); clearTimeout(timer); };
-  }, [id, active, refreshHistory]);
+  }, [id, active, refreshHistory, refreshUsage]);
 
   function remember(next: Audit) {
-    setAudit(next); setView("overview"); setError(""); setPollError("");
+    setAudit(next); setView("overview"); setError(""); setPollError(""); setNotice("");
     const url = new URL(window.location.href); url.searchParams.set("audit", next.id); window.history.replaceState(null, "", url);
   }
-  async function submit(url: string, business_context: string, page_limit: number, max_depth: number) {
+  async function submit(url: string, business_context: string, page_limit: number, max_depth: number, allow_ai: boolean) {
     setSubmitting("live"); setError("");
-    try { remember(await api.create({ url, business_context, options: { page_limit, max_depth } })); await refreshHistory(); }
+    try { const result = await api.create({ url, business_context, allow_ai, options: { page_limit, max_depth } }); remember(result.audit); if (result.reused) setNotice("Opened your identical active or recent audit. No additional audit allowance or AI calls were used."); await refreshHistory(); }
     catch (cause) { setError(cause instanceof Error ? cause.message : "Could not start the audit."); }
-    finally { setSubmitting(null); }
+    finally { await refreshUsage(); setSubmitting(null); }
   }
   async function demo() {
     setSubmitting("demo"); setError("");
@@ -97,7 +104,8 @@ export default function Dashboard() {
       <div className="page-content">
         {view === "overview" ? <>
           <section className="page-heading"><h1>Your next move in search.</h1><p>Turn your website into a clear, prioritized action plan.</p></section>
-          <AuditForm onSubmit={submit} onDemo={demo} submitting={submitting} active={active} initializing={loading} />
+          <AuditForm onSubmit={submit} onDemo={demo} onRefreshUsage={async () => { setError(""); await refreshUsage(); }} submitting={submitting} active={active} initializing={loading} usage={usage} />
+          {notice ? <Notice>{notice}</Notice> : null}
           {error ? <Notice variant="error">{error}</Notice> : null}
           {pollError ? <Notice variant="error">{pollError} Progress will reconnect automatically.</Notice> : null}
           {loading ? <div className="loading-surface" role="status"><Spinner />Loading your workspace…</div> : audit ? <AuditResults key={audit.id} audit={audit} onRecommendation={updateRecommendation} /> : <EmptyAudit onDemo={demo} disabled={!!submitting} />}

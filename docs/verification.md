@@ -6,6 +6,7 @@ Checked on 24 October 2026, using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 an
 | --- | --- |
 | Complete backend pytest suite | 205 passed |
 | Node authenticated-proxy tests | 6 passed |
+| GitHub Actions offline workflow | Added for push/PR; hosted result not yet observed at this documentation revision |
 | Ruff, backend and scripts | Passed |
 | Frontend ESLint | Passed without warnings |
 | TypeScript | Passed |
@@ -33,6 +34,7 @@ Independent review found and fixed validated-address fallback, worker claim reco
 - Starlette emits one upstream deprecation warning for its HTTPX TestClient integration. Tests pass; the warning is not suppressed.
 - Sandbox restrictions initially blocked virtual-environment bootstrap, npm registry access, temporary/event-loop resources and Turbopack's CSS child process. Scoped retries outside the sandbox completed installation, tests and build successfully.
 - The in-app browser origin gate first reported declined permission, then a saved or managed deny for `http://localhost:3000`. It remained denied after explicit user approval and a reported permission change. No alternate browser or Playwright execution was attempted to bypass it. Browser test code is present for an environment with authorized access.
+- Six browser scenarios are present, including allowance exhaustion and AI opt-out/duplicate reuse. They remain unexecuted under that same policy. UI additions passed static checks and the production build.
 - No OpenAI credentials were created or written. A blank ignored local environment file was prepared; the harmless build canary was process-local. Live AI/model/account access has not been verified. Optional AI failures preserve deterministic results.
 - Google Search Console and public hosting are not implemented. No performance measurements, deployment or organizer submission is claimed.
 

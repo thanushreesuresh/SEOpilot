@@ -46,7 +46,7 @@ test("mobile dashboard remains readable and operational", async ({ page }) => {
 });
 
 test("a blocked audit reports insufficient coverage instead of a clean result", async ({ page, request }) => {
-  const response = await request.post("http://127.0.0.1:8000/api/demo-audits", { data: {} });
+  const response = await request.post("/api/demo-audits", { data: {} });
   const sample = await response.json();
   const blocked = {
     ...sample, id: "blocked-ui-fixture", mode: "live", status: "failed", ai_status: "unavailable",
@@ -59,4 +59,38 @@ test("a blocked audit reports insufficient coverage instead of a clean result", 
   await page.goto("/?audit=blocked-ui-fixture");
   await expect(page.getByRole("heading", { name: "No pages could be assessed." })).toBeVisible();
   await expect(page.getByText("The completed checks did not identify any findings on the assessed pages.")).toHaveCount(0);
+});
+
+test("exhausted live allowance keeps samples available", async ({ page }) => {
+  await page.route("**/api/usage", (route) => route.fulfill({ json: {
+    limit: 3, used: 3, remaining: 0, reset_at: "2026-10-25T12:00:00Z", retry_after: 3600, window_hours: 24, ai_enabled: false, ai_calls_remaining: 0,
+  } }));
+  await page.goto("/");
+  await expect(page.getByText("0 of 3 live audits left")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Run audit", exact: true })).toBeDisabled();
+  await expect(page.getByRole("checkbox", { name: /Include optional AI suggestions/i })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Explore sample audit", exact: true })).toBeEnabled();
+});
+
+test("AI can be switched off and duplicate audit reuse is explained", async ({ page, request }) => {
+  const response = await request.post("/api/demo-audits", { data: {} });
+  const sample = await response.json();
+  await page.route("**/api/usage", (route) => route.fulfill({ json: {
+    limit: 3, used: 0, remaining: 3, reset_at: null, retry_after: 0, window_hours: 24, ai_enabled: true, ai_calls_remaining: 20,
+  } }));
+  let submitted = false;
+  await page.route("**/api/audits", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    expect(route.request().postDataJSON().allow_ai).toBe(false);
+    submitted = true;
+    return route.fulfill({ status: 202, headers: { "x-audit-reused": "true" }, json: { ...sample, mode: "live", allow_ai: false, ai_status: "unavailable" } });
+  });
+  await page.goto("/");
+  await page.getByRole("checkbox", { name: /Include optional AI suggestions/i }).uncheck();
+  await page.getByRole("textbox", { name: "Website URL", exact: true }).fill("https://example.com/");
+  await page.getByRole("button", { name: "Run audit", exact: true }).click();
+  await expect(page.getByText(/No additional audit allowance or AI calls were used/)).toBeVisible();
+  await page.getByRole("tab", { name: "Recommendations", exact: true }).click();
+  await expect(page.getByText(/Optional AI was switched off for this audit/)).toBeVisible();
+  expect(submitted).toBe(true);
 });

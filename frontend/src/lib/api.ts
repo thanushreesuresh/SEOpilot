@@ -6,8 +6,9 @@ export type Issue = components["schemas"]["Issue"];
 export type Recommendation = components["schemas"]["Recommendation"];
 export type Page = components["schemas"]["Page"];
 export type DecisionRequest = components["schemas"]["DecisionRequest"];
+export type UsageStatus = components["schemas"]["UsageStatus"];
 export const isActive = (audit: Audit) => ["queued", "crawling", "analyzing", "reviewing"].includes(audit.status);
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init?: RequestInit, onResponse?: (response: Response) => void): Promise<T> {
   let response: Response;
   try { response = await fetch(`/api${path}`, { cache: "no-store", ...init, headers: { "Content-Type": "application/json", ...init?.headers } }); }
   catch { throw new Error("Could not reach the audit service. Check that the backend is running on port 8000."); }
@@ -17,12 +18,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const message = typeof detail === "string" ? detail : Array.isArray(detail) ? detail.map((item: { msg: string }) => item.msg).join(". ") : "The audit service could not complete this request. Check that the backend is running and try again.";
     throw new Error(message);
   }
+  onResponse?.(response);
   return response.json() as Promise<T>;
 }
 export const api = {
+  usage: (signal?: AbortSignal) => request<UsageStatus>("/usage", { signal }),
   history: (signal?: AbortSignal) => request<AuditSummary[]>("/audits", { signal }),
   audit: (id: string, signal?: AbortSignal) => request<Audit>(`/audits/${encodeURIComponent(id)}`, { signal }),
-  create: (data: AuditRequest) => request<Audit>("/audits", { method: "POST", body: JSON.stringify(data) }),
+  create: async (data: AuditRequest) => {
+    let reused = false;
+    const audit = await request<Audit>("/audits", { method: "POST", body: JSON.stringify(data) }, (response) => { reused = response.headers.get("x-audit-reused") === "true"; });
+    return { audit, reused };
+  },
   demo: () => request<Audit>("/demo-audits", { method: "POST", body: "{}" }),
   decide: (id: string, data: DecisionRequest) => request<Recommendation>(`/recommendations/${encodeURIComponent(id)}/decision`, { method: "PATCH", body: JSON.stringify(data) }),
 };
