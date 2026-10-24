@@ -109,6 +109,14 @@ Open the **Pages** tab to inspect each page's JSON-LD summary. New HTML extracti
 
 New deterministic analyses record **rules version 2** for the JSON-LD diagnostics. Existing saved audits keep rules version 1 and their original findings and scores; score version remains **1**. A fresh audit is needed to collect the new evidence. Comparisons disclose version differences and withhold conclusions that the retained evidence cannot support.
 
+## Crawl discovery evidence
+
+New audits retain **Robots and sitemap checks** below coverage, including each inspected URL, final HTTP status, outcome and explanation. Expand **Inspect crawl discovery evidence** to see present, confirmed absent, blocked and unknown results, the recorded request-attempt count and effective minimum delay. Markdown, CSV and JSON reports include the same saved evidence. These additions reuse existing protected probes and make no additional network or AI requests.
+
+At most one robots probe and three same-origin sitemap locations are retained. Sitemap inspection stops at the first recognized `urlset` or `sitemapindex` XML root; it does not validate every listed URL, find orphan pages, or confirm search-engine indexing. Unsafe/external declarations and candidate limits leave explicit notes; failed, invalid or robots-blocked responses remain unknown. An absent file alone is not a ranking penalty. Request counts include budgeted attempts, redirects and retries, including attempts that fail before connecting. Interrupted runs retain the last saved update, which may precede their final in-flight attempt. The normal 60-attempt ceiling, deadlines, robots rules, origin/DNS protections and spending limits remain in force.
+
+Progress updates persist completed policy checks before content crawling, preserving them after cancellation or restart. Existing audits without the optional discovery snapshot stay **not recorded / unknown**; their evidence and scores are unchanged. Fresh demo audits include explicitly labelled fixture checks with zero HTTP requests. Comparisons can now resolve `robots_absent` or `sitemap_absent` only when the other audit retains a successful same-origin 2xx check of the corresponding kind, confirms presence, finishes deterministic analysis, uses matching rules and assesses the same nonempty URL set. A state label or omitted finding alone cannot prove resolution. Rules version 2 and score version 1 remain unchanged.
+
 ## Checks
 
 Backend checks, from the repository root:

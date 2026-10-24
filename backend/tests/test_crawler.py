@@ -74,8 +74,9 @@ async def test_end_to_end_crawl_extracts_actual_html_and_probe_evidence():
     })
     updates = []
 
-    async def progress(pages, discovered):
-        updates.append((len(pages), discovered))
+    async def progress(pages, discovered, discovery):
+        if pages:
+            updates.append((len(pages), discovered))
 
     result = await web.crawl(progress=progress)
     assert [page.title for page in result.pages] == ["Local pottery", "About us"]
@@ -87,6 +88,109 @@ async def test_end_to_end_crawl_extracts_actual_html_and_probe_evidence():
     assert result.discovery_evidence == {
         "robots": [(ORIGIN + "/robots.txt", 200)], "sitemap": [(ORIGIN + "/sitemap.xml", 404)],
     }
+
+
+@pytest.mark.asyncio
+async def test_discovery_snapshot_retains_checks_without_additional_requests():
+    web = FixtureWeb({"/robots.txt": (200, "text/plain", b"User-agent: *\nCrawl-delay: 2\n"),
+                      "/sitemap.xml": (200, "application/xml", b'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"/>')})
+    snapshots = []
+
+    async def progress(pages, discovered, discovery):
+        snapshots.append(discovery)
+
+    result = await web.crawl(progress=progress)
+    saved = result.discovery_snapshot()
+    assert saved.robots_state == saved.sitemap_state == "present"
+    assert [(probe.kind, probe.outcome, probe.status_code) for probe in saved.probes] == [
+        ("robots", "present", 200), ("sitemap", "present", 200),
+    ]
+    assert saved.request_attempts == len(web.calls) == 3
+    assert saved.effective_delay_seconds == 2
+    assert snapshots[0].robots_state == "present" and snapshots[0].sitemap_state == "unknown"
+    assert snapshots[0].request_attempts == 1  # snapshots must not mutate later
+    assert snapshots[1].sitemap_state == "present" and not result.warnings
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("route,outcome,status", [
+    ((404, "text/plain", b""), "absent", 404),
+    ((200, "text/html", b"<html>Not XML</html>"), "unknown", 200),
+    (NetworkError("Private provider exception canary"), "unknown", None),
+])
+async def test_sitemap_probe_distinguishes_absence_from_invalid_or_failed_response(route, outcome, status):
+    web = FixtureWeb({"/sitemap.xml": route})
+    snapshot = (await web.crawl()).discovery_snapshot()
+    probe = snapshot.probes[1]
+    assert (probe.outcome, probe.status_code) == (outcome, status)
+    assert snapshot.sitemap_state == ("absent" if outcome == "absent" else "unknown")
+    assert "Private provider exception" not in snapshot.model_dump_json()
+
+
+@pytest.mark.asyncio
+async def test_blocked_and_skipped_sitemaps_keep_explicit_unknown_evidence():
+    web = FixtureWeb({"/robots.txt": (200, "text/plain", b"User-agent: *\nDisallow: /sitemap.xml\nSitemap: https://external.example/private-canary.xml\n")})
+    snapshot = (await web.crawl()).discovery_snapshot()
+    assert snapshot.sitemap_state == "unknown"
+    assert snapshot.probes[1].outcome == "blocked" and snapshot.probes[1].status_code is None
+    assert snapshot.request_attempts == len(web.calls) == 2
+    assert snapshot.notes and "private-canary" not in snapshot.model_dump_json()
+
+
+@pytest.mark.asyncio
+async def test_robots_failure_is_retained_before_any_content_fetch():
+    web = FixtureWeb({"/robots.txt": (503, "text/plain", b"Private body canary")})
+    snapshot = (await web.crawl()).discovery_snapshot()
+    assert snapshot.robots_state == snapshot.sitemap_state == "unknown"
+    assert len(snapshot.probes) == 1 and snapshot.probes[0].status_code == 503
+    assert snapshot.probes[0].outcome == "unknown" and snapshot.request_attempts == 1
+    assert "Private body" not in snapshot.model_dump_json()
+
+
+@pytest.mark.asyncio
+async def test_runner_persists_discovery_before_cancelled_content_request(tmp_path, monkeypatch):
+    from seopilot.models import Audit
+    from seopilot.runner import execute
+    from seopilot.storage import Store
+
+    web = FixtureWeb()
+    original_transport = web.transport
+
+    async def transport(url, address, timeout, max_bytes):
+        if url == ORIGIN + "/":
+            raise asyncio.CancelledError
+        return await original_transport(url, address, timeout, max_bytes)
+
+    async def fixture_crawl(url, options, progress):
+        return await crawl(url, options, progress, resolver=web.resolve, transport=transport)
+
+    monkeypatch.setattr(crawler, "crawl", fixture_crawl)
+    store = Store(tmp_path / "retained.db")
+    audit = Audit(url=ORIGIN + "/", origin=ORIGIN, status="crawling", allow_ai=False)
+    store.save(audit)
+    with pytest.raises(asyncio.CancelledError):
+        await execute(audit, store)
+    retained = store.get(audit.id)
+    assert retained.pages == []
+    assert retained.discovery.robots_state == "present" and retained.discovery.sitemap_state == "absent"
+    assert len(retained.discovery.probes) == 2
+    store.cancel_audit(audit.id)
+    restarted = Store(store.path)
+    restarted.recover()
+    assert restarted.get(audit.id).discovery == retained.discovery
+
+
+def test_discovery_contract_is_bounded_and_legacy_audits_stay_unknown():
+    from pydantic import ValidationError
+
+    from seopilot.models import Audit, CrawlDiscovery, DiscoveryProbe
+
+    assert Audit(url=ORIGIN).discovery is None
+    probe = DiscoveryProbe(kind="robots", url=ORIGIN + "/robots.txt", outcome="unknown", explanation="No response")
+    for values in ({"probes": [probe] * 5}, {"request_attempts": 61}, {"effective_delay_seconds": float("inf")},
+                   {"notes": ["bounded"] * 6}):
+        with pytest.raises(ValidationError):
+            CrawlDiscovery(**values)
 
 
 @pytest.mark.asyncio
@@ -274,6 +378,8 @@ async def test_large_sitemap_candidate_set_does_not_create_false_absence():
     result = await web.crawl()
     assert result.sitemap_state == "unknown"
     assert len(result.discovery_evidence["sitemap"]) == 3
+    snapshot = result.discovery_snapshot()
+    assert len(snapshot.probes) == 4 and len(snapshot.notes) == 2
 
 
 @pytest.mark.asyncio
@@ -302,7 +408,7 @@ async def test_discovery_budget_is_hard(monkeypatch):
     web = FixtureWeb({"/": (200, "text/html", body)})
     updates = []
 
-    async def progress(pages, discovered):
+    async def progress(pages, discovered, discovery):
         updates.append(discovered)
 
     result = await web.crawl(progress=progress)

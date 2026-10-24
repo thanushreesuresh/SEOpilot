@@ -5,6 +5,7 @@ import { CopyButton, ExternalUrl, Notice, Severity, Spinner, Status, Verified } 
 import { fixApi, type DispositionRequest, type FindingDisposition } from "@/lib/fix-api";
 import { AuditReportTools } from "./audit-report-tools";
 import { AuditCancelControl } from "./audit-cancel-control";
+import { CrawlDiscoveryDetails } from "./crawl-discovery";
 
 type Props = { audit: Audit; onRecommendation: (recommendation: Recommendation) => void; onCancelled?: (audit: Audit) => void };
 type Tab = "issues" | "recommendations" | "pages";
@@ -62,6 +63,7 @@ export function AuditResults({ audit, onRecommendation, onCancelled }: Props) {
       </div>
     </section>
     <section className="coverage-panel" aria-label="Audit coverage"><Info size={19} className="coverage-icon" aria-hidden="true" /><div><h3>Coverage matters</h3><p>Assessed {audit.coverage.assessed} {audit.coverage.assessed === 1 ? "page" : "pages"} on {domain(audit.url)}. {audit.coverage.blocked} blocked · {audit.coverage.failed} failed · {audit.coverage.unchecked} unchecked.{audit.coverage.truncated ? " Crawl limits were reached." : ""} Findings describe the pages inspected in this audit.</p><details className="score-details"><summary>How is the score calculated?</summary><p>{audit.score.formula}</p><p>No assessed pages means no score. Severity is an estimate of technical impact, not a prediction of rankings or traffic.</p></details></div></section>
+    <CrawlDiscoveryDetails audit={audit} />
     {audit.warnings.length ? <div className="warnings-panel"><h3>Audit notes</h3><ul>{audit.warnings.map((warning, index) => <li key={index}>{warning}</li>)}</ul></div> : null}
   </>;
 }

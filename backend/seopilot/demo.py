@@ -1,7 +1,7 @@
 """Offline sample audit: bundled HTML is parsed and passed through the real rules."""
 
 from .extraction import extract_page
-from .models import Audit, Coverage, Page, Progress, Recommendation, now
+from .models import Audit, Coverage, CrawlDiscovery, DiscoveryProbe, Page, Progress, Recommendation, now
 from .rules import analyze, calculate_score, rule_recommendations
 
 ORIGIN = "https://northstar-pottery.example"
@@ -39,6 +39,12 @@ async def build_demo() -> Audit:
         business_context="Sample business: a handmade ceramics studio and beginner pottery workshops in Kochi.",
         progress=Progress(stage="completed", visited=4, discovered=4, message="Sample fixture audit complete"),
         coverage=Coverage(attempted=4, assessed=4), completed_at=now(),
+        discovery=CrawlDiscovery(robots_state="present", sitemap_state="absent", probes=[
+            DiscoveryProbe(kind="robots", url=ORIGIN + "/robots.txt", status_code=200, outcome="present",
+                           explanation="Sample fixture: a usable robots.txt text policy."),
+            DiscoveryProbe(kind="sitemap", url=ORIGIN + "/sitemap.xml", status_code=404, outcome="absent",
+                           explanation="Sample fixture: the inspected location returned HTTP 404."),
+        ], notes=["Sample checks only. No HTTP requests or delays were performed."]),
         warnings=["Sample data: bundled HTML fixtures, including a simulated 404. No website or AI provider was contacted."],
     )
     from .rules import RULES_VERSION

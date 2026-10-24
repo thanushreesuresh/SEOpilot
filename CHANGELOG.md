@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T03:35:23+05:30 — Retain crawl discovery evidence
+
+- Changed: Added bounded robots/sitemap check snapshots to audit contracts, crawler progress, persistence, demo, dashboard and Markdown/CSV/JSON exports. Successful checks can substantiate missing-policy resolution in comparisons only with matching rules, finished analysis and the same nonempty assessed scope.
+- Why: Earlier audits discarded successful probes, leaving users without an explanation of inspected discovery locations and preventing evidence-backed comparison of previously missing files. Older snapshots remain explicitly unknown; history and scoring versions are preserved.
+- Validation: Baseline 498 and final 521 backend tests passed locally; Ruff, frontend ESLint/TypeScript, 34 AST tests, seven validator/proxy tests each and production build passed. Independent standards and specification reviews found no actionable issues. Added three desktop/mobile/legacy browser scenarios for hosted execution; hosted results pending at this checkpoint.
+- Limitations: A recognized XML root does not verify listed URLs, orphan detection, indexing or ranking outcomes. Interrupted request counts describe the last persisted update. No additional probes or AI calls, original database/counter changes, or website writes; human review and owned-pilot acceptance remain pending. Local service restart remains a manual step following the earlier automatic approval rejection.
+
 ## 2026-10-25T03:22:10+05:30 — Record verified cancellation and shutdown recovery
 
 - Changed: Updated delivery records for source da67735 and successful hosted run 40135903810; documented the original database counts and remaining local/pilot setup steps.

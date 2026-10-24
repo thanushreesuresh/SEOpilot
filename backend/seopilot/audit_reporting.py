@@ -123,14 +123,33 @@ def _evidence_field(issue: Issue) -> str | None:
 
 def _resolution_unknown_reason(
     issues: list[Issue], before: Audit, after_index: dict[str, list[Page]], common: set[str], rules_match: bool,
-    *, target_status: str,
+    *, target: Audit,
 ) -> str | None:
     if not rules_match:
         return "Rule versions differ; absence under a different rule set does not prove resolution."
-    if target_status not in {"completed", "partial"}:
+    if target.status not in {"completed", "partial"}:
         return "The later audit did not confirm deterministic analysis finished; missing findings remain unknown."
     if any(issue.is_site for issue in issues):
-        return "The later audit does not retain an explicit successful site-policy inspection; absence is unknown."
+        before_urls = _assessed_urls(_pages(before, origin_of(before.origin or before.url)))
+        if not common or before_urls != _assessed_urls(after_index):
+            return "Site-policy findings require the same nonempty assessed URL scope in both audits."
+        discovery = target.discovery
+        for issue in issues:
+            kind = {"robots_absent": "robots", "sitemap_absent": "sitemap"}.get(issue.rule_id)
+            if discovery is None or kind is None or getattr(discovery, f"{kind}_state") != "present":
+                return "The later audit does not retain an explicit successful site-policy inspection; absence is unknown."
+            try:
+                successful = any(
+                    probe.kind == kind and probe.outcome == "present"
+                    and probe.status_code is not None and 200 <= probe.status_code < 300
+                    and origin_of(probe.url) == origin_of(target.origin or target.url)
+                    for probe in discovery.probes
+                )
+            except ValueError:
+                successful = False
+            if not successful:
+                return "The later audit has no matching successful same-origin policy probe; evidence is unknown."
+        return None
     before_by_id = {page.id: page for page in before.pages}
     for issue in issues:
         urls = {normalize_url(issue.url)}
@@ -201,13 +220,13 @@ def compare_audits(before: Audit, after: Audit) -> dict[str, Any]:
             status, reason = "persistent", "The same rule and primary evidence field were observed in both audits."
         elif earlier:
             reason = _resolution_unknown_reason(
-                earlier, before, after_index, common, rules_match, target_status=after.status,
+                earlier, before, after_index, common, rules_match, target=after,
             )
             status = "unresolved_unknown" if reason else "resolved"
             reason = reason or "Not observed by the same rules with complete required evidence on all affected URLs."
         elif in_common:
             reason = _resolution_unknown_reason(
-                later, after, before_index, common, rules_match, target_status=before.status,
+                later, after, before_index, common, rules_match, target=before,
             )
             status = "unresolved_unknown" if reason else "added"
             reason = (reason.replace("later", "earlier") if reason else
@@ -292,7 +311,12 @@ def _report(audit: Audit, dispositions: list[dict] | None) -> dict[str, Any]:
         "Scores are diagnostic heuristics, not measurements or forecasts of search rankings or traffic.",
         "Suggestions need human review. Approval records a decision; it does not verify implementation or results.",
         "AI and sample suggestions are hypotheses, not verified facts or confirmed fixes.",
+        "Listed sitemap URLs and search-engine indexing were not verified.",
     ]
+    if audit.discovery is None:
+        limitations.append("Discovery checks were not recorded for this audit; their outcomes remain unknown.")
+    else:
+        limitations.extend(audit.discovery.notes)
     if audit.status not in {"completed", "partial"}:
         limitations.append("The audit did not complete normally; retained observations may be incomplete.")
     if audit.mode == "demo":
@@ -318,6 +342,7 @@ def _report(audit: Audit, dispositions: list[dict] | None) -> dict[str, Any]:
         "updated_at": audit.updated_at, "completed_at": audit.completed_at,
         "summary": audit.summary, "rules_version": audit.rules_version, "score": audit.score.model_dump(),
         "coverage": audit.coverage.model_dump(), "ai_status": audit.ai_status,
+        "discovery": audit.discovery.model_dump() if audit.discovery else None,
         "recommendation_decision_counts": {
             status: sum(recommendation.status == status for recommendation in audit.recommendations)
             for status in ("pending", "approved", "rejected")
@@ -350,8 +375,21 @@ def _markdown(report: dict[str, Any]) -> str:
         "; ".join(f"{field}: {_md(value)}" for field, value in coverage.items()) + ".", "",
         "## Human review", "", _md(report["human_review"]), "",
         f"Recommendation decisions: pending {counts['pending']}, approved {counts['approved']}, "
-        f"rejected {counts['rejected']}.", "", "## Findings", "",
+        f"rejected {counts['rejected']}.", "", "## Crawl discovery", "",
     ]
+    discovery = report["discovery"]
+    if discovery is not None:
+        lines.extend([
+            f"Robots policy: {_md(discovery['robots_state'])}; sitemap: {_md(discovery['sitemap_state'])}.", "",
+            f"Budgeted request attempts: {discovery['request_attempts']}; "
+            f"effective minimum delay: {discovery['effective_delay_seconds']} seconds.", "",
+        ])
+        for probe in discovery["probes"]:
+            lines.extend([f"- {_md(probe['kind'])}: {_md(probe['url'])}; {_md(probe['outcome'])}; "
+                          f"HTTP {_md(probe['status_code'] or 'not recorded')}. {_md(probe['explanation'])}"])
+    else:
+        lines.append("Discovery checks were not recorded for this audit; their outcomes remain unknown.")
+    lines.extend(["", "## Findings", ""])
     if not report["findings"]:
         lines.extend(["No findings were recorded within the inspected scope; unchecked evidence remains unknown.", ""])
     for finding in report["findings"]:
@@ -415,6 +453,13 @@ def _csv(report: dict[str, Any]) -> str:
     for section in ("score", "coverage", "recommendation_decision_counts"):
         for field, value in report[section].items():
             write(section, field=field, value=value)
+    discovery = report["discovery"]
+    if discovery is not None:
+        for field in ("robots_state", "sitemap_state", "request_attempts", "effective_delay_seconds"):
+            write("discovery", field=field, value=discovery[field])
+        for probe in discovery["probes"]:
+            write("discovery_probe", url=probe["url"], field=probe["kind"], value=probe["outcome"],
+                  status=probe["status_code"], explanation=probe["explanation"])
     for page in report["pages"]:
         write("page", url=page["url"], field="outcome", value=page["outcome"], status=page["status_code"],
               reason=_json(page["truncated_fields"]))

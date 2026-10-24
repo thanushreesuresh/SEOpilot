@@ -5,7 +5,18 @@ import json
 import pytest
 
 from seopilot.audit_reporting import MAX_REPORT_BYTES, compare_audits, export_audit
-from seopilot.models import Audit, Coverage, Evidence, Issue, Page, Recommendation, Score, StructuredDataSummary
+from seopilot.models import (
+    Audit,
+    Coverage,
+    CrawlDiscovery,
+    DiscoveryProbe,
+    Evidence,
+    Issue,
+    Page,
+    Recommendation,
+    Score,
+    StructuredDataSummary,
+)
 
 
 def page(path="/", **values):
@@ -227,6 +238,67 @@ def test_site_absence_is_unknown_without_observed_after_policy_state():
     result = compare_audits(audit([before_page], [site_issue]), audit())
     assert result["resolved"] == []
     assert result["unresolved_unknown"][0]["is_site"] is True
+
+
+@pytest.mark.parametrize("kind", ["robots", "sitemap"])
+@pytest.mark.parametrize("direction", ["resolved", "added"])
+def test_site_policy_comparison_requires_retained_successful_probe(kind, direction):
+    target = page()
+    missing = audit([target], [issue(target, f"{kind}_absent", "inspected_url", is_site=True,
+                                   url="https://example.com/", page_ids=[])])
+    observed = audit(discovery=CrawlDiscovery(**{f"{kind}_state": "present"}, probes=[DiscoveryProbe(
+        kind=kind, url=f"https://example.com/{kind}.{'txt' if kind == 'robots' else 'xml'}", status_code=200, outcome="present", explanation="Fixture check",
+    )]))
+    args = (missing, observed) if direction == "resolved" else (observed, missing)
+    result = compare_audits(*args)
+    assert len(result[direction]) == 1 and result["unresolved_unknown"] == []
+    observed.discovery.probes = []
+    result = compare_audits(*args)
+    assert not result[direction] and len(result["unresolved_unknown"]) == 1
+
+
+@pytest.mark.parametrize("change", ["status", "outcome", "origin", "state", "coverage", "version", "analysis", "legacy"])
+def test_site_policy_success_cannot_hide_unknown_or_incompatible_evidence(change):
+    target = page()
+    before = audit([target], [issue(target, "sitemap_absent", "inspected_url", is_site=True,
+                                   url="https://example.com/", page_ids=[])])
+    after = audit(discovery=CrawlDiscovery(sitemap_state="present", probes=[DiscoveryProbe(
+        kind="sitemap", url="https://example.com/sitemap.xml", status_code=200,
+        outcome="present", explanation="Fixture check",
+    )]))
+    if change == "status":
+        after.discovery.probes[0].status_code = 503
+    elif change == "outcome":
+        after.discovery.probes[0].outcome = "unknown"
+    elif change == "origin":
+        after.discovery.probes[0].url = "https://other.example/sitemap.xml"
+    elif change == "state":
+        after.discovery.sitemap_state = "unknown"
+    elif change == "coverage":
+        after.pages.append(page("/new"))
+    elif change == "version":
+        after.rules_version = "different"
+    elif change == "analysis":
+        after.status = "cancelled"
+    else:
+        after.discovery = None
+    result = compare_audits(before, after)
+    assert result["resolved"] == [] and len(result["unresolved_unknown"]) == 1
+    assert result["score_delta"] is None
+
+
+@pytest.mark.parametrize("format", ["json", "markdown", "csv"])
+def test_reports_retain_discovery_scope_and_legacy_unknown(format):
+    discovery = CrawlDiscovery(robots_state="present", sitemap_state="unknown", request_attempts=3,
+                               notes=["An external-origin sitemap declaration was skipped."], probes=[DiscoveryProbe(
+        kind="robots", url="https://example.com/robots.txt", status_code=200, outcome="present",
+        explanation="Parsed a usable text policy.",
+    )])
+    content = export_audit(audit(discovery=discovery), format=format)["content"]
+    assert "https://example.com/robots.txt" in content and "Parsed a usable text policy." in content
+    assert "Listed sitemap URLs and search-engine indexing were not verified." in content
+    legacy = export_audit(audit(), format=format)["content"]
+    assert "Discovery checks were not recorded for this audit; their outcomes remain unknown." in legacy
 
 
 def test_unchecked_broken_link_target_does_not_make_source_link_resolved():

@@ -5,7 +5,7 @@ import logging
 import sqlite3
 from collections.abc import Awaitable, Callable
 
-from .models import Audit, Page, now
+from .models import Audit, CrawlDiscovery, Page, now
 from .settings import Settings
 from .storage import Store
 
@@ -16,8 +16,9 @@ async def execute(audit: Audit, store: Store, *, settings: Settings | None = Non
     from .crawler import crawl
     from .rules import RULES_VERSION, analyze, calculate_score, rule_recommendations
 
-    async def progress(pages: list[Page], discovered: int):
+    async def progress(pages: list[Page], discovered: int, discovery: CrawlDiscovery):
         audit.pages = list(pages)
+        audit.discovery = discovery
         audit.progress.visited = len(pages)
         audit.progress.discovered = discovered
         audit.progress.message = f"Checked {len(pages)} pages; {discovered} discovered"
@@ -30,6 +31,7 @@ async def execute(audit: Audit, store: Store, *, settings: Settings | None = Non
     audit.pages = result.pages
     audit.warnings = result.warnings
     audit.coverage = result.coverage
+    audit.discovery = result.discovery_snapshot()
     audit.status = "analyzing"
     audit.progress.stage = "analyzing"
     audit.progress.message = "Checking page evidence against SEO rules"

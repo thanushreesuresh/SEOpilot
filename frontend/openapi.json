@@ -1012,6 +1012,16 @@
           "coverage": {
             "$ref": "#/components/schemas/Coverage"
           },
+          "discovery": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CrawlDiscovery"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "score": {
             "$ref": "#/components/schemas/Score"
           },
@@ -1068,6 +1078,7 @@
           "recommendations",
           "warnings",
           "coverage",
+          "discovery",
           "score",
           "ai_status",
           "summary",
@@ -1528,6 +1539,70 @@
         ],
         "title": "Coverage"
       },
+      "CrawlDiscovery": {
+        "properties": {
+          "robots_state": {
+            "type": "string",
+            "enum": [
+              "present",
+              "absent",
+              "unknown"
+            ],
+            "title": "Robots State",
+            "default": "unknown"
+          },
+          "sitemap_state": {
+            "type": "string",
+            "enum": [
+              "present",
+              "absent",
+              "unknown"
+            ],
+            "title": "Sitemap State",
+            "default": "unknown"
+          },
+          "probes": {
+            "items": {
+              "$ref": "#/components/schemas/DiscoveryProbe"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "title": "Probes"
+          },
+          "request_attempts": {
+            "type": "integer",
+            "maximum": 60.0,
+            "minimum": 0.0,
+            "title": "Request Attempts",
+            "default": 0
+          },
+          "effective_delay_seconds": {
+            "type": "number",
+            "minimum": 0.75,
+            "title": "Effective Delay Seconds",
+            "default": 0.75
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Notes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "robots_state",
+          "sitemap_state",
+          "probes",
+          "request_attempts",
+          "effective_delay_seconds",
+          "notes"
+        ],
+        "title": "CrawlDiscovery"
+      },
       "CrawlOptions-Input": {
         "properties": {
           "page_limit": {
@@ -1651,6 +1726,61 @@
           "status"
         ],
         "title": "DecisionRequest"
+      },
+      "DiscoveryProbe": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "robots",
+              "sitemap"
+            ],
+            "title": "Kind"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048,
+            "title": "Url"
+          },
+          "status_code": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 599.0,
+                "minimum": 100.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Code"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "present",
+              "absent",
+              "blocked",
+              "unknown"
+            ],
+            "title": "Outcome"
+          },
+          "explanation": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Explanation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "url",
+          "status_code",
+          "outcome",
+          "explanation"
+        ],
+        "title": "DiscoveryProbe"
       },
       "DispositionRequest": {
         "properties": {

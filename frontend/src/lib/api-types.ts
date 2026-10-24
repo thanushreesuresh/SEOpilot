@@ -435,6 +435,7 @@ export interface components {
             /** Warnings */
             warnings: string[];
             coverage: components["schemas"]["Coverage"];
+            discovery: components["schemas"]["CrawlDiscovery"] | null;
             score: components["schemas"]["Score"];
             /**
              * Ai Status
@@ -638,6 +639,35 @@ export interface components {
              */
             truncated: boolean;
         };
+        /** CrawlDiscovery */
+        CrawlDiscovery: {
+            /**
+             * Robots State
+             * @default unknown
+             * @enum {string}
+             */
+            robots_state: "present" | "absent" | "unknown";
+            /**
+             * Sitemap State
+             * @default unknown
+             * @enum {string}
+             */
+            sitemap_state: "present" | "absent" | "unknown";
+            /** Probes */
+            probes: components["schemas"]["DiscoveryProbe"][];
+            /**
+             * Request Attempts
+             * @default 0
+             */
+            request_attempts: number;
+            /**
+             * Effective Delay Seconds
+             * @default 0.75
+             */
+            effective_delay_seconds: number;
+            /** Notes */
+            notes: string[];
+        };
         /** CrawlOptions */
         "CrawlOptions-Input": {
             /**
@@ -711,6 +741,25 @@ export interface components {
              * @enum {string}
              */
             status: "approved" | "rejected";
+        };
+        /** DiscoveryProbe */
+        DiscoveryProbe: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "robots" | "sitemap";
+            /** Url */
+            url: string;
+            /** Status Code */
+            status_code: number | null;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "present" | "absent" | "blocked" | "unknown";
+            /** Explanation */
+            explanation: string;
         };
         /** DispositionRequest */
         DispositionRequest: {

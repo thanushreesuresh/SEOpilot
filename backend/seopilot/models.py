@@ -131,6 +131,23 @@ class Coverage(Contract):
     truncated: bool = False
 
 
+class DiscoveryProbe(Contract):
+    kind: Literal["robots", "sitemap"]
+    url: str = Field(max_length=2048)
+    status_code: int | None = Field(default=None, ge=100, le=599)
+    outcome: Literal["present", "absent", "blocked", "unknown"]
+    explanation: str = Field(max_length=300)
+
+
+class CrawlDiscovery(Contract):
+    robots_state: Literal["present", "absent", "unknown"] = "unknown"
+    sitemap_state: Literal["present", "absent", "unknown"] = "unknown"
+    probes: list[DiscoveryProbe] = Field(default_factory=list, max_length=4)
+    request_attempts: int = Field(default=0, ge=0, le=60)
+    effective_delay_seconds: float = Field(default=0.75, ge=0.75, allow_inf_nan=False)
+    notes: list[str] = Field(default_factory=list, max_length=5)
+
+
 class Progress(Contract):
     stage: str = "queued"
     visited: int = 0
@@ -164,6 +181,7 @@ class Audit(Contract):
     recommendations: list[Recommendation] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
     coverage: Coverage = Field(default_factory=Coverage)
+    discovery: CrawlDiscovery | None = None
     score: Score = Field(default_factory=Score)
     ai_status: Literal["unavailable", "pending", "available", "failed", "demo", "limited", "cancelled"] = "unavailable"
     summary: str = ""
