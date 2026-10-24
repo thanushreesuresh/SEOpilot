@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T01:18:15+05:30 — Trusted static metadata adapter
+
+- Changed: Added `repository-tools/` pinned TypeScript AST parser and isolated Python adapter. Exact range edits preserve page content and unrelated metadata; static inherited values can receive page overrides.
+- Why: Generate predictable title/description changes without code generation, extra AI calls or local execution of target repositories.
+- Validation: 34 Node tests and 21 Python adapter tests passed, including Unicode/escaping, inheritance, dynamic/client/template refusals and a source-execution/environment canary. Ruff passed.
+- Limitations: TypeScript `.ts/.tsx` App Router only; uncertain metadata and routes require manual work. Human review pending; pilot deployment remains unverified.
+
 ## 2026-10-25T01:15:22+05:30 — V2 connection and persistence foundation
 
 - Changed: Added GitHub App authorization, repository-scoped in-memory tokens, v3 SQLite project/fix/event/publication/disposition storage, contracts and safe environment examples. Existing audit history and counters are preserved.

@@ -1,5 +1,7 @@
 # AI usage record
 
+| 2026-10-25T01:18:15+05:30 | Codex | Static metadata proposals | Built trusted TypeScript AST range editor and Python subprocess boundary; reviewed unsupported inheritance and source isolation | Pending human review | 34 Node and 21 Python tests passed, including secret environment and no-execution canaries; zero additional AI requests |
+
 | 2026-10-25T01:15:22+05:30 | Codex | V2 connection and persistence | Implemented App client, credential boundary, migration, contracts, retention and authorization fixtures | Pending human review | 207 baseline and 66 focused tests passed; no live credentials used or additional OpenAI calls made |
 
 Use Codex during the hackathon and briefly document its actual contribution here. Add a row after each meaningful task or milestone. Keep summaries concise and omit secrets, private data, and full chat transcripts.
