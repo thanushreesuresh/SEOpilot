@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Check, Download, ExternalLink, FileDiff, GitPullRequest, Plus, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
+import { Check, Download, ExternalLink, FileDiff, GitPullRequest, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
 import { api, dateTime, domain, pagePath, type Audit, type AuditSummary } from "@/lib/api";
 import { fixApi, type ConnectionStatus, type FixRun, type PatchExport, type Project, type ProjectRequest } from "@/lib/fix-api";
 import { Notice, Spinner } from "./ui";
+import { GitHubConnection } from "./github-connection";
 
-const setupGuide = "https://github.com/thanushreesuresh/SEOpilot/blob/main/docs/github-app-setup.md";
 const pollStatuses = new Set(["preparing", "publishing", "pr_opened", "checks_passed", "checks_failed", "merged"]);
 const terminalStatuses = new Set(["live_verified", "cancelled", "expired", "conflict", "failed"]);
 const message = (cause: unknown) => cause instanceof Error ? cause.message : "This action could not be completed. Please try again.";
@@ -20,12 +20,16 @@ export function ProjectWorkspace({ history, currentAudit }: {history: AuditSumma
   const [error, setError] = useState("");
   const [onboarding, setOnboarding] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const selected = projects.find((project) => project.id === selectedId);
 
   const refresh = useCallback(async (signal?: AbortSignal) => {
-    const [status, items] = await Promise.all([fixApi.connection(signal), fixApi.projects(signal)]);
-    if (signal?.aborted) return;
-    setConnection(status); setProjects(items); setSelectedId((current) => items.some((item) => item.id === current) ? current : items[0]?.id ?? "");
+    setRefreshing(true); setConnection(null);
+    try {
+      const [status, items] = await Promise.all([fixApi.connection(signal), fixApi.projects(signal)]);
+      if (signal?.aborted) return;
+      setConnection(status); setProjects(items); setSelectedId((current) => items.some((item) => item.id === current) ? current : items[0]?.id ?? "");
+    } finally {setRefreshing(false);}
   }, []);
   useEffect(() => {
     const abort = new AbortController();
@@ -46,11 +50,11 @@ export function ProjectWorkspace({ history, currentAudit }: {history: AuditSumma
     finally {setDisconnecting(false);}
   }
   return <div className="project-workspace">
-    <section className="page-heading history-heading"><div><h1>Review. Publish. Verify.</h1><p>Turn approved page metadata into a draft pull request.</p></div><button className="button button-secondary" onClick={() => {setError(""); void refresh().catch((cause) => setError(message(cause)));}}><RefreshCw size={15} />Refresh connection</button></section>
+    <section className="page-heading history-heading"><div><h1>Review. Publish. Verify.</h1><p>Turn approved page metadata into a draft pull request.</p></div><button className="button button-secondary" disabled={loading || refreshing} aria-busy={refreshing} onClick={() => {setError(""); void refresh().catch((cause) => setError(message(cause)));}}><RefreshCw size={15} />Refresh connection</button></section>
     {error ? <Notice variant="error">{error}</Notice> : null}
     {loading ? <div className="loading-surface" role="status"><Spinner />Loading projects…</div> : <>
-      <section className="project-card connection-card" aria-label="GitHub App connection"><div className="project-section-heading"><div><span className="project-eyebrow">Repository connection</span><h2><ShieldCheck size={20} />{connection?.configured ? "GitHub App configured" : "Connect your GitHub App"}</h2></div><span className={`fix-status ${connection?.configured ? "fix-status-checks_passed" : ""}`}>{connection?.configured ? `${connection.repositories.length} repositories available` : "Setup required"}</span></div><p>{connection?.message ?? "Connection status is unavailable. Refresh to try again."}</p><p>Private source stays outside OpenAI requests. Patch generation uses reviewed text and makes zero additional AI calls.</p><div className="project-actions"><a className="button button-secondary" href={setupGuide} target="_blank" rel="noreferrer">Setup guide<ExternalLink size={13} /></a><button className="button button-primary" onClick={() => setOnboarding((value) => !value)} disabled={!connection?.configured || !connection.repositories.length}><Plus size={15} />{onboarding ? "Close project setup" : "Connect a project"}</button></div><p className="project-footnote">{connection?.actions_notice} {connection ? `${connection.publications_remaining} of ${connection.publication_limit} draft PR publications remain in the rolling 24-hour allowance.` : ""}</p></section>
-      {onboarding && connection ? <ProjectOnboarding connection={connection} onCreated={created} /> : null}
+      <GitHubConnection connection={connection} checking={refreshing} onboarding={onboarding} onConnect={() => setOnboarding((value) => !value)} />
+      {onboarding && connection?.state === "ready" ? <ProjectOnboarding connection={connection} onCreated={created} /> : null}
       {projects.length ? <section className="project-card" aria-label="Connected projects"><div className="project-section-heading"><h2>Your projects</h2><label className="project-select">Project<select value={selectedId} onChange={(event) => setSelectedId(event.target.value)}>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}{project.connected ? "" : " (disconnected)"}</option>)}</select></label></div>{selected ? <><div className="project-mapping"><div><span>Production website</span><a href={selected.production_origin} target="_blank" rel="noreferrer">{selected.production_origin}<ExternalLink size={12} /></a></div><div><span>Source repository</span><strong>{selected.repository_owner}/{selected.repository_name}</strong></div><div><span>Base branch · application</span><code>{selected.base_branch} · {selected.app_subdirectory || "/"}</code></div><div><span>Validation workflow</span><code>{selected.workflow}</code></div></div><details className="project-danger"><summary>Connection and source retention</summary><p>Source and patches expire after 24 hours. Disconnecting removes retained private source and prevents further publication. The installed GitHub App can also be removed in your GitHub settings.</p><button className="button button-secondary" disabled={!selected.connected || disconnecting} onClick={() => void disconnect()}>{disconnecting ? <Spinner size={14} /> : <Trash2 size={14} />}Disconnect and delete retained source</button></details></> : null}</section> : <div className="project-empty"><GitPullRequest size={27} /><h2>Your first reviewed change starts here.</h2><p>Connect an owned Next.js site, finish a live audit, then review a title or description patch before publishing.</p></div>}
       {selected ? <ProjectFixes key={selected.id} project={selected} history={history} currentAudit={currentAudit} onPublished={() => {void refresh().catch((cause) => setError(message(cause)));}} /> : null}
     </>}

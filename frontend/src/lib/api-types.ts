@@ -584,12 +584,32 @@ export interface components {
              */
             after_audit_id: string;
         };
+        /** ConnectionCheck */
+        ConnectionCheck: {
+            /**
+             * Setting
+             * @enum {string}
+             */
+            setting: "GITHUB_APP_ID" | "GITHUB_APP_PRIVATE_KEY_PATH" | "GITHUB_APP_OWNERS";
+            /** Present */
+            present: boolean;
+        };
         /** ConnectionStatus */
         ConnectionStatus: {
             /** Configured */
             configured: boolean;
             /** Message */
             message: string;
+            /**
+             * State
+             * @default unknown
+             * @enum {string}
+             */
+            state: "unknown" | "setup_required" | "ready" | "no_repositories" | "credentials_error" | "access_denied" | "rate_limited" | "unavailable";
+            /** Setup Checks */
+            setup_checks: components["schemas"]["ConnectionCheck"][];
+            /** Checked At */
+            checked_at: string | null;
             /** Repositories */
             repositories: components["schemas"]["RepositoryInfo"][];
             /**

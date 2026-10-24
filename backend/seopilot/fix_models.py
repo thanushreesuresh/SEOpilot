@@ -20,9 +20,18 @@ class RepositoryInfo(Contract):
     default_branch: str
 
 
+class ConnectionCheck(Contract):
+    setting: Literal["GITHUB_APP_ID", "GITHUB_APP_PRIVATE_KEY_PATH", "GITHUB_APP_OWNERS"]
+    present: bool
+
+
 class ConnectionStatus(Contract):
     configured: bool
     message: str
+    state: Literal["unknown", "setup_required", "ready", "no_repositories", "credentials_error",
+                   "access_denied", "rate_limited", "unavailable"] = "unknown"
+    setup_checks: list[ConnectionCheck] = Field(default_factory=list, max_length=3)
+    checked_at: str | None = None
     repositories: list[RepositoryInfo] = Field(default_factory=list)
     publication_limit: int = 2
     publications_remaining: int = 2

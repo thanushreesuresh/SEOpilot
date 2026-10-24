@@ -1463,6 +1463,30 @@
         ],
         "title": "ComparisonRequest"
       },
+      "ConnectionCheck": {
+        "properties": {
+          "setting": {
+            "type": "string",
+            "enum": [
+              "GITHUB_APP_ID",
+              "GITHUB_APP_PRIVATE_KEY_PATH",
+              "GITHUB_APP_OWNERS"
+            ],
+            "title": "Setting"
+          },
+          "present": {
+            "type": "boolean",
+            "title": "Present"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "setting",
+          "present"
+        ],
+        "title": "ConnectionCheck"
+      },
       "ConnectionStatus": {
         "properties": {
           "configured": {
@@ -1472,6 +1496,40 @@
           "message": {
             "type": "string",
             "title": "Message"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "setup_required",
+              "ready",
+              "no_repositories",
+              "credentials_error",
+              "access_denied",
+              "rate_limited",
+              "unavailable"
+            ],
+            "title": "State",
+            "default": "unknown"
+          },
+          "setup_checks": {
+            "items": {
+              "$ref": "#/components/schemas/ConnectionCheck"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Setup Checks"
+          },
+          "checked_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked At"
           },
           "repositories": {
             "items": {
@@ -1501,6 +1559,9 @@
         "required": [
           "configured",
           "message",
+          "state",
+          "setup_checks",
+          "checked_at",
           "repositories",
           "publication_limit",
           "publications_remaining",

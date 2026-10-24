@@ -20,7 +20,7 @@ from .fix_models import (
     PublishRequest,
     poll_deadline,
 )
-from .models import Audit, CrawlOptions
+from .models import Audit, CrawlOptions, now
 from .network import normalize_url, origin_of
 
 
@@ -39,15 +39,35 @@ def router() -> APIRouter:
 
     @api.get("/github/connection", response_model=ConnectionStatus)
     async def connection(request: Request):
+        from .github_app import GitHubError
+
         client = request.app.state.github
         status = client.status()
-        values = {"configured": status["configured"], "message": status.get("message", "GitHub App configuration is available.")}
+        values = {"configured": status["configured"], "state": "setup_required",
+                  "setup_checks": status.get("setup_checks", []), "checked_at": now(),
+                  "message": "Add the missing GitHub App settings to backend/.env and restart the backend. Never enter credentials in this dashboard."}
         if status["configured"]:
             try:
                 repositories = await client.list_repositories()
                 values["repositories"] = [{key: getattr(repo, key) for key in ("id", "installation_id", "owner", "name", "default_branch")} for repo in repositories]
+                values["state"] = "ready" if repositories else "no_repositories"
+                values["message"] = ("GitHub verified the selected repositories. Confirm your website mapping before preparing a patch."
+                                     if repositories else "No eligible repositories were returned. Install the App on selected repositories in an allowed owner account, then refresh.")
+            except GitHubError as exc:
+                # Provider messages can contain private details; only fixed guidance crosses this boundary.
+                values["state"] = {"credentials": "credentials_error", "not_configured": "credentials_error",
+                                   "forbidden": "access_denied", "not_found": "access_denied",
+                                   "limited": "rate_limited"}.get(exc.code, "unavailable")
             except Exception:
-                values["message"] = "GitHub App could not verify its installation. Check the local configuration and selected repositories."
+                values["state"] = "unavailable"
+            guidance = {
+                "credentials_error": "GitHub authentication could not be completed. Check the numeric App ID, matching readable PEM file and computer clock, then restart the backend and refresh.",
+                "access_denied": "GitHub denied access or an API limit was reached. Check installation access, selected repositories, owner allowlist and required permissions before retrying.",
+                "rate_limited": "GitHub's API request limit was reached. Wait before refreshing; repeated clicks will not restore access.",
+                "unavailable": "GitHub verification is unavailable. Check your network and local App setup, then refresh. No repository access is confirmed by this result.",
+            }
+            if values["state"] in guidance:
+                values["message"] = guidance[values["state"]]
         return ConnectionStatus(**values, publications_remaining=request.app.state.store.fixes.publication_remaining())
 
     @api.get("/projects", response_model=list[Project])

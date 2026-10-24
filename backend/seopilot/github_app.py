@@ -121,7 +121,12 @@ class GitHubClient:
             logging.getLogger(name).setLevel(logging.WARNING)
 
     def status(self) -> dict:
-        return {"configured": self.config.configured, "owners": list(self.config.owners),
+        return {"configured": self.config.configured,
+                "setup_checks": [
+                    {"setting": "GITHUB_APP_ID", "present": bool(self.config.app_id)},
+                    {"setting": "GITHUB_APP_PRIVATE_KEY_PATH", "present": bool(self.config.private_key_path)},
+                    {"setting": "GITHUB_APP_OWNERS", "present": bool(self.config.owners)},
+                ],
                 "message": "GitHub App configured; connect an installed repository."
                 if self.config.configured else "Configure the server-side GitHub App to connect a repository."}
 

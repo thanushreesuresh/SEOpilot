@@ -55,6 +55,8 @@ Add your key only to `OPENAI_API_KEY` in **backend/.env** and restart the backen
 
 For repository fixes, follow the [private GitHub App setup guide](docs/github-app-setup.md). Install the App on selected repositories with Metadata read, Contents write, Pull requests write and Actions read. Keep its private key outside Git. Repository-scoped installation tokens remain in server memory; neither credentials nor tokens are returned to the browser. Install the [validation workflow and harness](validation/README.md) yourself in the target repository before publishing.
 
+The project workspace distinguishes missing settings, verified repositories, empty eligible installations, authentication errors, denied access, API limits and unavailable verification. Its checklist exposes only whether the three server settings are present, with the last check time and fixed troubleshooting guidance. Presence is not credential validation. **Connect a project** stays disabled until repositories are verified; a refresh clears stale setup access and disables repeat button activation while pending. Older API responses remain unverified until the backend is restarted. Invalid App ID/owner formats still fail startup with a fixed validation error; correct the local setting before restarting.
+
 The safe API entry point binds loopback, disables forwarded-header trust and access logs, and starts one worker. If invoking Uvicorn directly, include **`--no-proxy-headers --no-access-log`** and keep `--host 127.0.0.1`. Do not run multiple workers.
 
 ## Audit and spending protection

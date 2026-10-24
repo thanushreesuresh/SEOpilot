@@ -54,12 +54,13 @@ function fixRun(status: FixRun["status"] = "proposed"): FixRun {
 
 type MockState = {
   configured: boolean; projects: Project[]; run: FixRun | null; patchHash: string;
-  connectionFailure: boolean; requests: { method: string; path: string; body: unknown }[];
+  connectionFailure: boolean; connectionState: ConnectionStatus["state"] | null;
+  connectionGate: Promise<void> | null; missingKey: boolean; requests: { method: string; path: string; body: unknown }[];
 };
 
 async function mockWorkspace(page: Page, options: Partial<MockState> = {}) {
   const state: MockState = { configured: true, projects: [project()], run: null, patchHash: HASH,
-    connectionFailure: false, requests: [], ...options };
+    connectionFailure: false, connectionState: null, connectionGate: null, missingKey: false, requests: [], ...options };
   await page.route("**/api/**", async (route) => {
     const request = route.request();
     const pathname = new globalThis.URL(request.url()).pathname;
@@ -76,10 +77,15 @@ async function mockWorkspace(page: Page, options: Partial<MockState> = {}) {
     }
     if (pathname === `/api/audits/${AUDIT_ID}`) return fulfill(audit());
     if (pathname === "/api/github/connection") {
+      if (state.connectionGate) await state.connectionGate;
       if (state.connectionFailure) return fulfill({ detail: "GitHub connection is unavailable. Check local setup." }, 503);
       const connection: ConnectionStatus = { configured: state.configured,
+        state: state.connectionState ?? (state.configured ? "ready" : "setup_required"), checked_at: DATE,
+        setup_checks: [{ setting: "GITHUB_APP_ID", present: true },
+          { setting: "GITHUB_APP_PRIVATE_KEY_PATH", present: !state.missingKey },
+          { setting: "GITHUB_APP_OWNERS", present: true }],
         message: state.configured ? "Selected repositories verified." : "Configure the private GitHub App on this machine.",
-        repositories: state.configured ? [{ id: 5678, installation_id: 1234, owner: "owner", name: "pilot", default_branch: "main" }] : [],
+        repositories: state.configured && (state.connectionState === null || state.connectionState === "ready") ? [{ id: 5678, installation_id: 1234, owner: "owner", name: "pilot", default_branch: "main" }] : [],
         publication_limit: 2, publications_remaining: 2, actions_notice: "GitHub Actions usage is separate from OpenAI usage." };
       return fulfill(connection);
     }
@@ -264,6 +270,90 @@ test("connection failures show a retryable error without enabling writes", async
   await expect(page.getByRole("button", { name: "Connect a project", exact: true })).toBeDisabled();
   state.connectionFailure = false;
   await page.getByRole("button", { name: "Refresh connection", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "GitHub App configured", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "GitHub connection verified", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Connect a project", exact: true })).toBeEnabled();
+});
+
+test("an older connection response stays unverified without a dashboard error", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  const state = await mockWorkspace(page, { projects: [] });
+  await page.route("**/api/github/connection", (route) => route.fulfill({ json: {
+    configured: true, message: "Legacy configuration response; restart the backend for verification.",
+    repositories: [{ id: 5678, installation_id: 1234, owner: "owner", name: "pilot", default_branch: "main" }],
+    publication_limit: 2, publications_remaining: 2, actions_notice: "GitHub Actions usage is separate.",
+  } }));
+  await openProjects(page);
+  await expect(page.getByText("Not verified", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Connect a project", exact: true })).toBeDisabled();
+  expect(state.requests.filter((request) => request.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+for (const [stateName, badge] of [
+  ["credentials_error", "Authentication failed"], ["access_denied", "Access not verified"],
+  ["rate_limited", "GitHub rate limit"], ["unavailable", "Verification unavailable"],
+  ["no_repositories", "No repositories available"], ["unknown", "Not verified"],
+] as const) {
+  test(`GitHub ${stateName} remains unverified with a safe settings checklist`, async ({ page }) => {
+    const state = await mockWorkspace(page, { projects: [], connectionState: stateName });
+    await openProjects(page);
+    const card = page.getByRole("region", { name: "GitHub App connection", exact: true });
+    await expect(card.getByRole("heading", { name: "GitHub connection needs attention", exact: true })).toBeVisible();
+    await expect(card.getByText(badge, { exact: true })).toBeVisible();
+    const checks = card.getByRole("list", { name: "Server-side App settings" });
+    await expect(checks.getByRole("listitem")).toHaveCount(3);
+    await expect(checks.getByText("Present", { exact: true })).toHaveCount(3);
+    await expect(card.getByText(/Only setting presence is shown/)).toBeVisible();
+    await expect(card.getByText(/Last checked/)).toBeVisible();
+    await expect(card.getByRole("button", { name: "Connect a project", exact: true })).toBeDisabled();
+    expect(state.requests.filter((request) => request.method !== "GET")).toEqual([]);
+  });
+}
+
+test("mobile connection refresh clears stale access, prevents repeat activation and recovers by keyboard", async ({ page }, testInfo) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.setViewportSize({ width: 390, height: 844 });
+  const state = await mockWorkspace(page, { projects: [] });
+  await openProjects(page);
+  const connect = page.getByRole("button", { name: "Connect a project", exact: true });
+  await expect(connect).toBeEnabled();
+  await connect.click();
+  await expect(page.getByRole("heading", { name: "Connect an owned Next.js project", exact: true })).toBeVisible();
+  const before = state.requests.filter((request) => request.path === "/api/github/connection").length;
+  let release: () => void = () => { throw new Error("Connection gate was not initialized"); };
+  state.connectionGate = new Promise<void>((resolve) => { release = resolve; });
+  state.connectionFailure = true;
+  const refresh = page.getByRole("button", { name: "Refresh connection", exact: true });
+  await expect(refresh).toBeEnabled();
+  await refresh.focus();
+  await expect(refresh).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(refresh).toBeDisabled();
+  await expect(page.getByRole("heading", { name: "Checking GitHub connection", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Close project setup", exact: true })).toBeDisabled();
+  await expect(page.getByRole("heading", { name: "Connect an owned Next.js project", exact: true })).toHaveCount(0);
+  await expect.poll(() => state.requests.filter((request) => request.path === "/api/github/connection").length).toBe(before + 1);
+  await page.keyboard.press("Enter");
+  expect(state.requests.filter((request) => request.path === "/api/github/connection")).toHaveLength(before + 1);
+  release();
+  await expect(page.getByRole("alert").filter({ hasText: "GitHub connection is unavailable. Check local setup." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Connection status unavailable", exact: true })).toBeVisible();
+  state.connectionGate = null; state.connectionFailure = false; state.missingKey = true; state.configured = false;
+  await expect(refresh).toBeEnabled();
+  await refresh.focus(); await expect(refresh).toBeFocused(); await page.keyboard.press("Enter");
+  await expect(page.getByRole("heading", { name: "Connect your GitHub App", exact: true })).toBeVisible();
+  const checks = page.getByRole("list", { name: "Server-side App settings" });
+  await expect(checks.getByRole("listitem").filter({ hasText: "GITHUB_APP_PRIVATE_KEY_PATH" })).toContainText("Missing");
+  await expect(checks.getByText("Present", { exact: true })).toHaveCount(2);
+  state.missingKey = false; state.configured = true;
+  await expect(refresh).toBeEnabled();
+  await refresh.focus(); await expect(refresh).toBeFocused(); await page.keyboard.press("Enter");
+  await expect(page.getByRole("heading", { name: "GitHub connection verified", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Close project setup", exact: true })).toBeEnabled();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath("connection-diagnostics-mobile.png"), fullPage: true });
+  expect(state.requests.filter((request) => request.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
 });

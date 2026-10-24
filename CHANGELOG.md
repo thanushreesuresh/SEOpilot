@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T04:51:38+05:30 — Diagnose GitHub setup without disclosing credentials
+
+- Changed: Added typed connection states, presence-only server setting checks, check timestamps and fixed safe guidance to the existing connection endpoint. The dashboard distinguishes verified access from configuration, shows the checklist and disables stale/unknown onboarding access. Refresh disables repeated activation until it completes. Updated generated contracts and setup documentation.
+- Why: The owned pilot requires manual App setup; the previous configured flag and generic failure message did not establish successful GitHub verification or explain the next action.
+- Validation: Initially 21 new cases failed before implementation; all 22 added cases now pass; full suite 571 passed in 46.75 seconds with the existing upstream TestClient warning. Ruff, ESLint, TypeScript, production build, 34 AST and seven validator/proxy checks each passed. Independent standards/specification reviews found no actionable issues; eight additional hosted browser cases pending. Working/staged credential and Markdown-link checks passed.
+- Limits: Checklist reports presence only, not valid credentials. Invalid App ID/owner formats still fail backend startup. No provider calls, original counter resets or pilot repository changes. Live App setup, manual local restart, pilot approval/deployment and human review remain pending.
+
 ## 2026-10-25T04:42:07+05:30 — Record verified samples and guide the owned pilot setup
 
 - Changed: Recorded source `1482a5ca227acf9e3260fc3708b3a2d2d1a76ce2` and its passing hosted run in README, verification and submission records; expanded the GitHub App setup guide with exact fields, least permissions, selected repository installation, App ID/path configuration, manual restart and troubleshooting.
