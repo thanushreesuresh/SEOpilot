@@ -2,6 +2,26 @@
 
 Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and committed lockfiles. Historical real SEO/AI observations remain in the [bounded live record](live-validation-2026-10-25.md).
 
+## Optional GitHub setup isolation checkpoint
+
+At 2026-10-25T05:11:33+05:30, source **`dca6465843d8565429fa39e6d2a8e036aa33cb83`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40143543032). This later documentation checkpoint changes no implementation.
+
+| Setup-isolation check | Observed result |
+| --- | --- |
+| Complete backend suite | **583 passed**, 51.25 seconds locally and 30.84 seconds on GitHub; existing upstream TestClient warning remains |
+| AST / hosted-validator / authenticated-proxy checks | **34 / 7 / 7 passed** locally and on GitHub |
+| Ruff, ESLint, TypeScript, production build | Passed locally and on GitHub |
+| Generated-contract drift and credential/history checks | Passed on GitHub; local working/staged and ignored-private-path checks passed |
+| Hosted Chromium | **46 passed** in 51.2 seconds, including two new invalid-setting guidance/audit-access/mobile-recovery scenarios |
+| Original database, read-only | Still 5 audits, 7 pages, 26 issues, 29 recommendations, 0 decisions, 3 admissions and 6 AI reservations |
+| Additional live AI requests / pilot repository changes | **0 / 0** for this iteration |
+
+The initial ten regression cases failed before implementation. Twelve new offline cases now verify malformed IDs/owners, failed home expansion, discarded rejected values, partial setting presence, valid/missing configurations, unrelated programming errors propagating, blocked project connection, real runner analysis using fixture pages, persisted queue recovery, historical findings/scores/decisions/counters after restart and successful disconnect after settings become invalid. Tripwires reject GitHub requests and private-key reads during these cases; private canaries stay out of public responses and logs. The strict parser remains available; runtime startup/disconnect isolate only its expected optional configuration failures.
+
+Separate standards/specification reviews found no actionable issues in the immutable patch. Hosted cases confirm auditing is accessible while the App error is visible, onboarding stays disabled, mobile guidance fits the viewport and keyboard refresh recovers after a simulated corrected setup. The final 390-pixel screenshot was inspected: the correction heading, fixed guidance and presence-only checklist are readable and contained, with no raw credential/path values. The development indicator remains an existing capture artifact. This fixture recovery does not establish real App access or remove the documented restart requirement.
+
+No live credentials were read or printed, no original counters reset, and tests use fresh databases with live credentials disabled. Local services were not restarted and are not acceptance evidence for this source. Automatic approval previously rejected dashboard restart as “blocked by policy”; manual restart remains required. Real App setup, owner workflow, exact-patch pilot approval, human merge/deployment, live verification and human review remain pending. Historical checkpoints below accurately describe earlier source behavior; the earlier fatal optional-settings limitation is fixed by this source.
+
 ## GitHub connection diagnostics checkpoint
 
 At 2026-10-25T04:57:18+05:30, source **`38158868473a40883d85ad84d1e43362cefe8a40`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40142551431). This later documentation checkpoint changes no implementation.

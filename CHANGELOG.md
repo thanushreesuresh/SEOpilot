@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T05:11:33+05:30 — Record optional setup-isolation acceptance
+
+- Changed: Recorded exact source `dca6465843d8565429fa39e6d2a8e036aa33cb83` and passing hosted run in README, verification and submission records, including the correction to the prior fatal optional-settings limitation.
+- Validation: Hosted 583 backend tests in 30.84 seconds, 46 browser scenarios in 51.2 seconds, 34 AST and seven validator/proxy tests each passed with lint/type/build/contracts/credential-history checks. Final mobile screenshot inspected; original read-only counts unchanged. Documentation link/credential checks passed; both independent review axes found no actionable issues.
+- Limits: No paid calls, secret reads, counter resets or pilot repository changes. Real App setup, owner workflow, pilot approval/manual merge/deployment/live verification and human review remain pending. Manual local restart is still required following the prior automatic approval rejection.
+
 ## 2026-10-25T05:06:31+05:30 — Keep auditing available when optional GitHub setup is invalid
 
 - Changed: Added a runtime GitHub client factory that preserves strict configuration parsing but isolates expected parse/home-expansion failures. Rejected values are discarded; only presence flags remain and repository access stays disabled. Startup and disconnect use the same factory. Added an explicit invalid-settings API/UI state, refreshed generated contracts and corrected current setup/architecture guidance.
