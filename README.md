@@ -127,6 +127,8 @@ The smoke test sends `allow_ai=false`, even if the running API has live AI confi
 
 ## Status
 
+V2 development adds a private GitHub App boundary, selected-repository authorization and versioned project/fix persistence while retaining audit and AI quotas. See [App setup](docs/github-app-setup.md). The draft-PR workflow is being integrated; no pilot PR or deployed change is claimed at this checkpoint.
+
 The connected dashboard is implemented and its production build, TypeScript and ESLint checks pass. Rendered browser/E2E verification is blocked by the local browser origin permission policy; no browser or visual-fidelity pass is claimed. No deployment is claimed.
 
 The real crawler and API are implemented and verified against a one-page example.com audit. Crawl limits, policy failures and extraction truncation remain visible as coverage information. The server uses validated-IP connections with normal TLS hostname verification and never follows links outside the submitted origin.

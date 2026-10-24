@@ -21,7 +21,7 @@ class Store:
         with self.connection() as db:
             db.execute("PRAGMA journal_mode=WAL")
             version = db.execute("PRAGMA user_version").fetchone()[0]
-            if version not in (0, 1, 2):
+            if version not in (0, 1, 2, 3):
                 raise RuntimeError("Unsupported database version")
             db.executescript("""
                 CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY, origin TEXT NOT NULL UNIQUE);
@@ -49,10 +49,14 @@ class Store:
                 );
                 CREATE INDEX IF NOT EXISTS ai_calls_time ON ai_calls(reserved_at);
                 CREATE INDEX IF NOT EXISTS ai_calls_audit ON ai_calls(audit_id);
-                PRAGMA user_version=2;
             """)
             db.execute("INSERT OR IGNORE INTO local_settings VALUES('quota_salt',?)", (secrets.token_hex(32),))
             self._quota_salt = db.execute("SELECT value FROM local_settings WHERE name='quota_salt'").fetchone()[0].encode()
+            if version < 2:
+                db.execute("PRAGMA user_version=2")
+        from .fix_storage import FixStore
+
+        self.fixes = FixStore(self)
 
     @contextmanager
     def connection(self):
@@ -124,15 +128,16 @@ class Store:
         tick = time.time() if at is None else at
         key = self._identity_key(identity)
         fingerprint = hashlib.sha256(json.dumps({"url": audit.url, "context": audit.business_context,
-            "options": audit.options.model_dump(), "allow_ai": audit.allow_ai}, sort_keys=True).encode()).hexdigest()
+            "options": audit.options.model_dump(), "allow_ai": audit.allow_ai,
+            "verification_urls": audit.verification_urls}, sort_keys=True).encode()).hexdigest()
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
             quota = self._quota(db, key, tick)
             duplicate = db.execute("""SELECT a.payload FROM admissions q JOIN audits a ON a.id=q.audit_id
                 WHERE q.identity=? AND q.fingerprint=? AND
                 (a.status IN ('queued','crawling','analyzing','reviewing') OR
-                 (q.admitted_at>? AND a.status IN ('completed','partial')))
-                ORDER BY q.admitted_at DESC LIMIT 1""", (key, fingerprint, tick - 900)).fetchone()
+                 (?=0 AND q.admitted_at>? AND a.status IN ('completed','partial')))
+                ORDER BY q.admitted_at DESC LIMIT 1""", (key, fingerprint, bool(audit.verification_urls), tick - 900)).fetchone()
             if duplicate:
                 return Audit.model_validate_json(duplicate[0]), "reused", quota
             if not quota["remaining"]:

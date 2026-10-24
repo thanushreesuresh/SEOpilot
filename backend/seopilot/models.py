@@ -125,6 +125,7 @@ class Progress(Contract):
 
 
 class Score(Contract):
+    version: str = "1"
     value: int | None = None
     assessed_pages: int = 0
     formula: str = "100 − mean(capped page penalties) − capped site penalties. Critical=20, High=10, Medium=5, Low=2; HTTP error pages=100. Site cap=20. Unknown pages excluded."
@@ -151,6 +152,8 @@ class Audit(Contract):
     score: Score = Field(default_factory=Score)
     ai_status: Literal["unavailable", "pending", "available", "failed", "demo", "limited"] = "unavailable"
     summary: str = ""
+    rules_version: str = "1"
+    verification_urls: list[str] = Field(default_factory=list, max_length=3)
 
 
 class AuditSummary(Contract):

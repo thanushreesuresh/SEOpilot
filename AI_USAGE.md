@@ -1,5 +1,7 @@
 # AI usage record
 
+| 2026-10-25T01:15:22+05:30 | Codex | V2 connection and persistence | Implemented App client, credential boundary, migration, contracts, retention and authorization fixtures | Pending human review | 207 baseline and 66 focused tests passed; no live credentials used or additional OpenAI calls made |
+
 Use Codex during the hackathon and briefly document its actual contribution here. Add a row after each meaningful task or milestone. Keep summaries concise and omit secrets, private data, and full chat transcripts.
 
 ## Event build log

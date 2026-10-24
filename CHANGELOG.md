@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T01:15:22+05:30 — V2 connection and persistence foundation
+
+- Changed: Added GitHub App authorization, repository-scoped in-memory tokens, v3 SQLite project/fix/event/publication/disposition storage, contracts and safe environment examples. Existing audit history and counters are preserved.
+- Why: Establish credential and persistence boundaries before exposing repository writes.
+- Validation: Existing baseline 207 backend tests passed; 66 focused GitHub/persistence tests passed with fresh databases and injected transports. No live GitHub App or OpenAI calls used.
+- Limitations: API/UI integration and pilot acceptance follow in later milestones. Human review pending.
+
 Record each meaningful project change during the event, newest first. Update this file in the same commit as the change. Use a real timestamp with timezone, for example `YYYY-MM-DDTHH:MM:SS+05:30`.
 
 ## Event build log
