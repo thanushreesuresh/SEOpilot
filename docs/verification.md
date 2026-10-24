@@ -2,6 +2,26 @@
 
 Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and committed lockfiles. Historical real SEO/AI observations remain in the [bounded live record](live-validation-2026-10-25.md).
 
+## GitHub connection diagnostics checkpoint
+
+At 2026-10-25T04:57:18+05:30, source **`38158868473a40883d85ad84d1e43362cefe8a40`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40142551431). This later documentation checkpoint changes no implementation.
+
+| Connection check | Observed result |
+| --- | --- |
+| Complete backend suite | **571 passed**, 46.75 seconds locally and 30.36 seconds on GitHub; existing upstream TestClient warning remains |
+| AST / hosted-validator / authenticated-proxy checks | **34 / 7 / 7 passed** locally and on GitHub |
+| Ruff, ESLint, TypeScript, production build | Passed locally and on GitHub |
+| Generated-contract drift and credential/history checks | Passed on GitHub; local working/staged and ignored-private-path checks passed |
+| Hosted Chromium | **44 passed** in 48.4 seconds, including eight new connection-state, legacy-response and mobile keyboard cases |
+| Original database, read-only | Still 5 audits, 7 pages, 26 issues, 29 recommendations, 0 decisions, 3 admissions and 6 AI reservations |
+| Additional live AI requests / pilot repository changes | **0 / 0** for this iteration |
+
+The 22 new offline cases verify all combinations of setting presence without reading a PEM, incomplete setup without a GitHub request, ready versus empty repository lists, fixed guidance for known/unknown provider failures, recovery, revocation, an unreadable key and private canaries absent from responses/logs. The initial 21 cases failed before implementation. Separate standards/specification reviews found no actionable issues in the immutable patch. The endpoint remains bounded by the existing GitHub client limits; a refresh may authenticate to GitHub but changes no repository and makes no OpenAI call.
+
+Hosted cases verify disabled onboarding for authentication/access/rate/unavailable/empty/unknown states, legacy responses failing closed without a page error, setting presence and timestamps, a pending refresh clearing stale onboarding access, repeated keyboard activation remaining disabled, error recovery and missing-setting recovery. The final 390-pixel screenshot was inspected: the checklist and its 12-pixel explanation wrap within the card, values/key paths are absent, and the recovered onboarding form stays within the viewport. The development indicator remains an existing capture artifact. These fixture results do not establish a real App connection.
+
+Invalid App ID/owner formats still stop backend startup with fixed validation errors; the checklist checks presence and GitHub access rather than replacing startup validation. No live credentials were read or printed and no original counters reset. Tests use fresh databases with live credentials disabled. Local services were not restarted and are not acceptance evidence for this source. Automatic approval previously rejected dashboard restart as “blocked by policy”; manual restart remains required. The owned pilot still requires App installation/configuration, the owner workflow, exact-patch approval, human merge/deployment, successful live verification and human review.
+
 ## Revision-aware sample checkpoint
 
 At 2026-10-25T04:42:07+05:30, source **`1482a5ca227acf9e3260fc3708b3a2d2d1a76ce2`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40141578038). This later documentation checkpoint changes no implementation and expands the owner-requested GitHub App setup instructions.

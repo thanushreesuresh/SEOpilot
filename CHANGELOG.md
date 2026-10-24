@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T04:57:18+05:30 — Record hosted connection-diagnostics acceptance
+
+- Changed: Recorded exact source `38158868473a40883d85ad84d1e43362cefe8a40` and hosted run in README, verification and submission records; documented diagnostic contract/security boundaries in architecture notes.
+- Validation: GitHub passed 571 backend tests in 30.36 seconds, 44 browser scenarios in 48.4 seconds, 34 AST and seven validator/proxy tests each, plus lint/type/build/contracts/credential-history checks. Inspected the final mobile screenshot. Original read-only counts unchanged. Documentation links/credential checks passed; both independent documentation review axes found no actionable issues.
+- Limits: Fixture acceptance does not prove live App setup. No paid calls, pilot source changes, publication, merge or deployment performed. Manual local restart remains required following the earlier automatic approval rejection; human review pending.
+
 ## 2026-10-25T04:51:38+05:30 — Diagnose GitHub setup without disclosing credentials
 
 - Changed: Added typed connection states, presence-only server setting checks, check timestamps and fixed safe guidance to the existing connection endpoint. The dashboard distinguishes verified access from configuration, shows the checklist and disables stale/unknown onboarding access. Refresh disables repeated activation until it completes. Updated generated contracts and setup documentation.
