@@ -1,9 +1,16 @@
 import importlib.util
+import os
 from pathlib import Path
 
 import pytest
 
 from seopilot.settings import Settings, proxy_token
+
+
+def test_offline_suite_cannot_inherit_a_live_api_key():
+    key_present = bool(os.environ.get("OPENAI_API_KEY"))
+    assert not key_present
+    assert os.environ.get("PYTHON_DOTENV_DISABLED") == "1"
 
 
 def test_safe_defaults_and_invalid_config(monkeypatch):

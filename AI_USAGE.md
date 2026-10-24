@@ -4,6 +4,8 @@ Use Codex during the hackathon and briefly document its actual contribution here
 
 ## Event build log
 
+| 2026-10-25T00:18:56+05:30 | Codex + live gpt-6-luna | Real-data verification and TLS correction | Ran bounded real audits, independently checked HTML and scoring, reproduced/fixed SDK trust using verified OS certificates, tested live spending controls and isolated pytest from real keys | Pending human review; all published AI decisions remain pending | 207 offline tests/Ruff passed; Python3pages/8findings/score89/3reviewedAI suggestions; Example score82 and post-fix generation passed, re-review withheld by budget; no key disclosure or quota resets |
+
 | 2026-10-24T18:25:46+00:00 | Codex | Publication and hosted verification record | Recorded atomic Git publication, verified remote SHA and passing hosted workflow for source commit 3a90c3c | Pending human review | Push/remote verification and GitHub Checks success observed; documentation-only checkpoint, no paid calls |
 
 | 2026-10-24T18:18:49+00:00 | Codex | Allowance interface and CI | Added quota/reset/shared-call display, AI opt-out, duplicate-reuse notice, browser scenario source and offline GitHub Actions checks | Pending human review | ESLint, TypeScript/build and six Node proxy tests passed; browser execution blocked; hosted CI not yet observed |

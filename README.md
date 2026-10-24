@@ -62,7 +62,7 @@ The safe API entry point binds loopback, disables forwarded-header trust and acc
 
 Local browsers normally share one loopback allowance. A reverse proxy in front of Next also shares one conservative bucket; arbitrary forwarding headers are never trusted. Preserve the SQLite database and its quota salt when restarting: deleting/replacing it resets local counters. The proxy token is generated in ignored `backend/.data/proxy-token` and stays outside production bundles.
 
-This release remains **local and single-user**. IP limits cannot stop a botnet by themselves; the global AI cap provides the additional spending boundary. Before public hosting, add authentication, audit ownership checks and a trusted edge with rate limits. For a monetary ceiling, also configure a dedicated OpenAI project with a restricted key and [project spend limits](https://developers.openai.com/api/docs/guides/spend-limits); application request counts are not billing telemetry. Provider spend-limit enforcement may have a short delay. No paid model/account compatibility test has been performed.
+This release remains **local and single-user**. IP limits cannot stop a botnet by themselves; the global AI cap provides the additional spending boundary. Before public hosting, add authentication, audit ownership checks and a trusted edge with rate limits. For a monetary ceiling, also configure a dedicated OpenAI project with a restricted key and [project spend limits](https://developers.openai.com/api/docs/guides/spend-limits); application request counts are not billing telemetry. Provider spend-limit enforcement may have a short delay. Live `gpt-6-luna` access and a complete generation/review workflow have been tested; see the [bounded live verification record](docs/live-validation-2026-10-25.md).
 
 No credentials are required for the labelled sample demo. The app never modifies or publishes to the audited website.
 
@@ -83,6 +83,8 @@ Backend checks, from the repository root:
 .\.venv\Scripts\python.exe -m ruff check backend scripts
 .\.venv\Scripts\python.exe scripts/check_repository.py --history
 ```
+
+pytest deliberately ignores local dotenv files and masks inherited API keys. It uses offline fixtures and harmless SDK fakes. Live paid testing is separate and requires explicit authorization; configuring `backend/.env` does not make routine tests billable. The AI client uses the verified system certificate store, with hostname validation enabled, just like the crawler. For connection errors, check the network and trusted OS certificate configuration; never disable TLS verification.
 
 Frontend checks, from `frontend/`:
 
@@ -131,7 +133,7 @@ The real crawler and API are implemented and verified against a one-page example
 
 The deterministic rules now evaluate extracted metadata, heading structure, image alt presence, canonicals, indexing directives, confirmed internal-link failures, HTTP errors, duplicate titles/descriptions, and evidence-backed site discovery observations. Character ranges are configurable review heuristics, not ranking rules. The internal health score subtracts mean capped page penalties (Critical 20, High 10, Medium 5, Low 2; HTTP errors 100) and site penalties capped at 20. Unknown pages do not enter its denominator; insufficient data produces no score.
 
-Verified: 205 backend tests, six Node proxy tests, Ruff, frontend ESLint, TypeScript, production build, and a server-secret canary absent from browser assets. A real one-page API audit passed before the spending controls; no new live crawl or paid AI call was needed for these offline regressions. Live AI is untested without credentials. Browser rendering, mobile interaction and screenshot fidelity remain unverified because of the origin permission block.
+Verified: 207 backend tests and Ruff; prior frontend ESLint/TypeScript/build, six proxy tests and browser-bundle canary checks passed. Live Python.org sampling assessed three pages, verified eight observations and produced three evidence-reviewed AI suggestions; independent HTML checks and score arithmetic matched. Example.com scored 82; a TLS trust failure was reproduced and corrected, and a post-fix generation succeeded while the exhausted per-audit review allowance withheld its suggestions. See [actual results and limits](docs/live-validation-2026-10-25.md). Browser rendering, mobile interaction and screenshot fidelity remain unverified because of the origin permission block.
 
 This MVP parses fetched HTML without JavaScript execution, stays on the exact submitted origin, and is local/single-user. Search Console, authentication/hosting, orphan detection, recurring audits and automatic publishing are deferred. Full details: [architecture and scoring](docs/architecture.md), [verification](docs/verification.md), and [submission record](SUBMISSION.md).
 

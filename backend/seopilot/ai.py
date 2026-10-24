@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import re
+import ssl
 from typing import Literal, Protocol
 
 from pydantic import Field
@@ -109,7 +110,8 @@ class OpenAIProvider:
             logging.getLogger(logger_name).setLevel(logging.WARNING)
         self.client = AsyncOpenAI(
             api_key=api_key, base_url="https://api.openai.com/v1", timeout=35, max_retries=0,
-            http_client=DefaultAsyncHttpxClient(trust_env=False),
+            # Match the crawler's verified OS trust store, including managed Windows roots.
+            http_client=DefaultAsyncHttpxClient(trust_env=False, verify=ssl.create_default_context()),
         )
         self.model = model
         self.max_output_tokens = max_output_tokens
@@ -346,6 +348,8 @@ async def enrich(
             reason = "AI analysis exceeded its time limit."
         elif error_type in {"AuthenticationError", "PermissionDeniedError"}:
             reason = "AI provider credentials or model access need attention."
+        elif error_type == "APIConnectionError":
+            reason = "The AI provider could not be reached. Check the network and trusted certificate configuration."
         else:
             reason = "AI analysis could not produce a validated, reviewed response."
         audit.warnings.append(reason + " Verified findings and rule-based recommendations remain available.")

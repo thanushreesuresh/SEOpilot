@@ -1,10 +1,10 @@
 # Verification and delivery record
 
-Checked on 24 October 2026, using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and the committed dependency lockfiles.
+Updated on 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and the committed dependency lockfiles. Live results and failure details are in the [bounded verification record](live-validation-2026-10-25.md).
 
 | Check | Result |
 | --- | --- |
-| Complete backend pytest suite | 205 passed |
+| Complete backend pytest suite | 207 passed; real keys/dotenv disabled during pytest |
 | Node authenticated-proxy tests | 6 passed |
 | GitHub Actions offline workflow | [Passed](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40120505329) on Linux for implementation commit `3a90c3c` |
 | Ruff, backend and scripts | Passed |
@@ -17,6 +17,10 @@ Checked on 24 October 2026, using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 an
 | Dependency consistency | pip check passed; npm install reported 0 vulnerabilities |
 | Real pinned HTTPS fetch | example.com returned HTTP 200 |
 | Real local audit API | Completed: one page assessed, six findings, score 82, AI unavailable |
+| Live AI generation and review | Python.org: 3 pages, 8 findings, score 89; 3 accepted AI suggestions, human decisions pending |
+| Independent raw HTML and score checks | Python and Example observations matched; scores independently recalculated |
+| Verified AI TLS and model access | System-trust correction passed authenticated model lookup and real structured generation; Example re-review withheld by lifetime budget |
+| Live abuse controls across restart | Fourth admission 429, duplicate reuse without extra allowance, forged identity 403, results persisted |
 | Offline AI/provider contracts | Passed within backend suite; no paid requests |
 | Browser desktop/mobile scenarios | Not run: local-origin permission policy denied access |
 | Browser screenshot/concept fidelity | Not verified; no implementation screenshot captured |
@@ -36,7 +40,7 @@ Independent review found and fixed validated-address fallback, worker claim reco
 - Sandbox restrictions initially blocked virtual-environment bootstrap, npm registry access, temporary/event-loop resources and Turbopack's CSS child process. Scoped retries outside the sandbox completed installation, tests and build successfully.
 - The in-app browser origin gate first reported declined permission, then a saved or managed deny for `http://localhost:3000`. It remained denied after explicit user approval and a reported permission change. No alternate browser or Playwright execution was attempted to bypass it. Browser test code is present for an environment with authorized access.
 - Six browser scenarios are present, including allowance exhaustion and AI opt-out/duplicate reuse. They remain unexecuted under that same policy. UI additions passed static checks and the production build.
-- No OpenAI credentials were created or written. A blank ignored local environment file was prepared; the harmless build canary was process-local. Live AI/model/account access has not been verified. Optional AI failures preserve deterministic results.
+- The user supplied a key in the ignored backend environment file and explicitly authorized live tests. It was not printed, rewritten or committed. Live model access and Python generation/review passed; the Example failure, TLS correction and exhausted re-review allowance are disclosed in the live record. Optional AI failures preserve deterministic results.
 - Google Search Console and public hosting are not implemented. No performance measurements, deployment or organizer submission is claimed.
 
 See README for exact setup, test commands and the demonstration. Human review remains pending in AI_USAGE.

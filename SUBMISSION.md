@@ -41,7 +41,7 @@ Demonstrate a labelled sample, inspect evidence and severity filters, approve/re
 
 Use the blank `backend/.env.example` template and put your future key only in ignored `backend/.env`. Model: `gpt-6-luna`. The README lists the server kill switch, global call/output limits, database and private proxy-token configuration. Three accepted live audits per IP per rolling 24 hours, duplicate reuse and durable paid-call reservations protect local use. Samples and the smoke-test command make zero paid calls. Secrets are not included in this repository.
 
-**Validation:** 205 backend tests, six Node proxy tests, Ruff, ESLint, TypeScript and production build passed. A harmless server-secret marker was absent from browser assets. A live example.com API audit passed before the security additions. Browser/E2E and screenshot fidelity are unverified because local-origin policy denied access. Live AI awaits credentials. See [verification details](docs/verification.md), [architecture](docs/architecture.md), [README](README.md), [AI usage](AI_USAGE.md) and [change log](CHANGELOG.md).
+**Validation:** 207 backend tests and Ruff passed; prior six Node proxy tests, ESLint, TypeScript/build and secret-marker checks passed. Live Python.org generation/review produced three grounded AI suggestions; raw HTML observations and both sites' scores were independently checked. Example transport failed, then passed verified TLS/model/generation checks; its review was withheld when the lifetime allowance was exhausted. Browser/E2E and screenshot fidelity remain unverified under local-origin policy. See [live verification](docs/live-validation-2026-10-25.md), [verification details](docs/verification.md), [architecture](docs/architecture.md), [README](README.md), [AI usage](AI_USAGE.md) and [change log](CHANGELOG.md).
 
 **Deferred:** Search Console, public hosting/authentication, automatic publishing, recurring audits and reliable orphan detection. No traffic, ranking, search-volume or other unavailable measurements are fabricated. Sources and dependencies are linked in README.
 
@@ -52,7 +52,7 @@ Use the blank `backend/.env.example` template and put your future key only in ig
 - [x] Codex contributions recorded; human review pending.
 - [x] Secrets and local database files excluded from source control.
 - [ ] Rendered desktop/mobile browser verification completed.
-- [ ] Live AI integration verified with user-supplied credentials.
+- [x] Live AI integration verified with user-supplied credentials; bounded results and limits recorded.
 - [ ] Participant details and event eligibility verified.
 - [ ] Organizer submission performed through its announced method and timing.
 

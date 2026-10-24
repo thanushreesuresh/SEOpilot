@@ -4,6 +4,13 @@ Record each meaningful project change during the event, newest first. Update thi
 
 ## Event build log
 
+## 2026-10-25T00:18:56+05:30 — Verify real SEO evidence and correct verified AI TLS trust
+
+- Changed: Ran bounded live Python.org and Example.com audits with the user's existing key, independently checked raw metadata/headings and score arithmetic, verified live quota/deduplication/persistence/secret boundaries, and recorded exact results. Matched AI TLS to the crawler's verified system trust store, improved sanitized connection failure guidance and isolated pytest from real credentials/dotenv.
+- Why: Verify actual optional AI behavior and SEO evidence, fix a reproduced SDK certificate-trust failure without weakening TLS, and prevent future routine tests from spending the developer's credits.
+- Validation: TLS regression failed before correction; 207 offline backend tests and Ruff passed afterward. Python's three-page sample scored89 with three evidence-reviewed AI suggestions. Example scored82; authenticated model lookup and post-fix generation returned success, while its spent lifetime review budget correctly withheld suggestions. Fourth admission429, duplicate reuse and forged-header403 passed across restart. No credentials appeared in checked responses or Git.
+- Limitations: Three live audit slots and six conservative AI reservations were consumed, including failed/local diagnostics; no counters were reset. Full Example generation/review was not repeated after its lifetime limit. Browser verification remains blocked; ranking performance and public hosting are unverified. Human review pending.
+
 ## 2026-10-24T18:25:46+00:00 — Record atomic publication and successful hosted verification
 
 - Changed: Recorded implementation commit `3a90c3cd24662eb11bd6ea1067ea7a07a6c754f9`, atomic publication of both security/UI commits, and successful GitHub Actions run 40120505329 in README, verification and submission notes.

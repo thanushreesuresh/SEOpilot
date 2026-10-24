@@ -1,4 +1,5 @@
 import asyncio
+import ssl
 from types import SimpleNamespace
 
 import pytest
@@ -76,6 +77,27 @@ class RecordingBudget:
             return False
         self.calls.append((audit_id, daily_limit, max_per_audit))
         return True
+
+
+@pytest.mark.asyncio
+async def test_provider_uses_verified_system_certificate_store(monkeypatch):
+    from openai import DefaultAsyncHttpxClient
+
+    captured = {}
+
+    def client_factory(**kwargs):
+        captured.update(kwargs)
+        return DefaultAsyncHttpxClient(**kwargs)
+
+    monkeypatch.setattr("openai.DefaultAsyncHttpxClient", client_factory)
+    provider = OpenAIProvider("offline-test-placeholder", "gpt-6-luna")
+    try:
+        context = captured.get("verify")
+        assert isinstance(context, ssl.SSLContext)
+        assert context.verify_mode == ssl.CERT_REQUIRED and context.check_hostname
+        assert captured["trust_env"] is False
+    finally:
+        await provider.close()
 
 
 @pytest.mark.asyncio
@@ -285,7 +307,8 @@ async def test_responses_transport_uses_structured_formats_no_tools_or_retries(m
     assert len(budget.calls) == 2
     assert all(call["model"] == "gpt-6-luna" for call in calls)
     assert all(call["max_output_tokens"] == 2500 and call["reasoning"] == {"effort": "low"} for call in calls)
-    assert transport_settings == [{"trust_env": False}]
+    assert len(transport_settings) == 1 and transport_settings[0]["trust_env"] is False
+    assert isinstance(transport_settings[0]["verify"], ssl.SSLContext)
     assert all("offline-test-placeholder" not in str(call) for call in calls)
 
 
