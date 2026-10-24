@@ -20,4 +20,6 @@ Intentional additions needed by the implementation: crawl settings; clearly labe
 
 - Frontend ESLint: passed without warnings.
 - Frontend TypeScript: passed.
-- Native browser screenshots and final fidelity comparison: pending root-agent QA.
+- Production Next.js build: passed.
+- Static independent review: initialization race, duplicate-group URL filtering and zero-assessment messaging were fixed; lint and type checks passed afterward.
+- Native browser screenshots, desktop/mobile interaction and final fidelity comparison: unverified. The origin policy denied localhost despite explicit approval and a reported permission change. No alternate browser execution was used to bypass the block. The concept was inspected with view_image; no running-product screenshot or visual-fidelity pass is claimed.

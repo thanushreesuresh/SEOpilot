@@ -4,6 +4,13 @@ Record each meaningful project change during the event, newest first. Update thi
 
 ## Event build log
 
+## 2026-10-24T23:13:00+05:30 — Verify the complete workflow and document reproducible delivery
+
+- Changed: Added API-to-storage integration tests, real bounded API smoke command, publishable-file/credential-pattern/Markdown-link checks, architecture/scoring/limitations documentation, exact Windows setup and demonstration commands, and an honest submission record. Removed trailing blank lines from crawler files.
+- Why: Deliver a reproducible local product with explicit evidence for what passed and what remains unverified.
+- Validation: Final backend suite177passed with one upstream TestClient deprecation warning; Ruff, frontend ESLint/TypeScript and production build passed. Regenerated API types show no drift. Dependency and repository checks passed. Atomic push dry run confirmed Git write access; actual publication is recorded after pushing.
+- Limitations: Browser origin policy prevented rendered desktop/mobile/E2E and screenshot verification even after user approval/retry. Live AI awaits credentials. No Search Console, hosting or organizer submission claimed.
+
 ## 2026-10-24T22:58:22+05:30 — Add optional evidence-reviewed AI and labelled demonstration
 
 - Changed: Added provider interface, bounded structured OpenAI Responses analysis/review, evidence ownership and quotation checks, unsupported-claim and conflict rejection, deterministic reporting/fallback, and a fixture demo using production extraction/rules with curated suggestions.

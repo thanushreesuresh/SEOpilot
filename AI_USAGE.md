@@ -4,6 +4,8 @@ Use Codex during the hackathon and briefly document its actual contribution here
 
 ## Event build log
 
+| 2026-10-24T23:13:00+05:30 | Codex | Integration and delivery verification | Added real runner/API/history/decision regression tests, public-page smoke command, repository checks, setup/demo and limitation documentation | Pending human review | Final177backendtests, Ruff, ESLint, TypeScript, production build and contract drift checks passed; browser policy remained blocked |
+
 | 2026-10-24T22:58:22+05:30 | Codex | Optional AI and demo | Implemented grouped structured analysis, independent reviewer, evidence validation, bounded failure handling and production-parser sample fixtures | Pending human review | Full backend suite177passed; provider calls mocked, no live AI/key creation; SDK request contract verified |
 
 | 2026-10-24T22:56:17+05:30 | Codex + built-in ImageGen | Connected frontend | Generated a primary design reference and implemented dashboard, polling, filters, evidence, decisions, history and browser scenarios; fixed independent review findings | Pending human review | ESLint, TypeScript and production build passed; browser policy blocked rendered/E2E verification |

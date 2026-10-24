@@ -322,4 +322,3 @@ async def fetch(
         except ValueError as error:
             raise NetworkPolicyError(str(error)) from None
     raise NetworkError("The website exceeded the redirect limit.")
-

@@ -1,48 +1,58 @@
-# Project submission
-
-Complete this file during the hackathon and use it to prepare your submission through the method announced by the organizers. Do not submit your project to the template repository.
+# SEOPilot delivery and demonstration
 
 ## Project
 
-- **Project name:** TODO
-- **Short description:** TODO — describe the problem, what you built, and who benefits.
-- **Code repository URL:** TODO
-- **Final submitted implementation commit SHA:** TODO
-- **Working demo URL or local demo steps:** TODO
-- **Demo access requirements:** TODO — explain any prerequisites without including private credentials.
+- **Project name:** SEOPilot.
+- **Description:** A local SEO audit application for small businesses: secure website crawling, evidence-backed deterministic findings, contextual AI suggestions when configured, and human recommendation review.
+- **Code repository:** https://github.com/thanushreesuresh/SEOpilot
+- **Verified implementation commit:** Recorded after the final verification milestone; organizer submission has not been performed.
+- **Working demo:** Follow the README's local setup and three-minute demonstration at http://localhost:3000.
+- **Access requirements:** Node.js 22+, Python 3.13+, local loopback services. No credentials required for deterministic audits or labelled sample mode.
 
-## Participants
+## Participants and event status
 
-Participate solo or in a team of up to 4. Remove unused rows.
-
-| Participant name | GitHub handle | Contribution |
-| --- | --- | --- |
-| TODO | TODO | TODO |
+Participant names and event eligibility have not been supplied or verified. The repository owner is not automatically assumed to be the participant. Current implementation uses actual 24 October 2026 timestamps and does not claim development took place during the 10–11 October event.
 
 ## Run and demonstrate
 
-- **Prerequisites and versions:** TODO
-- **Install command:** TODO
-- **Required environment variable names:** TODO — use a sanitized example file if needed.
-- **Start command:** TODO
-- **Demo walkthrough:** TODO — brief steps showing the implemented features.
-- **Checks performed and results:** TODO
-- **Known limitations or incomplete features:** TODO
-- **Libraries, APIs, and public datasets used:** TODO — link sources and record attribution where required.
-- **AI usage record:** [AI_USAGE.md](AI_USAGE.md)
-- **Development change log:** [CHANGELOG.md](CHANGELOG.md)
+Install from the repository root:
 
-## Submission checklist
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -c backend/requirements.lock -e "backend[dev]"
+cd frontend
+npm ci
+```
 
-- [ ] The project implementation started from scratch at the event.
-- [ ] I participated solo or with no more than 4 team members in total.
-- [ ] Codex was used during development and its usage is documented.
-- [ ] The code repository URL, short description, and working demo are provided.
-- [ ] README setup and demo instructions match the submitted code.
-- [ ] Actual checks and known limitations are documented.
-- [ ] Meaningful changes are documented and committed throughout development.
-- [ ] The final implementation is committed and pushed, and its SHA is recorded above.
-- [ ] No credentials or private data are included in the repository or demo instructions.
-- [ ] The organizers' announced submission method and timing have been followed.
+Start FastAPI from the root in one terminal:
 
-Event reference: [DevDay Exchange Community: Kochi on Luma](https://luma.com/z10nz8gp). The event wraps up by **10:00 AM IST on 11 October 2026**.
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn seopilot.app:app --app-dir backend --host 127.0.0.1 --port 8000
+```
+
+Start Next.js from `frontend/` in another:
+
+```powershell
+npm run dev
+```
+
+Demonstrate a labelled sample, inspect evidence and severity filters, approve/reject a recommendation, copy a suggestion, reopen history, then perform a real bounded audit. Approval never publishes changes.
+
+Optional server-side environment names: `OPENAI_API_KEY`, `OPENAI_MODEL`, `SEOPILOT_DB`. Secrets are not included in this repository.
+
+**Validation:** 177 backend tests, Ruff, ESLint, TypeScript and production build passed; live example.com API audit completed. Browser/E2E and screenshot fidelity are unverified because local-origin policy denied access. Live AI awaits credentials. See [verification details](docs/verification.md), [architecture](docs/architecture.md), [README](README.md), [AI usage](AI_USAGE.md) and [change log](CHANGELOG.md).
+
+**Deferred:** Search Console, public hosting/authentication, automatic publishing, recurring audits and reliable orphan detection. No traffic, ranking, search-volume or other unavailable measurements are fabricated. Sources and dependencies are linked in README.
+
+## Honest delivery checklist
+
+- [x] Project description, repository and local demonstration instructions provided.
+- [x] Core implementation and actual validation documented.
+- [x] Codex contributions recorded; human review pending.
+- [x] Secrets and local database files excluded from source control.
+- [ ] Rendered desktop/mobile browser verification completed.
+- [ ] Live AI integration verified with user-supplied credentials.
+- [ ] Participant details and event eligibility verified.
+- [ ] Organizer submission performed through its announced method and timing.
+
+The original [event rules](RULES.md) remain preserved. This file records technical delivery readiness, not organizer acceptance.
