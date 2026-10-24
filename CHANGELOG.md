@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T02:32:41+05:30 — Isolate remaining hosted scroll overflow
+
+- Changed: Expanded the bounded mobile diagnostic with computed scroll-region styles and reversible region-isolation measurements. The page is restored before the unchanged width assertion.
+- Why: Paint containment alone did not resolve the 629-pixel document width in hosted Chromium; the same single browser case remains failed.
+- Validation: ESLint and TypeScript passed. Backend465 and browser22 passed again on source 9b0d2e1; the isolated diagnostic awaits hosted execution.
+- Limitations: The local dashboard needs a restart after rebuilding; automatic approval review rejected that process restart with only “blocked by policy.” No bypass attempted. API/saved data remain intact; human review pending.
+
 ## 2026-10-25T02:26:34+05:30 — Contain mobile comparison table scrolling
 
 - Changed: Added a containing block and paint containment to the comparison table scroller; the browser scenario also verifies horizontal scrolling by keyboard.

@@ -306,14 +306,28 @@ test("mobile keyboard flows expose bounded JSON-LD evidence and keep comparison 
   await page.getByRole("combobox", { name: "Later audit", exact: true }).selectOption(AFTER_ID);
   await page.getByRole("button", { name: "Run comparison", exact: true }).focus(); await page.keyboard.press("Enter");
   await expect(page.getByText("Unavailable", { exact: true })).toBeVisible();
-  const overflow = await page.evaluate(() => ({
-    viewport: window.innerWidth, document: document.documentElement.scrollWidth,
-    elements: [...document.querySelectorAll("body *")].flatMap((element) => {
+  const overflow = await page.evaluate(() => {
+    const documentWidth = document.documentElement.scrollWidth;
+    const selectors = [".comparison-table-scroll", ".comparison-detail", ".history-panel", ".comparison-results"];
+    const regions = selectors.map((selector) => {
+      const element = document.querySelector<HTMLElement>(selector)!;
+      const style = getComputedStyle(element);
+      const original = element.style.cssText;
+      const region = { selector, clientWidth: element.clientWidth, scrollWidth: element.scrollWidth,
+        overflowX: style.overflowX, overflowY: style.overflowY, contain: style.contain };
+      element.style.display = "none";
+      const withoutRegion = document.documentElement.scrollWidth;
+      element.style.cssText = original;
+      return { ...region, withoutRegion };
+    });
+    return { viewport: window.innerWidth, document: documentWidth, regions,
+      elements: [...document.querySelectorAll("body *")].flatMap((element) => {
       const box = element.getBoundingClientRect();
       return box.width && (box.right > window.innerWidth + 1 || box.left < -1)
         ? [{ tag: element.tagName, class: element.className, left: box.left, right: box.right }] : [];
-    }).slice(0, 30),
-  }));
+      }).slice(0, 30),
+    };
+  });
   await page.screenshot({ path: testInfo.outputPath("reporting-mobile-before-coverage.png"), fullPage: true });
   expect(overflow.document, JSON.stringify(overflow)).toBeLessThanOrEqual(overflow.viewport + 1);
   const tableScroller = page.locator(".comparison-table-scroll");
