@@ -6,12 +6,13 @@ import sqlite3
 from collections.abc import Awaitable, Callable
 
 from .models import Audit, Page, now
+from .settings import Settings
 from .storage import Store
 
 log = logging.getLogger(__name__)
 
 
-async def execute(audit: Audit, store: Store):
+async def execute(audit: Audit, store: Store, *, settings: Settings | None = None):
     from .crawler import crawl
     from .rules import analyze, calculate_score, rule_recommendations
 
@@ -41,7 +42,7 @@ async def execute(audit: Audit, store: Store):
     try:
         from .ai import enrich
 
-        await enrich(audit)
+        await enrich(audit, store=store, settings=settings)
     except Exception:
         # Provider bugs must never discard a completed deterministic audit.
         log.warning("AI enrichment failed for audit %s", audit.id)

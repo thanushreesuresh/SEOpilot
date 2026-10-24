@@ -17,7 +17,7 @@ cd ..
 Start the API in one terminal:
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn seopilot.app:app --app-dir backend --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe -m seopilot
 ```
 
 Start the dashboard in a second terminal:
@@ -31,10 +31,37 @@ Open [SEOPilot](http://localhost:3000). Keep both services on loopback. Use one 
 
 ## Configuration
 
-The backend reads process environment variables and an optional ignored `backend/.env`. `backend/.env.example` lists names without secrets:
+The backend reads process variables and an ignored `backend/.env`. Copy the safe template once if the local file does not already exist:
 
-- `OPENAI_API_KEY` and `OPENAI_MODEL`: both required to enable live AI. Leave unset for deterministic auditing. Supply credentials through your local environment; never put them in frontend variables or commits.
-- `SEOPILOT_DB`: optional SQLite path, default `backend/.data/seopilot.db`.
+```powershell
+if (-not (Test-Path backend/.env)) { Copy-Item backend/.env.example backend/.env }
+```
+
+Add your key only to `OPENAI_API_KEY` in **backend/.env** and restart the backend. Keep the committed example blank. Never use `NEXT_PUBLIC_*` for keys or put keys in frontend files. The selected API model is [`gpt-6-luna`](https://developers.openai.com/api/docs/models/gpt-6-luna); other model IDs are rejected to avoid accidental cost changes. No key is needed for crawling, rules or samples.
+
+| Variable | Default / purpose |
+| --- | --- |
+| `OPENAI_API_KEY` | Blank; server-only credential you supply locally |
+| `OPENAI_MODEL` | `gpt-6-luna`; fixed allowed model |
+| `SEOPILOT_AI_ENABLED` | `true`; set `false` and restart for zero AI calls |
+| `SEOPILOT_AI_DAILY_CALL_LIMIT` | `20`; global maximum requests per rolling 24 hours, configurable 0–100 |
+| `OPENAI_MAX_OUTPUT_TOKENS` | `2500`; per-call ceiling, allowed 512–2500, including reasoning |
+| `SEOPILOT_DB` | Optional SQLite path; default `backend/.data/seopilot.db` |
+| `SEOPILOT_PROXY_TOKEN_FILE` | Usually blank; optional private absolute token path, set identically in both server process environments |
+
+The safe API entry point binds loopback, disables forwarded-header trust and access logs, and starts one worker. If invoking Uvicorn directly, include **`--no-proxy-headers --no-access-log`** and keep `--host 127.0.0.1`. Do not run multiple workers.
+
+## Audit and spending protection
+
+- Three accepted live audits per IP per **rolling 24 hours**. A fourth distinct audit receives `429` and `Retry-After` until the oldest admission expires. Counters persist across restarts and concurrent submissions. Admitted failures still count; invalid URLs and a full queue do not.
+- Identical requests from the same IP reuse an active audit, or a completed result admitted within 15 minutes, without consuming another admission or triggering another AI stage. Context, crawl options and the AI opt-out are part of the match.
+- At most two paid requests per audit: generation and review. Each must reserve a global allowance before calling OpenAI. Errors/timeouts retain their reservation, SDK retries are disabled, and unreviewed suggestions never publish. Output and UTF-8 input sizes are bounded. Reaching the cap preserves deterministic results.
+- `GET /api/usage` exposes allowance/reset information; `allow_ai=false` opts an audit out of paid calls. The labelled sample uses no live quota or paid calls and repeated sample requests reuse its result. The real smoke-test command explicitly opts out of AI.
+- The Next server derives client identity from its socket and authenticates it to the fixed loopback backend using a private generated token. Incoming forwarding/IP/token headers are discarded. The backend stores HMAC identities, groups IPv6 addresses by `/64`, and accepts stamped identity only from an authenticated loopback proxy.
+
+Local browsers normally share one loopback allowance. A reverse proxy in front of Next also shares one conservative bucket; arbitrary forwarding headers are never trusted. Preserve the SQLite database and its quota salt when restarting: deleting/replacing it resets local counters. The proxy token is generated in ignored `backend/.data/proxy-token` and stays outside production bundles.
+
+This release remains **local and single-user**. IP limits cannot stop a botnet by themselves; the global AI cap provides the additional spending boundary. Before public hosting, add authentication, audit ownership checks and a trusted edge with rate limits. For a monetary ceiling, also configure a dedicated OpenAI project with a restricted key and [project spend limits](https://developers.openai.com/api/docs/guides/spend-limits); application request counts are not billing telemetry. Provider spend-limit enforcement may have a short delay. No paid model/account compatibility test has been performed.
 
 No credentials are required for the labelled sample demo. The app never modifies or publishes to the audited website.
 
@@ -60,6 +87,7 @@ Frontend checks, from `frontend/`:
 ```powershell
 npm run lint
 npm run typecheck
+npm run test:proxy
 npm run build
 ```
 
@@ -89,7 +117,7 @@ For a bounded real API smoke test while the backend is running:
 .\.venv\Scripts\python.exe scripts/smoke_audit.py
 ```
 
-The smoke test does not supply AI credentials. If the running API has live AI configured, its normal optional AI stage can still run.
+The smoke test sends `allow_ai=false`, even if the running API has live AI configured. It consumes one live audit admission unless a matching audit is reused.
 
 ## Status
 
@@ -99,7 +127,7 @@ The real crawler and API are implemented and verified against a one-page example
 
 The deterministic rules now evaluate extracted metadata, heading structure, image alt presence, canonicals, indexing directives, confirmed internal-link failures, HTTP errors, duplicate titles/descriptions, and evidence-backed site discovery observations. Character ranges are configurable review heuristics, not ranking rules. The internal health score subtracts mean capped page penalties (Critical 20, High 10, Medium 5, Low 2; HTTP errors 100) and site penalties capped at 20. Unknown pages do not enter its denominator; insufficient data produces no score.
 
-Verified: 177 backend tests, Ruff, frontend ESLint, TypeScript, production build, and a real one-page API audit. Live AI is untested without credentials. Browser rendering, mobile interaction and screenshot fidelity remain unverified because of the origin permission block.
+Verified: 205 backend tests, six Node proxy tests, Ruff, frontend ESLint, TypeScript, production build, and a server-secret canary absent from browser assets. A real one-page API audit passed before the spending controls; no new live crawl or paid AI call was needed for these offline regressions. Live AI is untested without credentials. Browser rendering, mobile interaction and screenshot fidelity remain unverified because of the origin permission block.
 
 This MVP parses fetched HTML without JavaScript execution, stays on the exact submitted origin, and is local/single-user. Search Console, authentication/hosting, orphan detection, recurring audits and automatic publishing are deferred. Full details: [architecture and scoring](docs/architecture.md), [verification](docs/verification.md), and [submission record](SUBMISSION.md).
 

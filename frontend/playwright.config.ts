@@ -13,7 +13,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: [
     {
-      command: `"${python}" -m uvicorn seopilot.app:app --app-dir backend --host 127.0.0.1 --port 8000`,
+      command: `"${python}" -m uvicorn seopilot.app:app --app-dir backend --host 127.0.0.1 --port 8000 --no-proxy-headers`,
       cwd: root,
       url: "http://127.0.0.1:8000/api/health",
       reuseExistingServer: !process.env.CI,

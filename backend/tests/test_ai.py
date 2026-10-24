@@ -4,9 +4,22 @@ from types import SimpleNamespace
 import pytest
 from pydantic import ValidationError
 
-from seopilot.ai import AnalysisBundle, Candidate, EvidenceQuote, ReviewBundle, ReviewDecision, enrich
+from seopilot.ai import (
+    MAX_AI_INPUT_BYTES,
+    MAX_CONTEXT_BYTES,
+    AnalysisBundle,
+    Candidate,
+    EvidenceQuote,
+    OpenAIProvider,
+    ReviewBundle,
+    ReviewDecision,
+    _context,
+    enrich,
+)
 from seopilot.models import Audit, Heading, Page
 from seopilot.rules import analyze, rule_recommendations
+from seopilot.settings import Settings
+from seopilot.storage import Store
 
 
 def audit_fixture():
@@ -51,6 +64,18 @@ class FakeProvider:
         return ReviewBundle(decisions=[ReviewDecision(
             candidate_id=c.id, accepted=not self.reject, reason="Checked against quoted evidence.",
         ) for c in candidates])
+
+
+class RecordingBudget:
+    def __init__(self, allowance=20):
+        self.calls = []
+        self.allowance = allowance
+
+    def reserve_ai_call(self, audit_id, daily_limit, max_per_audit=2):
+        if len(self.calls) >= min(self.allowance, daily_limit):
+            return False
+        self.calls.append((audit_id, daily_limit, max_per_audit))
+        return True
 
 
 @pytest.mark.asyncio
@@ -148,11 +173,9 @@ async def test_demo_uses_fixture_rules_and_never_live_ai():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("absent", ["OPENAI_API_KEY", "OPENAI_MODEL"])
-async def test_each_configuration_name_is_required_before_client_creation(monkeypatch, absent):
-    monkeypatch.setenv("OPENAI_API_KEY", "offline-test-placeholder")
-    monkeypatch.setenv("OPENAI_MODEL", "offline-model-placeholder")
-    monkeypatch.delenv(absent)
+async def test_key_is_required_before_client_creation(monkeypatch):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setenv("OPENAI_MODEL", "gpt-6-luna")
 
     def forbidden(*args):
         raise AssertionError("Provider must not be constructed for incomplete configuration")
@@ -182,10 +205,10 @@ async def test_client_cleanup_failure_does_not_override_validated_results(monkey
             raise RuntimeError("cleanup detail must not escape")
 
     monkeypatch.setenv("OPENAI_API_KEY", "offline-test-placeholder")
-    monkeypatch.setenv("OPENAI_MODEL", "offline-model-placeholder")
+    monkeypatch.setenv("OPENAI_MODEL", "gpt-6-luna")
     fake = CloseFailure([candidate(audit)])
-    monkeypatch.setattr("seopilot.ai.OpenAIProvider", lambda key, model: fake)
-    await enrich(audit)
+    monkeypatch.setattr("seopilot.ai.OpenAIProvider", lambda key, model, **kwargs: fake)
+    await enrich(audit, store=RecordingBudget())
     assert audit.ai_status == "available"
     assert any(r.source == "ai" for r in audit.recommendations)
 
@@ -230,10 +253,12 @@ async def test_responses_transport_uses_structured_formats_no_tools_or_retries(m
     generated = candidate(audit)
     calls = []
     closed = []
+    transport_settings = []
 
     class FakeClient:
         def __init__(self, **kwargs):
             assert kwargs["max_retries"] == 0 and kwargs["timeout"] == 35
+            assert kwargs["base_url"] == "https://api.openai.com/v1"
             self.responses = self
 
         async def parse(self, **kwargs):
@@ -248,10 +273,218 @@ async def test_responses_transport_uses_structured_formats_no_tools_or_retries(m
             closed.append(True)
 
     monkeypatch.setenv("OPENAI_API_KEY", "offline-test-placeholder")
-    monkeypatch.setenv("OPENAI_MODEL", "offline-model-placeholder")
+    monkeypatch.setenv("OPENAI_MODEL", "gpt-6-luna")
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://untrusted.example/steal")
+    monkeypatch.setattr("openai.DefaultAsyncHttpxClient", lambda **kwargs: transport_settings.append(kwargs))
     monkeypatch.setattr("openai.AsyncOpenAI", FakeClient)
-    await enrich(audit)
+    budget = RecordingBudget()
+    await enrich(audit, store=budget)
     assert audit.ai_status == "available"
     assert len(calls) == 2 and closed == [True]
     assert all(call["store"] is False and "tools" not in call for call in calls)
-    assert all(call["model"] == "offline-model-placeholder" for call in calls)
+    assert len(budget.calls) == 2
+    assert all(call["model"] == "gpt-6-luna" for call in calls)
+    assert all(call["max_output_tokens"] == 2500 and call["reasoning"] == {"effort": "low"} for call in calls)
+    assert transport_settings == [{"trust_env": False}]
+    assert all("offline-test-placeholder" not in str(call) for call in calls)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("allow_ai,enabled", [(False, True), (True, False)])
+async def test_audit_opt_out_and_server_kill_switch_make_no_calls(allow_ai, enabled):
+    audit = audit_fixture()
+    audit.allow_ai = allow_ai
+    provider = FakeProvider([candidate(audit)])
+    budget = RecordingBudget()
+    await enrich(audit, provider=provider, store=budget, settings=Settings(ai_enabled=enabled))
+    assert audit.ai_status == "unavailable"
+    assert not provider.calls and not budget.calls
+    assert all(rec.source == "rule" for rec in audit.recommendations)
+
+
+@pytest.mark.asyncio
+async def test_model_defaults_to_luna_when_only_key_is_configured(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "offline-test-placeholder")
+    monkeypatch.delenv("OPENAI_MODEL", raising=False)
+    audit = audit_fixture()
+    provider = FakeProvider([])
+    constructed = []
+
+    def make_provider(key, model, **kwargs):
+        constructed.append((model, kwargs))
+        return provider
+
+    monkeypatch.setattr("seopilot.ai.OpenAIProvider", make_provider)
+    await enrich(audit, store=RecordingBudget())
+    assert audit.ai_status == "available"
+    assert constructed == [("gpt-6-luna", {"max_output_tokens": 2500})]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("model", ["", "GPT-6-Luna", "gpt-6", "untrusted-model"])
+async def test_unsupported_models_fail_before_sdk_construction(monkeypatch, model):
+    monkeypatch.setenv("OPENAI_API_KEY", "offline-test-placeholder")
+    monkeypatch.setenv("OPENAI_MODEL", model)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Unsupported models must never construct a provider")
+
+    monkeypatch.setattr("seopilot.ai.OpenAIProvider", forbidden)
+    audit = audit_fixture()
+    await enrich(audit, store=RecordingBudget())
+    assert audit.ai_status == "unavailable"
+    assert "gpt-6-luna" in audit.warnings[-1]
+    assert all(rec.source == "rule" for rec in audit.recommendations)
+
+
+@pytest.mark.asyncio
+async def test_live_provider_without_persistent_budget_fails_closed(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "offline-test-placeholder")
+    monkeypatch.setenv("OPENAI_MODEL", "gpt-6-luna")
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("A persistent budget is required")
+
+    monkeypatch.setattr("seopilot.ai.OpenAIProvider", forbidden)
+    audit = audit_fixture()
+    await enrich(audit)
+    assert audit.ai_status == "limited"
+    assert all(rec.source == "rule" for rec in audit.recommendations)
+
+
+@pytest.mark.asyncio
+async def test_explicit_live_provider_injection_cannot_bypass_budget_guard():
+    class BudgetedProvider(FakeProvider):
+        requires_budget = True
+
+    audit = audit_fixture()
+    provider = BudgetedProvider([candidate(audit)])
+    await enrich(audit, provider=provider)
+    assert audit.ai_status == "limited" and not provider.calls
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("limit,expected_calls", [(0, []), (1, ["generate"]), (2, ["generate", "review"])])
+async def test_each_generation_and_review_requires_a_durable_reservation(tmp_path, limit, expected_calls):
+    audit = audit_fixture()
+    store = Store(tmp_path / "budget.db")
+    store.save(audit)
+
+    class CheckReservation(FakeProvider):
+        async def generate(self, context):
+            with store.connection() as db:
+                assert db.execute("SELECT COUNT(*) FROM ai_calls").fetchone()[0] == 1
+            return await super().generate(context)
+
+        async def review(self, context, candidates):
+            with store.connection() as db:
+                assert db.execute("SELECT COUNT(*) FROM ai_calls").fetchone()[0] == 2
+            return await super().review(context, candidates)
+
+    provider = CheckReservation([candidate(audit)])
+    await enrich(audit, provider=provider, store=store, settings=Settings(ai_daily_call_limit=limit))
+    assert [name for name, _ in provider.calls] == expected_calls
+    assert audit.ai_status == ("available" if limit == 2 else "limited")
+    assert sum(rec.source == "ai" for rec in audit.recommendations) == (1 if limit == 2 else 0)
+    with store.connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM ai_calls").fetchone()[0] == len(expected_calls)
+
+
+@pytest.mark.asyncio
+async def test_failed_generation_keeps_reservation_after_restart(tmp_path):
+    path = tmp_path / "budget.db"
+    store = Store(path)
+    audit = audit_fixture()
+    store.save(audit)
+    await enrich(audit, provider=FakeProvider([], error=True), store=store, settings=Settings(ai_daily_call_limit=1))
+    assert audit.ai_status == "failed"
+    restarted = Store(path)
+    another = audit_fixture()
+    restarted.save(another)
+    provider = FakeProvider([candidate(another)])
+    await enrich(another, provider=provider, store=restarted, settings=Settings(ai_daily_call_limit=1))
+    assert another.ai_status == "limited" and not provider.calls
+
+
+@pytest.mark.asyncio
+async def test_failed_review_is_charged_and_never_publishes_candidates(tmp_path):
+    audit = audit_fixture()
+    store = Store(tmp_path / "budget.db")
+    store.save(audit)
+
+    class BrokenReview(FakeProvider):
+        async def review(self, context, candidates):
+            raise RuntimeError("private-provider-review-detail")
+
+    await enrich(audit, provider=BrokenReview([candidate(audit)]), store=store)
+    assert audit.ai_status == "failed"
+    assert all(rec.source == "rule" for rec in audit.recommendations)
+    assert "private-provider-review-detail" not in audit.model_dump_json()
+    with store.connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM ai_calls").fetchone()[0] == 2
+
+
+@pytest.mark.asyncio
+async def test_one_audit_cannot_start_more_than_two_calls_over_its_lifetime(tmp_path):
+    audit = audit_fixture()
+    store = Store(tmp_path / "budget.db")
+    store.save(audit)
+    await enrich(audit, provider=FakeProvider([candidate(audit)]), store=store)
+    provider = FakeProvider([candidate(audit)])
+    await enrich(audit, provider=provider, store=store)
+    assert audit.ai_status == "limited" and not provider.calls
+    assert sum(rec.source == "ai" for rec in audit.recommendations) == 1
+
+
+def test_context_has_utf8_byte_limit_and_only_included_evidence():
+    import json
+
+    audit = audit_fixture()
+    audit.business_context = "界" * 2000
+    audit.pages = [Page(
+        url=f"https://example.com/{index}", status_code=200, title="界" * 512,
+        description="界" * 1000, text_excerpt="界" * 2500,
+        headings=[Heading(level=1, text="界" * 3000)],
+    ) for index in range(8)]
+    audit.issues = analyze(audit.pages, audit.origin)
+    context, evidence = _context(audit)
+    assert len(json.dumps(context, ensure_ascii=False).encode("utf-8")) <= MAX_CONTEXT_BYTES
+    assert len(context["pages"]) <= 4 and len(context["issues"]) <= 20
+    included = {key for item in context["pages"] + context["issues"] for key in item["observations"]}
+    assert set(evidence) == included
+
+
+@pytest.mark.asyncio
+async def test_oversized_input_is_rejected_before_transport_and_sdk_logs_are_restricted(monkeypatch):
+    import logging
+
+    calls = []
+
+    class FakeClient:
+        def __init__(self, **kwargs):
+            self.responses = self
+
+        async def parse(self, **kwargs):
+            calls.append(kwargs)
+            raise AssertionError("Oversized input must not be sent")
+
+        async def close(self):
+            pass
+
+    monkeypatch.setenv("OPENAI_LOG", "debug")
+    monkeypatch.setattr("openai.AsyncOpenAI", FakeClient)
+    provider = OpenAIProvider("offline-test-placeholder", "gpt-6-luna")
+    with pytest.raises(ValueError, match="fixed size allowance"):
+        await provider.generate({"content": "界" * MAX_AI_INPUT_BYTES})
+    assert not calls
+    assert all(logging.getLogger(name).getEffectiveLevel() >= logging.WARNING for name in ("openai", "httpx", "httpcore"))
+
+
+@pytest.mark.parametrize("model,cap", [("other-model", 2500), ("gpt-6-luna", 511), ("gpt-6-luna", 2501)])
+def test_provider_rejects_unsafe_model_or_output_allowance_before_client(monkeypatch, model, cap):
+    def forbidden(**kwargs):
+        raise AssertionError("Invalid configuration must not construct a client")
+
+    monkeypatch.setattr("openai.AsyncOpenAI", forbidden)
+    with pytest.raises(ValueError, match="Unsupported model"):
+        OpenAIProvider("offline-test-placeholder", model, max_output_tokens=cap)

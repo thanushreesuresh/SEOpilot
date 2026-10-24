@@ -21,6 +21,24 @@
         }
       }
     },
+    "/api/usage": {
+      "get": {
+        "summary": "Usage",
+        "operationId": "usage_api_usage_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/audits": {
       "get": {
         "summary": "History",
@@ -251,6 +269,11 @@
             "title": "Business Context",
             "default": ""
           },
+          "allow_ai": {
+            "type": "boolean",
+            "title": "Allow Ai",
+            "default": true
+          },
           "options": {
             "$ref": "#/components/schemas/CrawlOptions-Output"
           },
@@ -298,7 +321,8 @@
               "pending",
               "available",
               "failed",
-              "demo"
+              "demo",
+              "limited"
             ],
             "title": "Ai Status",
             "default": "unavailable"
@@ -321,6 +345,7 @@
           "updated_at",
           "completed_at",
           "business_context",
+          "allow_ai",
           "options",
           "progress",
           "pages",
@@ -350,6 +375,11 @@
           },
           "options": {
             "$ref": "#/components/schemas/CrawlOptions-Input"
+          },
+          "allow_ai": {
+            "type": "boolean",
+            "title": "Allow Ai",
+            "default": true
           }
         },
         "additionalProperties": false,
@@ -1116,6 +1146,64 @@
           "formula"
         ],
         "title": "Score"
+      },
+      "UsageStatus": {
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 3
+          },
+          "used": {
+            "type": "integer",
+            "title": "Used"
+          },
+          "remaining": {
+            "type": "integer",
+            "title": "Remaining"
+          },
+          "reset_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reset At"
+          },
+          "retry_after": {
+            "type": "integer",
+            "title": "Retry After"
+          },
+          "window_hours": {
+            "type": "integer",
+            "title": "Window Hours",
+            "default": 24
+          },
+          "ai_enabled": {
+            "type": "boolean",
+            "title": "Ai Enabled"
+          },
+          "ai_calls_remaining": {
+            "type": "integer",
+            "title": "Ai Calls Remaining"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "limit",
+          "used",
+          "remaining",
+          "reset_at",
+          "retry_after",
+          "window_hours",
+          "ai_enabled",
+          "ai_calls_remaining"
+        ],
+        "title": "UsageStatus"
       },
       "ValidationError": {
         "properties": {

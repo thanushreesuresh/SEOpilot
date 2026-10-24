@@ -36,6 +36,7 @@ class AuditRequest(Contract):
     url: str = Field(min_length=8, max_length=2048)
     business_context: str = Field(default="", max_length=2000)
     options: CrawlOptions = Field(default_factory=CrawlOptions)
+    allow_ai: bool = True
 
 
 class Heading(Contract):
@@ -139,6 +140,7 @@ class Audit(Contract):
     updated_at: str = Field(default_factory=now)
     completed_at: str | None = None
     business_context: str = ""
+    allow_ai: bool = True
     options: CrawlOptions = Field(default_factory=CrawlOptions)
     progress: Progress = Field(default_factory=Progress)
     pages: list[Page] = Field(default_factory=list)
@@ -147,7 +149,7 @@ class Audit(Contract):
     warnings: list[str] = Field(default_factory=list)
     coverage: Coverage = Field(default_factory=Coverage)
     score: Score = Field(default_factory=Score)
-    ai_status: Literal["unavailable", "pending", "available", "failed", "demo"] = "unavailable"
+    ai_status: Literal["unavailable", "pending", "available", "failed", "demo", "limited"] = "unavailable"
     summary: str = ""
 
 
@@ -164,3 +166,14 @@ class AuditSummary(Contract):
 
 class DecisionRequest(Contract):
     status: Literal["approved", "rejected"]
+
+
+class UsageStatus(Contract):
+    limit: int = 3
+    used: int
+    remaining: int
+    reset_at: str | None
+    retry_after: int
+    window_hours: int = 24
+    ai_enabled: bool
+    ai_calls_remaining: int

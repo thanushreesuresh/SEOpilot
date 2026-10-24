@@ -56,9 +56,9 @@ def test_restricted_urls_options_and_admission(tmp_path):
         for url in ("file:///etc/passwd", "http://127.0.0.1/", "http://169.254.169.254/", "https://user:pass@example.com/"):
             assert client.post("/api/audits", json={"url": url}).status_code == 422
         assert client.post("/api/audits", json={"url": "https://example.com/", "options": {"page_limit": 10000}}).status_code == 422
-        for _ in range(5):
-            assert client.post("/api/audits", json={"url": "https://example.com/"}).status_code == 202
-        assert client.post("/api/audits", json={"url": "https://example.com/"}).status_code == 429
+        for index in range(3):
+            assert client.post("/api/audits", json={"url": f"https://example.com/{index}"}).status_code == 202
+        assert client.post("/api/audits", json={"url": "https://example.com/fourth"}).status_code == 429
 
 
 def test_sample_endpoint_is_explicit_and_never_runs_live_provider(tmp_path, monkeypatch):

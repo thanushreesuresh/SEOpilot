@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Usage */
+        get: operations["usage_api_usage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/audits": {
         parameters: {
             query?: never;
@@ -128,6 +145,11 @@ export interface components {
              * @default
              */
             business_context: string;
+            /**
+             * Allow Ai
+             * @default true
+             */
+            allow_ai: boolean;
             options: components["schemas"]["CrawlOptions-Output"];
             progress: components["schemas"]["Progress"];
             /** Pages */
@@ -145,7 +167,7 @@ export interface components {
              * @default unavailable
              * @enum {string}
              */
-            ai_status: "unavailable" | "pending" | "available" | "failed" | "demo";
+            ai_status: "unavailable" | "pending" | "available" | "failed" | "demo" | "limited";
             /**
              * Summary
              * @default
@@ -162,6 +184,11 @@ export interface components {
              */
             business_context?: string;
             options?: components["schemas"]["CrawlOptions-Input"];
+            /**
+             * Allow Ai
+             * @default true
+             */
+            allow_ai?: boolean;
         };
         /** AuditSummary */
         AuditSummary: {
@@ -512,6 +539,31 @@ export interface components {
              */
             formula: string;
         };
+        /** UsageStatus */
+        UsageStatus: {
+            /**
+             * Limit
+             * @default 3
+             */
+            limit: number;
+            /** Used */
+            used: number;
+            /** Remaining */
+            remaining: number;
+            /** Reset At */
+            reset_at: string | null;
+            /** Retry After */
+            retry_after: number;
+            /**
+             * Window Hours
+             * @default 24
+             */
+            window_hours: number;
+            /** Ai Enabled */
+            ai_enabled: boolean;
+            /** Ai Calls Remaining */
+            ai_calls_remaining: number;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -550,6 +602,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    usage_api_usage_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageStatus"];
                 };
             };
         };

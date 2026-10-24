@@ -5,7 +5,7 @@
 - **Project name:** SEOPilot.
 - **Description:** A local SEO audit application for small businesses: secure website crawling, evidence-backed deterministic findings, contextual AI suggestions when configured, and human recommendation review.
 - **Code repository:** https://github.com/thanushreesuresh/SEOpilot
-- **Verified implementation commit:** [f66d76108a0f0fd3d11df2c2d0f9862f0be7f42d](https://github.com/thanushreesuresh/SEOpilot/commit/f66d76108a0f0fd3d11df2c2d0f9862f0be7f42d). This revision contains the completed implementation and verification record; this subsequent documentation commit records its identity. Organizer submission has not been performed.
+- **Original verified MVP commit:** [f66d76108a0f0fd3d11df2c2d0f9862f0be7f42d](https://github.com/thanushreesuresh/SEOpilot/commit/f66d76108a0f0fd3d11df2c2d0f9862f0be7f42d). Later security/configuration and allowance-interface changes are recorded in CHANGELOG; this earlier SHA does not include them. Organizer submission has not been performed.
 - **Working demo:** Follow the README's local setup and three-minute demonstration at http://localhost:3000.
 - **Access requirements:** Node.js 22+, Python 3.13+, local loopback services. No credentials required for deterministic audits or labelled sample mode.
 
@@ -27,7 +27,7 @@ npm ci
 Start FastAPI from the root in one terminal:
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn seopilot.app:app --app-dir backend --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe -m seopilot
 ```
 
 Start Next.js from `frontend/` in another:
@@ -38,9 +38,9 @@ npm run dev
 
 Demonstrate a labelled sample, inspect evidence and severity filters, approve/reject a recommendation, copy a suggestion, reopen history, then perform a real bounded audit. Approval never publishes changes.
 
-Optional server-side environment names: `OPENAI_API_KEY`, `OPENAI_MODEL`, `SEOPILOT_DB`. Secrets are not included in this repository.
+Use the blank `backend/.env.example` template and put your future key only in ignored `backend/.env`. Model: `gpt-6-luna`. The README lists the server kill switch, global call/output limits, database and private proxy-token configuration. Three accepted live audits per IP per rolling 24 hours, duplicate reuse and durable paid-call reservations protect local use. Samples and the smoke-test command make zero paid calls. Secrets are not included in this repository.
 
-**Validation:** 177 backend tests, Ruff, ESLint, TypeScript and production build passed; live example.com API audit completed. Browser/E2E and screenshot fidelity are unverified because local-origin policy denied access. Live AI awaits credentials. See [verification details](docs/verification.md), [architecture](docs/architecture.md), [README](README.md), [AI usage](AI_USAGE.md) and [change log](CHANGELOG.md).
+**Validation:** 205 backend tests, six Node proxy tests, Ruff, ESLint, TypeScript and production build passed. A harmless server-secret marker was absent from browser assets. A live example.com API audit passed before the security additions. Browser/E2E and screenshot fidelity are unverified because local-origin policy denied access. Live AI awaits credentials. See [verification details](docs/verification.md), [architecture](docs/architecture.md), [README](README.md), [AI usage](AI_USAGE.md) and [change log](CHANGELOG.md).
 
 **Deferred:** Search Console, public hosting/authentication, automatic publishing, recurring audits and reliable orphan detection. No traffic, ranking, search-volume or other unavailable measurements are fabricated. Sources and dependencies are linked in README.
 

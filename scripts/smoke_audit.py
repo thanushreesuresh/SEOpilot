@@ -12,7 +12,7 @@ args = parser.parse_args()
 
 with httpx.Client(base_url="http://127.0.0.1:8000", timeout=15, trust_env=False) as client:
     response = client.post("/api/audits", json={
-        "url": args.url,
+        "url": args.url, "allow_ai": False,
         "options": {"page_limit": 1, "max_depth": 0, "total_seconds": 20, "timeout_seconds": 8},
     })
     response.raise_for_status()

@@ -5,15 +5,18 @@ import os
 import time
 from collections import deque
 from contextlib import asynccontextmanager, suppress
+from functools import partial
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from .models import Audit, AuditRequest, AuditSummary, DecisionRequest, Progress, Recommendation
-from .runner import run_queue
+from .abuse import client_identity
+from .models import Audit, AuditRequest, AuditSummary, DecisionRequest, Progress, Recommendation, UsageStatus
+from .runner import execute, run_queue
+from .settings import BACKEND_ROOT, Settings, proxy_token
 from .storage import Store
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
@@ -21,16 +24,21 @@ ALLOWED_ORIGINS = {"http://localhost:3000", "http://127.0.0.1:3000"}
 MAX_BODY = 16384
 
 
-def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, processor=None) -> FastAPI:
+def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, processor=None, settings: Settings | None = None) -> FastAPI:
     path = db_path or os.environ.get("SEOPILOT_DB") or Path(__file__).resolve().parents[1] / ".data" / "seopilot.db"
     # No database or worker is created merely by importing the OpenAPI definition.
     starts: deque[float] = deque()
+    config = settings or Settings.from_env()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.store = Store(path)
+        # Tests with explicit databases get an isolated token beside that database.
+        token_path = Path(os.environ.get("SEOPILOT_PROXY_TOKEN_FILE") or
+                          (Path(path).parent / "proxy-token" if db_path else BACKEND_ROOT / ".data" / "proxy-token"))
+        app.state.proxy_token = proxy_token(token_path)
         app.state.store.recover()
-        task = asyncio.create_task(run_queue(app.state.store, **({"processor": processor} if processor else {}))) if start_worker else None
+        task = asyncio.create_task(run_queue(app.state.store, processor=processor or partial(execute, settings=config))) if start_worker else None
         app.state.worker = task
         yield
         if task:
@@ -43,6 +51,10 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
 
     @app.middleware("http")
     async def guard(request: Request, call_next):
+        try:
+            request.state.identity = client_identity(request)
+        except HTTPException as exc:
+            return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
         if request.method in ("POST", "PATCH", "PUT", "DELETE"):
             origin = request.headers.get("origin")
             if origin and origin not in ALLOWED_ORIGINS:
@@ -69,7 +81,7 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
         while starts and tick - starts[0] >= 60:
             starts.popleft()
         if len(starts) >= 10:
-            raise HTTPException(429, "Too many audit requests. Please wait a minute.")
+            raise HTTPException(429, "Too many audit requests. Please wait a minute.", headers={"Retry-After": "60"})
         starts.append(tick)
 
     @app.get("/api/health")
@@ -82,8 +94,15 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
             raise HTTPException(503, "The audit worker stopped. Restart the local API.")
         return {"status": "ok", "mode": "local-single-user"}
 
+    @app.get("/api/usage", response_model=UsageStatus)
+    async def usage(request: Request):
+        store = request.app.state.store
+        ai_ready = config.ai_enabled and bool(os.getenv("OPENAI_API_KEY", "").strip()) and os.getenv("OPENAI_MODEL", "gpt-6-luna").strip() == "gpt-6-luna"
+        return UsageStatus(**store.quota(request.state.identity), ai_enabled=ai_ready,
+                           ai_calls_remaining=store.ai_calls_remaining(config.ai_daily_call_limit))
+
     @app.post("/api/audits", response_model=Audit, status_code=202)
-    async def start_audit(body: AuditRequest, request: Request):
+    async def start_audit(body: AuditRequest, request: Request, response: Response):
         from .network import normalize_url, origin_of
 
         try:
@@ -94,10 +113,20 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
         if request.app.state.worker is not None and request.app.state.worker.done():
             raise HTTPException(503, "The audit worker stopped. Restart the local API.")
         audit = Audit(url=url, origin=origin_of(url), options=body.options,
-                      business_context=body.business_context, progress=Progress(limit=body.options.page_limit))
-        if not request.app.state.store.enqueue(audit):
-            raise HTTPException(429, "The local audit queue is full. Wait for an audit to finish.")
-        return audit
+                      allow_ai=body.allow_ai, business_context=body.business_context,
+                      progress=Progress(limit=body.options.page_limit))
+        admitted, reason, quota = request.app.state.store.admit_audit(audit, request.state.identity)
+        headers = {"RateLimit-Limit": "3", "RateLimit-Remaining": str(quota["remaining"])}
+        if reason == "daily":
+            raise HTTPException(429, "Daily audit allowance reached: 3 audits per rolling 24 hours. Try again after the reset.",
+                                headers={**headers, "Retry-After": str(quota["retry_after"])})
+        if reason == "queue":
+            raise HTTPException(429, "The local audit queue is full. Wait for an audit to finish.",
+                                headers={**headers, "Retry-After": "30"})
+        for name, value in headers.items():
+            response.headers[name] = value
+        response.headers["X-Audit-Reused"] = str(reason == "reused").lower()
+        return admitted
 
     @app.get("/api/audits", response_model=list[AuditSummary])
     async def history(request: Request):
@@ -125,6 +154,10 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
         from .demo import build_demo
 
         admit()
+        # Sample data is public and deterministic; repeated clicks reuse it.
+        for previous in request.app.state.store.history():
+            if previous.mode == "demo":
+                return request.app.state.store.get(previous.id)
         audit = await build_demo()
         request.app.state.store.save(audit)
         return audit
