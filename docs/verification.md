@@ -2,6 +2,28 @@
 
 Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and committed lockfiles. Historical real SEO/AI observations remain in the [bounded live record](live-validation-2026-10-25.md).
 
+## Genuine legacy upgrade and release-readiness checkpoint
+
+At 2026-10-25T05:35:12+05:30, source **`6231133bbb465f3fba2b0f7c2b69601c07df09d9`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40145002773). This later documentation checkpoint changes no implementation.
+
+| Upgrade check | Observed result |
+| --- | --- |
+| Complete backend suite | **598 passed**, 59.25 seconds locally and 31.54 seconds on GitHub; existing upstream TestClient warning remains |
+| AST / hosted-validator / authenticated-proxy checks | **34 / 7 / 7 passed** on GitHub |
+| Ruff, ESLint, TypeScript, production build | Passed on GitHub; changed backend suite and Ruff passed locally |
+| Generated-contract drift and credential/history checks | Passed on GitHub; local working/staged and ignored-private-path checks passed |
+| Hosted Chromium | **46 passed** in 49.4 seconds; frontend source unchanged by this backend follow-up |
+| Original database, read-only | Still 5 audits, 7 pages, 26 issues, 29 recommendations, 0 decisions, 3 admissions and 6 AI reservations |
+| Additional live AI requests / website requests / pilot repository changes | **0 / 0 / 0** for this iteration |
+
+The release audit found that the previous migration test created a current-schema database and only lowered its version number, without creating a decision. It now has an honest reopen-test name. Fifteen new cases start with the actual pre-repository-workflow schema from source `3a90c3c`, seed synthetic old payloads, timestamped rejection/approval events, quota salt, admission and AI reservations, and only then initialize the current Store. Assertions preserve every original row/payload, history, score, decisions, salt, charges and new project mapping, including idempotent approval and subsequent review.
+
+Four new cases first reproduced an admission bug: pre-v2 fingerprints omitted `verification_urls`, so adding the empty list in a later release stopped identical legacy requests from being reused. Normal crawls now match either known format without rewriting admissions. Tests verify active/recent reuse, API `X-Audit-Reused`, reuse even with exhausted daily quota, and rejection of reuse for changed peer/context/options/AI opt-out/verification scope or expired completed evidence. Separate standards/specification reviews found no actionable issues in the immutable patch.
+
+The [release-readiness report](release-readiness.md) maps the approved v2 clusters to inspected source and substantive test assertions. A separate pinned public-source probe checked portfolio commit `193eb61222d1ee695077cdbff095c50de0ca1db1`: fetched page/layout text matched its Git blob hashes, the production AST adapter added only a home-page title override while preserving description/layout, and a dynamic project route was refused. No portfolio imports/config/build/scripts were executed; the temporary source input was deleted. The observed root lacks the owner validator and an ESLint configuration for its declared `next lint` script. Owner lint preparation is recommended from the version-matched official documentation; no actual pilot lint/build failure is claimed.
+
+The owner confirmed that the GitHub App is not yet set up. No live credentials were read or printed, no original counters reset, and tests use fresh databases with live credentials disabled. Local services were not restarted and are not acceptance evidence for this source. Automatic approval previously rejected dashboard restart as “blocked by policy”; manual restart remains required. App installation/configuration, owner workflow, reviewed exact-patch publication, human merge/deployment, live verification and human review remain pending. Static source compatibility and passing SEOPilot fixtures do not satisfy that real release gate.
+
 ## Optional GitHub setup isolation checkpoint
 
 At 2026-10-25T05:11:33+05:30, source **`dca6465843d8565429fa39e6d2a8e036aa33cb83`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40143543032). This later documentation checkpoint changes no implementation.

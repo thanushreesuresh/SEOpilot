@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T05:35:12+05:30 — Record hosted upgrade acceptance and real pilot boundaries
+
+- Changed: Recorded source `6231133bbb465f3fba2b0f7c2b69601c07df09d9` and its passing hosted run in README, verification, submission and release-readiness records. Captured the owner's current confirmation that App setup is pending.
+- Validation: Hosted 598 backend tests in 31.54 seconds, 46 browser scenarios in 49.4 seconds, 34 AST and seven validator/proxy tests each passed with lint/type/build/contracts/credential-history checks. Original read-only counts unchanged. Documentation link/credential checks passed; both independent review axes found no actionable issues.
+- Limits: No original counters reset or live credentials read. Public source was inspected as data; no website requests, pilot writes, target script execution or OpenAI API calls. Owner App/workflow/lint preparation, manual local restart, reviewed PR/manual deployment/live verification and human review remain pending.
+
 ## 2026-10-25T05:28:25+05:30 — Preserve legacy duplicate reuse and establish release evidence
 
 - Changed: Recognize the released pre-v2 admission fingerprint for unchanged normal crawls alongside the current format; fixed-URL verification keeps its distinct binding. Added the actual historical schema and 15 upgrade regressions covering raw rows, decisions, scores, quota salt/charges, reuse at the daily limit, API reuse headers and changed-request isolation. Renamed the prior current-schema reopen test honestly. Added a line-linked release-readiness audit and pinned public portfolio compatibility evidence; updated README.
