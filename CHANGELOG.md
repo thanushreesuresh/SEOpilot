@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T07:19:44+05:30 — Verify restored dashboard assets and hosted UI checks
+
+- Result: After port 3000 became free, started the development dashboard with the normal npm command. The local stylesheet (including dashboard rules), all 17 JavaScript assets, history and usage API routes returned HTTP 200. A hard browser refresh is needed for the old page; direct local rendered inspection remains permission-blocked.
+- Hosted validation: Source 9f6dbd31a5c48ebe15516ed53afd5cddfe6b2db1 passed run 40151593481: 623 backend tests in 24.20 seconds, 48 browser scenarios in 35.1 seconds, two build-guard cases, helper/proxy/static/build/contract/credential-history checks. Existing desktop discovery and mobile sample fixture screenshots from this run were inspected. Browser cases use the development server; the production build is a separate passing check.
+- Documentation: Corrected recovery instructions to the normal npm dev command after PowerShell did not forward an extra port argument. Excluded framework-generated local instruction/type-file changes from this commit. No design rewrite, credentials, quotas or portfolio changes. Human review pending.
+
 ## 2026-10-25T07:08:23+05:30 — Prevent unstyled dashboards from stale production assets
 
 - Found: The running Next production server returned HTTP 200 HTML referencing a missing stylesheet (404) and a failed JavaScript chunk. Existing CSS source and a newer built stylesheet were present; the screenshot matched stale runtime asset references rather than missing design rules.
