@@ -1,8 +1,12 @@
 # SEOPilot v2 release readiness
 
-Updated 2026-10-25T05:35:12+05:30. **The owned-pilot release gate is not complete.** This audit separates implemented behavior and fixture evidence from an actual App connection, reviewed PR, hosted website build and deployed result. Human review remains pending.
+Updated 2026-10-25T06:23:12+05:30. **The owned-pilot release gate is not complete.** The real App connection is now verified; a reviewed PR, hosted website build and deployed result remain pending. Human review remains pending.
 
-The latest fully hosted implementation checkpoint is [`6231133`](https://github.com/thanushreesuresh/SEOpilot/commit/6231133bbb465f3fba2b0f7c2b69601c07df09d9): [598 backend and 46 browser cases passed](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40145002773), with static/build/contract/credential checks. The genuine upgrade regressions and legacy duplicate-reuse fix are included. Detailed historical results remain in [verification](verification.md). The owner confirmed during this checkpoint that the GitHub App is not set up yet.
+The latest fully hosted implementation checkpoint is [`6231133`](https://github.com/thanushreesuresh/SEOpilot/commit/6231133bbb465f3fba2b0f7c2b69601c07df09d9): [598 backend and 46 browser cases passed](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40145002773), with static/build/contract/credential checks. The genuine upgrade regressions and legacy duplicate-reuse fix are included. Detailed historical results remain in [verification](verification.md).
+
+After the owner configured and installed the App, live GitHub checks returned exactly one eligible repository: `thanushreesuresh/thanushree-portfolio`. The selected-repository installation has exactly the required permissions. Repository-scoped token exchange, authorization and reading `main` passed. A fresh-database API probe returned connection state `ready`, created and retrieved an isolated project mapping, and returned no credential fields. The trusted local AST helper prepared an illustrative home-page edit from authenticated source and refused the dynamic-route probe; source remained in memory and no proposal was saved. All 116 targeted App/setup/storage/workflow tests passed in 34.76 seconds. No OpenAI calls, remote repository writes or original database changes occurred.
+
+The existing backend process still returns an older unconfigured connection response and needs manual restart. The target workflow lookup returned not found at portfolio commit `193eb61222d1ee695077cdbff095c50de0ca1db1`. No hosted portfolio validation or deployment is established by the connection probe.
 
 ## Owned portfolio source compatibility
 
@@ -30,9 +34,9 @@ The bounded audit inspected implementation and substantive test bodies. **Fixtur
 | Approved requirement cluster | Implementation / acceptance evidence | Remaining boundary |
 | --- | --- | --- |
 | Local stack, one worker and persisted jobs | [Lifespan](../backend/seopilot/app.py#L35), [runner](../backend/seopilot/runner.py#L1), [queue tests](../backend/tests/test_runner.py#L1) | Current local processes require manual restart. |
-| Selected App repositories, owner allowlist, least permissions, scoped short-lived tokens | [App authorization](../backend/seopilot/github_app.py#L1), [request-level authorization/expiry/revocation tests](../backend/tests/test_github_app.py#L138) | Real portfolio App setup and token exchange pending. |
+| Selected App repositories, owner allowlist, least permissions, scoped short-lived tokens | [App authorization](../backend/seopilot/github_app.py#L1), [request-level authorization/expiry/revocation tests](../backend/tests/test_github_app.py#L138) | Real portfolio installation, token exchange and read authorization passed; publication remains pending. |
 | Keys/tokens/source excluded from public responses, logs and AI requests | [Provider boundary](../backend/seopilot/github_app.py#L1), [fixed parser environment](../backend/seopilot/metadata_adapter.py#L50), [private-source/AI tripwire](../backend/tests/test_fix_workflow.py#L197) | User-managed key storage permissions require human setup; public source inspection here is separate from private-source processing. |
-| Ownership confirmation, origin/repository/branch/subdirectory mapping and bounded polling | [Contracts](../backend/seopilot/fix_models.py#L1), [project API](../backend/seopilot/fix_api.py#L1), [workflow tests](../backend/tests/test_fix_workflow.py#L1) | Actual mapping confirmation pending. |
+| Ownership confirmation, origin/repository/branch/subdirectory mapping and bounded polling | [Contracts](../backend/seopilot/fix_models.py#L1), [project API](../backend/seopilot/fix_api.py#L1), [workflow tests](../backend/tests/test_fix_workflow.py#L1) | Real repository mapping passed in an isolated database; saved operator mapping remains pending. |
 | Static page title/description only; inherited metadata, Unicode, escaping and unsupported routes | [AST](../repository-tools/metadata.mjs#L63), [real helper tests](../backend/tests/test_metadata_adapter.py#L16), [parser suite](../repository-tools/metadata.test.mjs#L1) | Home source probe passes; project routes remain manual. Actual render pending. |
 | Forbidden shared-layout/canonical/indexing/content/dependency/workflow edits; no local repository execution | [Prepare](../backend/seopilot/fix_engine.py#L138), [forbidden write tests](../backend/tests/test_github_app.py#L279), [nonexecution test](../backend/tests/test_metadata_adapter.py#L40) | Scope remains deliberately limited to metadata. |
 | Immutable audit/repository/base/old-values/URLs/files/hash; three pages, five files, 100 changed lines | [Proposal construction](../backend/seopilot/fix_engine.py#L138), [immutable storage](../backend/seopilot/fix_storage.py#L66), [freeze tests](../backend/tests/test_fix_storage.py#L1) | Any source change requires a fresh proposal and review. |
@@ -53,7 +57,7 @@ The audit found two related upgrade gaps: the previous migration test merely cha
 
 ## Next owner actions
 
-1. Review/install the [private App](github-app-setup.md) on the portfolio repository and configure its ignored server settings.
+1. App configuration and installation are verified. Keep the [private App settings](github-app-setup.md) server-side and manually restart the existing backend to load them.
 2. Review and commit the [owner validation workflow and harness](../validation/README.md) to the portfolio base branch; prepare noninteractive lint. SEOPilot does not modify these files for you.
 3. Manually restart the local services, connect the confirmed production mapping with a blank application subdirectory, and obtain a current bounded live audit within the existing quota.
 4. Select only the home page for the first supported fix. Review its wording and complete diff; separately approve publication of that exact patch.

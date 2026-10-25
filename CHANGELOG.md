@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T06:23:12+05:30 — Verify installed portfolio App access
+
+- Changed: Updated README, App setup, verification, release-readiness and submission records after the owner configured and installed the private App. No application code changed.
+- Why: Replace the obsolete setup blocker with observed live authentication, selected-repository authorization and isolated project/metadata compatibility results.
+- Validation: Exactly one eligible portfolio repository with the required permissions; live connection API returned ready; isolated project creation/history and local home-page AST probe passed; dynamic route refused. Targeted App/setup/storage/workflow suite: 116 passed in 34.76 seconds. Original database counters unchanged; no OpenAI calls or remote repository writes. Existing backend still needs manual restart; target validation workflow is missing.
+- Limits: No saved operator mapping/proposal or approved wording; no full-suite/browser rerun, pilot PR, hosted website checks, merge/deployment or live verification. Human review pending. Credentials were used only server-side and omitted from records.
+
 ## 2026-10-25T05:35:12+05:30 — Record hosted upgrade acceptance and real pilot boundaries
 
 - Changed: Recorded source `6231133bbb465f3fba2b0f7c2b69601c07df09d9` and its passing hosted run in README, verification, submission and release-readiness records. Captured the owner's current confirmation that App setup is pending.

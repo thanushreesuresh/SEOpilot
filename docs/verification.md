@@ -2,6 +2,16 @@
 
 Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and committed lockfiles. Historical real SEO/AI observations remain in the [bounded live record](live-validation-2026-10-25.md).
 
+## Installed App live connection check
+
+At 2026-10-25T06:23:12+05:30, the owner-configured App authenticated to GitHub and returned one selected-repository installation with exactly Metadata/Actions read and Contents/Pull requests write. Exactly one eligible repository was returned: `thanushreesuresh/thanushree-portfolio`. Scoped authorization and reading `main` passed at `193eb61222d1ee695077cdbff095c50de0ca1db1`.
+
+Using a fresh temporary SQLite database, disabled AI and no audit worker, the real `/api/github/connection` route returned `ready`; project creation/history passed against that repository and user-confirmed production origin. The trusted AST helper read authenticated sources as data, prepared an illustrative `app/page.tsx` title override and refused the unsupported dynamic route. Source stayed in memory, no proposal was retained and no target code was executed. No OpenAI request, repository write, publication, merge or deployment occurred. Read-only before/after checks confirmed the operator's audit/decision/admission/AI counters were unchanged. The ignored environment file and external key path were checked without printing secrets.
+
+Command: from `backend/`, `../.venv/Scripts/python.exe -m pytest tests/test_github_app.py tests/test_optional_github_setup.py tests/test_fix_storage.py tests/test_fix_workflow.py -q` — **116 passed in 34.76 seconds**, with the existing Starlette/httpx deprecation warning. These fixture tests disable dotenv/live credentials; the separate live probe used the App credentials only. This documentation-only checkpoint does not repeat the earlier full hosted suite.
+
+Remaining: the running local backend still exposes an older unconfigured response and requires manual restart. The portfolio's `seopilot-validation.yml` lookup returned not found. Owner workflow installation, saved project mapping, current live-audit evidence, wording/diff review, exact-patch publication approval, hosted checks, manual merge/deployment and live verification remain pending. Human review is pending.
+
 ## Genuine legacy upgrade and release-readiness checkpoint
 
 At 2026-10-25T05:35:12+05:30, source **`6231133bbb465f3fba2b0f7c2b69601c07df09d9`** passed the [complete hosted run](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40145002773). This later documentation checkpoint changes no implementation.
