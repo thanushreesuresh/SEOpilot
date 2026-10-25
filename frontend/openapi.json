@@ -3399,7 +3399,14 @@
       "UsageStatus": {
         "properties": {
           "limit": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Limit",
             "default": 3
           },
@@ -3408,7 +3415,14 @@
             "title": "Used"
           },
           "remaining": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Remaining"
           },
           "reset_at": {
@@ -3438,6 +3452,11 @@
           "ai_calls_remaining": {
             "type": "integer",
             "title": "Ai Calls Remaining"
+          },
+          "unlimited": {
+            "type": "boolean",
+            "title": "Unlimited",
+            "default": false
           }
         },
         "additionalProperties": false,
@@ -3450,7 +3469,8 @@
           "retry_after",
           "window_hours",
           "ai_enabled",
-          "ai_calls_remaining"
+          "ai_calls_remaining",
+          "unlimited"
         ],
         "title": "UsageStatus"
       },

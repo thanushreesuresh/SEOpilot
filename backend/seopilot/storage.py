@@ -175,20 +175,24 @@ class Store:
             audit.progress.stage = "crawling"
             self._write(db, audit)
 
-    def _quota(self, db, identity: str, tick: float) -> dict:
+    def _quota(self, db, identity: str, tick: float, *, unlimited: bool = False) -> dict:
         row = db.execute("SELECT COUNT(*),MIN(admitted_at) FROM admissions WHERE identity=? AND admitted_at>?",
                          (identity, tick - 86400)).fetchone()
         used, earliest = row
+        if unlimited:
+            return {"limit": None, "used": used, "remaining": None, "reset_at": None, "retry_after": 0,
+                    "unlimited": True}
         reset = earliest + 86400 if earliest is not None else None
         return {"limit": 3, "used": used, "remaining": max(0, 3 - used),
                 "reset_at": datetime.fromtimestamp(reset, timezone.utc).isoformat() if reset is not None else None,
                 "retry_after": max(1, math.ceil(reset - tick)) if used >= 3 else 0}
 
-    def quota(self, identity: str, *, at: float | None = None) -> dict:
+    def quota(self, identity: str, *, at: float | None = None, unlimited: bool = False) -> dict:
         with self.connection() as db:
-            return self._quota(db, self._identity_key(identity), time.time() if at is None else at)
+            return self._quota(db, self._identity_key(identity), time.time() if at is None else at, unlimited=unlimited)
 
-    def admit_audit(self, audit: Audit, identity: str, *, at: float | None = None, max_pending: int = 5) -> tuple[Audit | None, str, dict]:
+    def admit_audit(self, audit: Audit, identity: str, *, at: float | None = None, max_pending: int = 5,
+                    unlimited: bool = False) -> tuple[Audit | None, str, dict]:
         """Quota, duplicate detection and queue insertion share one write lock."""
         tick = time.time() if at is None else at
         key = self._identity_key(identity)
@@ -202,7 +206,7 @@ class Store:
                               if not audit.verification_urls else fingerprint)
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
-            quota = self._quota(db, key, tick)
+            quota = self._quota(db, key, tick, unlimited=unlimited)
             duplicate = db.execute("""SELECT a.payload FROM admissions q JOIN audits a ON a.id=q.audit_id
                 WHERE q.identity=? AND q.fingerprint IN (?,?) AND
                 (a.status IN ('queued','crawling','analyzing','reviewing') OR
@@ -211,14 +215,14 @@ class Store:
                                                         bool(audit.verification_urls), tick - 900)).fetchone()
             if duplicate:
                 return Audit.model_validate_json(duplicate[0]), "reused", quota
-            if not quota["remaining"]:
+            if not unlimited and not quota["remaining"]:
                 return None, "daily", quota
             count = db.execute("SELECT COUNT(*) FROM audits WHERE status IN ('queued','crawling','analyzing','reviewing')").fetchone()[0]
             if count >= max_pending:
                 return None, "queue", quota
             self._write(db, audit)
             db.execute("INSERT INTO admissions VALUES(?,?,?,?)", (audit.id, key, fingerprint, tick))
-            return audit, "created", self._quota(db, key, tick)
+            return audit, "created", self._quota(db, key, tick, unlimited=unlimited)
 
     def reserve_ai_call(self, audit_id: str, daily_limit: int, max_per_audit: int = 2) -> bool:
         """Reservations count even on timeout; never silently retry paid calls."""

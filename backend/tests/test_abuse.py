@@ -9,6 +9,7 @@ from starlette.datastructures import Headers
 from seopilot.abuse import canonical_identity, client_identity
 from seopilot.app import create_app
 from seopilot.models import Audit
+from seopilot.settings import Settings
 from seopilot.storage import Store
 
 
@@ -130,3 +131,76 @@ def test_api_quota_headers_forgery_restart_demo_and_optout(tmp_path):
     with TestClient(create_app(path, start_worker=False), base_url="http://localhost") as client:
         assert client.get("/api/usage").json()["remaining"] == 0
         assert client.post("/api/audits", json={"url": "https://example.com/fifth"}).status_code == 429
+
+
+@pytest.mark.parametrize("address,proxied", [("127.0.0.1", False), ("::1", False),
+                                            ("::ffff:127.0.0.1", True)])
+def test_local_unlimited_survives_exhaustion_and_restart_without_resetting_history(tmp_path, address, proxied):
+    path = tmp_path / "local.db"
+    store = Store(path)
+    identity = canonical_identity(address)
+    for index in range(3):
+        item, reason, _ = store.admit_audit(audit(index), identity)
+        assert reason == "created"
+        item.status = "completed"
+        store.save(item)
+    before_ids = {item.id for item in store.history()}
+    config = Settings(local_unlimited_audits=True, ai_daily_call_limit=0)
+    app = create_app(path, start_worker=False, settings=config)
+    with TestClient(app, base_url="http://localhost", client=("127.0.0.1" if proxied else address, 50000)) as client:
+        headers = ({"x-seopilot-proxy-token": app.state.proxy_token, "x-seopilot-client-ip": address}
+                   if proxied else {})
+        usage = client.get("/api/usage", headers=headers).json()
+        assert usage["unlimited"] and usage["used"] == 3
+        assert usage["limit"] is None and usage["remaining"] is None
+        assert usage["reset_at"] is None and usage["retry_after"] == 0
+        # More than both the old daily limit and ten-request burst guard.
+        for index in range(12):
+            response = client.post("/api/audits", headers=headers,
+                                   json={"url": f"https://example.com/local-{index}", "allow_ai": False})
+            assert response.status_code == 202
+            assert "RateLimit-Limit" not in response.headers
+            saved = app.state.store.get(response.json()["id"])
+            saved.status = "completed"
+            app.state.store.save(saved)
+        reused = client.post("/api/audits", headers=headers,
+                             json={"url": "https://example.com/local-0", "allow_ai": False})
+        assert reused.status_code == 202 and reused.headers["X-Audit-Reused"] == "true"
+        assert not app.state.store.reserve_ai_call(saved.id, 0)
+    restored = Store(path)
+    assert restored.quota(identity)["used"] == 15
+    assert before_ids.issubset({item.id for item in restored.history()})
+    with restored.connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM ai_calls").fetchone()[0] == 0
+    with TestClient(create_app(path, start_worker=False, settings=config), base_url="http://localhost",
+                    client=(address, 50000)) as client:
+        assert client.get("/api/usage").json()["unlimited"]
+        assert client.post("/api/audits", json={"url": "https://example.com/after-restart", "allow_ai": False}).status_code == 202
+
+
+@pytest.mark.parametrize("proxied", [False, True])
+def test_unlimited_setting_keeps_remote_clients_limited_and_rejects_spoofed_localhost(tmp_path, proxied):
+    app = create_app(tmp_path / "remote.db", start_worker=False, settings=Settings(local_unlimited_audits=True))
+    with TestClient(app, base_url="http://localhost", client=("127.0.0.1" if proxied else "198.51.100.4", 50000)) as client:
+        headers = {"x-forwarded-for": "127.0.0.1", "x-real-ip": "::1"}
+        if proxied:
+            headers.update({"x-seopilot-proxy-token": app.state.proxy_token, "x-seopilot-client-ip": "198.51.100.4"})
+        usage = client.get("/api/usage", headers=headers).json()
+        assert not usage["unlimited"] and usage["remaining"] == 3
+        for index in range(3):
+            assert client.post("/api/audits", headers=headers,
+                               json={"url": f"https://example.com/{index}", "allow_ai": False}).status_code == 202
+        assert client.post("/api/audits", headers=headers,
+                           json={"url": "https://example.com/fourth", "allow_ai": False}).status_code == 429
+        assert client.get("/api/usage", headers={"x-seopilot-client-ip": "127.0.0.1"}).status_code == 403
+
+
+def test_unlimited_local_queue_capacity_still_applies(tmp_path):
+    app = create_app(tmp_path / "capacity.db", start_worker=False, settings=Settings(local_unlimited_audits=True))
+    with TestClient(app, base_url="http://localhost", client=("127.0.0.1", 50000)) as client:
+        for index in range(5):
+            assert client.post("/api/audits", json={"url": f"https://example.com/{index}", "allow_ai": False}).status_code == 202
+        response = client.post("/api/audits", json={"url": "https://example.com/full", "allow_ai": False})
+        assert response.status_code == 429 and "queue is full" in response.json()["detail"]
+        usage = client.get("/api/usage").json()
+        assert usage["unlimited"] and usage["used"] == 5

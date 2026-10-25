@@ -39,3 +39,15 @@ def client_identity(request: Request) -> str:
         return canonical_identity(forwarded)
     # X-Forwarded-For, Forwarded and X-Real-IP are deliberately ignored.
     return canonical_identity(peer)
+
+
+def is_loopback_client(request: Request) -> bool:
+    """Inspect the original address after client_identity authenticates proxy headers."""
+    raw = request.headers.get("x-seopilot-client-ip") or (request.client.host if request.client else "unknown")
+    try:
+        address = ipaddress.ip_address(raw)
+    except ValueError:
+        return False
+    if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped:
+        address = address.ipv4_mapped
+    return address.is_loopback

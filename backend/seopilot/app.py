@@ -14,7 +14,7 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from .abuse import client_identity
+from .abuse import client_identity, is_loopback_client
 from .models import Audit, AuditRequest, AuditSummary, DecisionRequest, Progress, Recommendation, UsageStatus
 from .runner import execute, run_queue
 from .settings import BACKEND_ROOT, Settings, proxy_token
@@ -62,6 +62,7 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
     async def guard(request: Request, call_next):
         try:
             request.state.identity = client_identity(request)
+            request.state.unlimited_audits = config.local_unlimited_audits and is_loopback_client(request)
         except HTTPException as exc:
             return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
         if request.method in ("POST", "PATCH", "PUT", "DELETE"):
@@ -85,7 +86,9 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
         response.headers["Cache-Control"] = "no-store"
         return response
 
-    def admit():
+    def admit(request: Request):
+        if request.state.unlimited_audits:
+            return
         tick = time.monotonic()
         while starts and tick - starts[0] >= 60:
             starts.popleft()
@@ -107,7 +110,7 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
     async def usage(request: Request):
         store = request.app.state.store
         ai_ready = config.ai_enabled and bool(os.getenv("OPENAI_API_KEY", "").strip()) and os.getenv("OPENAI_MODEL", "gpt-6-luna").strip() == "gpt-6-luna"
-        return UsageStatus(**store.quota(request.state.identity), ai_enabled=ai_ready,
+        return UsageStatus(**store.quota(request.state.identity, unlimited=request.state.unlimited_audits), ai_enabled=ai_ready,
                            ai_calls_remaining=store.ai_calls_remaining(config.ai_daily_call_limit))
 
     @app.post("/api/audits", response_model=Audit, status_code=202)
@@ -118,14 +121,16 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
             url = normalize_url(body.url)
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from None
-        admit()
+        admit(request)
         if request.app.state.worker is not None and request.app.state.worker.done():
             raise HTTPException(503, "The audit worker stopped. Restart the local API.")
         audit = Audit(url=url, origin=origin_of(url), options=body.options,
                       allow_ai=body.allow_ai, business_context=body.business_context,
                       progress=Progress(limit=body.options.page_limit))
-        admitted, reason, quota = request.app.state.store.admit_audit(audit, request.state.identity)
-        headers = {"RateLimit-Limit": "3", "RateLimit-Remaining": str(quota["remaining"])}
+        admitted, reason, quota = request.app.state.store.admit_audit(
+            audit, request.state.identity, unlimited=request.state.unlimited_audits)
+        headers = {} if request.state.unlimited_audits else {
+            "RateLimit-Limit": "3", "RateLimit-Remaining": str(quota["remaining"])}
         if reason == "daily":
             raise HTTPException(429, "Daily audit allowance reached: 3 audits per rolling 24 hours. Try again after the reset.",
                                 headers={**headers, "Retry-After": str(quota["retry_after"])})
@@ -172,7 +177,7 @@ def create_app(db_path: str | Path | None = None, *, start_worker: bool = True, 
     async def demo(request: Request):
         from .demo import build_demo
 
-        admit()
+        admit(request)
         # Current fixtures are free/offline; old snapshots and decisions remain.
         audit = await build_demo()
         return request.app.state.store.get_or_create_demo(audit)

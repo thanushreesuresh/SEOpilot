@@ -72,6 +72,30 @@ test("exhausted live allowance keeps samples available", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Explore sample audit", exact: true })).toBeEnabled();
 });
 
+test("unlimited local allowance permits audits despite exhausted legacy counters", async ({ page, request }) => {
+  const sample = await sampleAudit(request);
+  await page.route("**/api/usage", (route) => route.fulfill({ json: {
+    unlimited: true, limit: 3, used: 3, remaining: 0, reset_at: "2026-10-25T12:00:00Z", retry_after: 3600, window_hours: 24, ai_enabled: false, ai_calls_remaining: 0,
+  } }));
+  let submitted = false;
+  await page.route("**/api/audits", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    expect(route.request().postDataJSON()).toMatchObject({ url: "https://example.com/", allow_ai: false });
+    submitted = true;
+    return route.fulfill({ status: 202, json: { ...sample, mode: "live", allow_ai: false, ai_status: "unavailable" } });
+  });
+  await page.goto("/");
+  await expect(page.getByText("Unlimited local audits", { exact: true })).toBeVisible();
+  await expect(page.getByText("No daily audit limit on this computer.", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Next allowance returns|0 of 3 live audits left/)).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Run audit", exact: true })).toBeEnabled();
+  await expect(page.getByRole("checkbox", { name: /Include optional AI suggestions/i })).toBeDisabled();
+  await page.getByRole("textbox", { name: "Website URL", exact: true }).fill("https://example.com/");
+  await page.getByRole("button", { name: "Run audit", exact: true }).click();
+  await expect(page.getByText(sample.summary, { exact: true })).toBeVisible();
+  expect(submitted).toBe(true);
+});
+
 test("AI can be switched off and duplicate audit reuse is explained", async ({ page, request }) => {
   const sample = await sampleAudit(request);
   await page.route("**/api/usage", (route) => route.fulfill({ json: {

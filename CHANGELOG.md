@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T07:26:17+05:30 — Enable unlimited localhost audit testing
+
+- Changed: Added the explicit server-only `SEOPILOT_LOCAL_UNLIMITED_AUDITS` setting, authenticated-loopback daily/burst admission exemption, nullable unlimited usage contract, matching dashboard label/button behavior, and the same exemption for live verification. Updated backend settings/storage/API tests, generated frontend contracts, browser scenario, safe environment example and README. Default/public limits remain unchanged.
+- Local result: Enabled the setting in the ignored local environment, restarted the backend, stopped the dashboard before a successful production build, and started the updated dashboard on port 3000. The proxied usage response reports unlimited with no reset; dashboard HTML and all eight referenced CSS/JS assets returned 200. Sample creation completed without AI; the real AI-disabled smoke audit completed with one assessed page after the original three admissions. Existing admissions/history were retained and AI allowance remained 14.
+- Validation: Final full backend suite passed all 632 tests in 92.92 seconds. Ruff, frontend lint/type checks, production build, 34 AST tests, seven validator tests, seven proxy tests, two build-guard cases, reproducible generated contracts, credential/private-path/link checks and diff whitespace checks passed. Independent standards and specification reviews found no actionable issues, including the added exhausted-local/limited-remote verification regression.
+- Limits: Queue/crawl/AI spending and draft-PR publication bounds remain. A local reverse proxy also appears local; this opt-in is for direct local testing. Existing upstream TestClient warning remains. The browser attempt against the old runtime failed before the new scenario and was stopped; local rendered access remains permission-blocked and the new browser scenario awaits hosted execution. Human review pending. No paid calls, counter reset or portfolio changes.
+
 ## 2026-10-25T07:19:44+05:30 — Verify restored dashboard assets and hosted UI checks
 
 - Result: After port 3000 became free, started the development dashboard with the normal npm command. The local stylesheet (including dashboard rules), all 17 JavaScript assets, history and usage API routes returned HTTP 200. A hard browser refresh is needed for the old page; direct local rendered inspection remains permission-blocked.

@@ -1369,11 +1369,11 @@ export interface components {
              * Limit
              * @default 3
              */
-            limit: number;
+            limit: number | null;
             /** Used */
             used: number;
             /** Remaining */
-            remaining: number;
+            remaining: number | null;
             /** Reset At */
             reset_at: string | null;
             /** Retry After */
@@ -1387,6 +1387,11 @@ export interface components {
             ai_enabled: boolean;
             /** Ai Calls Remaining */
             ai_calls_remaining: number;
+            /**
+             * Unlimited
+             * @default false
+             */
+            unlimited: boolean;
         };
         /** ValidationError */
         ValidationError: {

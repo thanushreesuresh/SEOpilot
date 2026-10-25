@@ -14,15 +14,24 @@ def test_offline_suite_cannot_inherit_a_live_api_key():
 
 
 def test_safe_defaults_and_invalid_config(monkeypatch):
-    for name in ("SEOPILOT_AI_ENABLED", "SEOPILOT_AI_DAILY_CALL_LIMIT", "OPENAI_MAX_OUTPUT_TOKENS"):
+    for name in ("SEOPILOT_AI_ENABLED", "SEOPILOT_AI_DAILY_CALL_LIMIT", "OPENAI_MAX_OUTPUT_TOKENS",
+                 "SEOPILOT_LOCAL_UNLIMITED_AUDITS"):
         monkeypatch.delenv(name, raising=False)
     assert Settings.from_env() == Settings()
     for name, value in [("OPENAI_MAX_OUTPUT_TOKENS", "2501"), ("SEOPILOT_AI_DAILY_CALL_LIMIT", "-1"),
-                        ("SEOPILOT_AI_DAILY_CALL_LIMIT", "unlimited"), ("SEOPILOT_AI_ENABLED", "yes")]:
+                        ("SEOPILOT_AI_DAILY_CALL_LIMIT", "unlimited"), ("SEOPILOT_AI_ENABLED", "yes"),
+                        ("SEOPILOT_LOCAL_UNLIMITED_AUDITS", "yes")]:
         with monkeypatch.context() as context:
             context.setenv(name, value)
             with pytest.raises(ValueError, match=name):
                 Settings.from_env()
+
+
+def test_unlimited_local_audits_are_explicitly_enabled(monkeypatch):
+    monkeypatch.setenv("SEOPILOT_LOCAL_UNLIMITED_AUDITS", "true")
+    assert Settings.from_env().local_unlimited_audits is True
+    monkeypatch.setenv("SEOPILOT_LOCAL_UNLIMITED_AUDITS", "false")
+    assert Settings.from_env().local_unlimited_audits is False
 
 
 def test_proxy_token_persists_and_bad_file_fails_closed(tmp_path):

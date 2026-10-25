@@ -169,10 +169,11 @@ class Workflow:
 
 
 @contextmanager
-def workflow_context(path, fake=None, *, existing_audit=None, existing_project=None):
+def workflow_context(path, fake=None, *, existing_audit=None, existing_project=None, settings=None,
+                     client_address="testclient"):
     fake = fake or FakeGitHub()
-    app = create_app(path, start_worker=False, github_client=fake, settings=Settings(ai_enabled=False))
-    with TestClient(app, base_url="http://localhost") as client:
+    app = create_app(path, start_worker=False, github_client=fake, settings=settings or Settings(ai_enabled=False))
+    with TestClient(app, base_url="http://localhost", client=(client_address, 50000)) as client:
         audit = existing_audit or audit_fixture()
         if not existing_audit:
             app.state.store.admit_audit(audit, "unknown")
@@ -449,6 +450,27 @@ def test_live_verification_cannot_bypass_existing_daily_audit_allowance(workflow
     assert workflow.store.quota("unknown")["used"] == 3
     assert workflow.post(f"fix-runs/{run['id']}/verify").status_code == 429
     assert workflow.get(run["id"])["verification_audit_id"] is None
+
+
+@pytest.mark.parametrize("client_address,expected_status", [("127.0.0.1", 202), ("198.51.100.4", 429)])
+def test_unlimited_local_setting_applies_to_live_verification_only_for_local_clients(tmp_path, client_address, expected_status):
+    with workflow_context(tmp_path / "verify-local.db", client_address=client_address,
+                          settings=Settings(ai_enabled=False, local_unlimited_audits=True)) as workflow:
+        run = workflow.publish(workflow.create())
+        merge(workflow, run)
+        for index in range(3):
+            item = Audit(url=f"{ORIGIN}/other-{index}", origin=ORIGIN, status="completed", allow_ai=False)
+            assert workflow.store.admit_audit(item, client_address)[1] == "created"
+        assert workflow.store.quota(client_address)["remaining"] == 0
+        response = workflow.post(f"fix-runs/{run['id']}/verify")
+        assert response.status_code == expected_status
+        if expected_status == 202:
+            verification = workflow.store.get(response.json()["verification_audit_id"])
+            assert verification.allow_ai is False and verification.verification_urls == [URL]
+            assert workflow.store.quota(client_address)["used"] == 4
+        else:
+            assert workflow.get(run["id"])["verification_audit_id"] is None
+        assert workflow.store.ai_calls_remaining(20) == 20
 
 
 def test_cancelled_live_verification_fails_and_retry_uses_a_fresh_admission(workflow):

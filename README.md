@@ -44,6 +44,7 @@ Add your key only to `OPENAI_API_KEY` in **backend/.env** and restart the backen
 | --- | --- |
 | `OPENAI_API_KEY` | Blank; server-only credential you supply locally |
 | `OPENAI_MODEL` | `gpt-6-luna`; fixed allowed model |
+| `SEOPILOT_LOCAL_UNLIMITED_AUDITS` | `false`; set `true` for unlimited daily/burst audit requests from verified localhost clients |
 | `SEOPILOT_AI_ENABLED` | `true`; set `false` and restart for zero AI calls |
 | `SEOPILOT_AI_DAILY_CALL_LIMIT` | `20`; global maximum requests per rolling 24 hours, configurable 0–100 |
 | `OPENAI_MAX_OUTPUT_TOKENS` | `2500`; per-call ceiling, allowed 512–2500, including reasoning |
@@ -61,6 +62,7 @@ The safe API entry point binds loopback, disables forwarded-header trust and acc
 
 ## Audit and spending protection
 
+- For unrestricted local audit testing in the port 3000 dashboard, set `SEOPILOT_LOCAL_UNLIMITED_AUDITS=true` in ignored `backend/.env` and restart the API. The dashboard shows **Unlimited local audits**. This removes the daily and ten-requests/minute admission limits for direct or authenticated-proxy loopback clients, including live verification. Remote clients retain their normal limits. Saved history, admissions and duplicate reuse remain; AI spending, queue capacity and per-crawl safety bounds still apply. `/api/usage` returns `unlimited: true`, null `limit`/`remaining`, and no reset countdown. Set the flag back to `false` and restart to restore the local allowance without deleting data. Keep this opt-in for direct local testing; a loopback reverse proxy also appears local.
 - Public HTTP users get three accepted live audits per IP per **rolling 24 hours**. A fourth distinct audit receives `429` and `Retry-After` until the oldest admission expires. Counters persist across restarts and concurrent submissions. Admitted failures still count; invalid URLs and a full queue do not.
 - Identical requests from the same IP reuse an active audit, or a completed result admitted within 15 minutes, without consuming another admission or triggering another AI stage. Context, crawl options and the AI opt-out are part of the match. Upgrades also recognize pre-v2 fingerprints for unchanged normal crawls; frozen-URL verification stays separate and saved admissions are never rewritten.
 - At most two paid requests per audit: generation and review. Each must reserve a global allowance before calling OpenAI. Errors/timeouts retain their reservation, SDK retries are disabled, and unreviewed suggestions never publish. Output and UTF-8 input sizes are bounded. Reaching the cap preserves deterministic results.
@@ -68,7 +70,7 @@ The safe API entry point binds loopback, disables forwarded-header trust and acc
 - The dashboard displays your remaining audits and next reset, the shared AI-call allowance, a no-AI option and duplicate-reuse notices. You can refresh the allowance after a reset; sample mode remains available when live quota is exhausted.
 - The Next server derives client identity from its socket and authenticates it to the fixed loopback backend using a private generated token. Incoming forwarding/IP/token headers are discarded. The backend stores HMAC identities, groups IPv6 addresses by `/64`, and accepts stamped identity only from an authenticated loopback proxy.
 
-Local browsers normally share one loopback allowance. A reverse proxy in front of Next also shares one conservative bucket; arbitrary forwarding headers are never trusted. Preserve the SQLite database and its quota salt when restarting: deleting/replacing it resets local counters. The proxy token is generated in ignored `backend/.data/proxy-token` and stays outside production bundles.
+With the unlimited-local setting off, local browsers share one loopback allowance. A reverse proxy in front of Next also shares one conservative bucket; arbitrary forwarding headers are never trusted. Preserve the SQLite database and its quota salt when restarting: deleting/replacing it resets local counters. The proxy token is generated in ignored `backend/.data/proxy-token` and stays outside production bundles.
 
 This release remains **local and single-user**. IP limits cannot stop a botnet by themselves; the global AI cap provides the additional spending boundary. Before public hosting, add authentication, audit ownership checks and a trusted edge with rate limits. For a monetary ceiling, also configure a dedicated OpenAI project with a restricted key and [project spend limits](https://developers.openai.com/api/docs/guides/spend-limits); application request counts are not billing telemetry. Provider spend-limit enforcement may have a short delay. Live `gpt-6-luna` access and a complete generation/review workflow have been tested; see the [bounded live verification record](docs/live-validation-2026-10-25.md).
 

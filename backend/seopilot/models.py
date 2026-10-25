@@ -240,11 +240,12 @@ class DecisionRequest(Contract):
 
 
 class UsageStatus(Contract):
-    limit: int = 3
+    limit: int | None = 3
     used: int
-    remaining: int
+    remaining: int | None
     reset_at: str | None
     retry_after: int
     window_hours: int = 24
     ai_enabled: bool
     ai_calls_remaining: int
+    unlimited: bool = False

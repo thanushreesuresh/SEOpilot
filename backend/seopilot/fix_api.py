@@ -278,9 +278,12 @@ def router() -> APIRouter:
             urls = [target.url for target in run.targets]
             audit = Audit(url=urls[0], origin=project.production_origin, allow_ai=False,
                 verification_urls=urls, options=CrawlOptions(page_limit=len(urls), max_depth=0))
-            admitted, reason, quota = store.admit_audit(audit, request.state.identity)
+            admitted, reason, quota = store.admit_audit(
+                audit, request.state.identity, unlimited=request.state.unlimited_audits)
             if admitted is None:
-                raise HTTPException(429, "Live verification uses the existing daily audit allowance. Wait for capacity or its reset.",
+                message = ("The local audit queue is full. Wait for an audit to finish." if reason == "queue" else
+                           "Live verification uses the existing daily audit allowance. Wait for capacity or its reset.")
+                raise HTTPException(429, message,
                     headers={"Retry-After": str(quota["retry_after"] or 30)})
             run.verification_audit_id = admitted.id
             run.poll_until = poll_deadline()
