@@ -162,10 +162,13 @@ Frontend checks, from `frontend/`:
 npm run lint
 npm run typecheck
 npm run test:proxy
+npm run test:build-guard
 npm run build
 ```
 
-The committed lockfiles record tested dependencies. For a fully constrained Python install, add `-c backend/requirements.lock` to the installation command. A production dashboard starts with `npm run start` after building, alongside the same API service. Stop the existing dashboard process before rebuilding, then start it again: a running production process can retain asset paths from the previous build. From the repository root, use `npm --prefix frontend run build`, then `npm --prefix frontend run start` after the old process has stopped.
+The committed lockfiles record tested dependencies. For a fully constrained Python install, add `-c backend/requirements.lock` to the installation command. A production dashboard starts with `npm run start` after building, alongside the same API service. Stop the existing dashboard process before rebuilding, then start it again: a running production process can retain asset paths from the previous build. From the repository root, use `npm --prefix frontend run build`, then `npm --prefix frontend run start` after the old process has stopped. The build command checks loopback port 3000 (and `PORT` when configured) and refuses to overwrite assets while a server is listening. It exits with stop/build/restart guidance; it never terminates that server. A service starting after this check is still the operator's responsibility.
+
+If the dashboard shows plain, unstyled HTML or stays on its loading message, check for failed `/_next/static/` CSS/JavaScript requests. An old production process can return HTML referencing files removed by a later build. Stop its terminal with Ctrl+C, then run `npm --prefix frontend run dev -- --port 3000` for the local demo and hard-refresh the page. A deliberate production refresh uses stop → build → start instead. The audit database and credentials are unaffected. The desktop/mobile asset tests check actual stylesheet delivery, styled layout, loading completion, keyboard navigation and runtime/console errors.
 
 Run the repository check before commits and pushes. It checks working files, staged bytes, reachable history, ignored private paths and obvious credential patterns without printing potential secret values. GitHub Actions repeats the offline checks on pushes and pull requests, including contract drift, proxy tests, lint/type checks and a production build. No live key is supplied to CI. The [first hosted run passed](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40120505329) for implementation commit `3a90c3c`.
 

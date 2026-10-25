@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T07:08:23+05:30 — Prevent unstyled dashboards from stale production assets
+
+- Found: The running Next production server returned HTTP 200 HTML referencing a missing stylesheet (404) and a failed JavaScript chunk. Existing CSS source and a newer built stylesheet were present; the screenshot matched stale runtime asset references rather than missing design rules.
+- Changed: Added a guarded frontend build command that refuses to overwrite assets while the configured loopback dashboard port is occupied, with actionable restart guidance. Added two TCP/build-preservation tests and desktop/mobile browser regressions for CSS delivery, geometry, hydration, keyboard navigation and console health. Updated CI and README commands.
+- Validation: Both build-guard tests, frontend ESLint and TypeScript passed locally. Browser observation of localhost is blocked by the saved origin permission; local rendered acceptance and manual stale-process restart remain pending. Hosted production build/browser checks will run on push. No audit/provider requests, counters or portfolio files changed.
+- Limits: The guard checks port 3000 and optional PORT at build start; it does not manage processes or protect direct Next invocations/custom ports not declared through PORT. Human review pending.
+
 ## 2026-10-25T06:48:36+05:30 — Record hosted developer-audit acceptance
 
 - Changed: Recorded source e5928afa66071f25ff44e06b6c62cf8d6668db57 and passing hosted run 40149886193 in README, verification, pilot/readiness and submission records. No application code changed.

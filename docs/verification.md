@@ -2,6 +2,14 @@
 
 Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and committed lockfiles. Historical real SEO/AI observations remain in the [bounded live record](live-validation-2026-10-25.md).
 
+## Stylesheet delivery and stale dashboard process
+
+At 2026-10-25T07:08:23+05:30, the user's unstyled screenshot was traced to the local production server returning HTTP 200 HTML with a stylesheet reference returning HTTP 404 and one failed JavaScript asset. The source imports its existing stylesheet correctly, and a newer CSS asset exists on disk. Process inspection identified the project-specific `next start` listener; it was not terminated. The user received exact manual stop/start instructions because an earlier automatic approval review blocked dashboard restart.
+
+The normal build now checks loopback port 3000 and optional PORT before spawning Next. An occupied port or unverifiable check refuses the build with actionable guidance and leaves the running server alone. Two unit cases exercise a real TCP listener, unchanged BUILD_ID, a closed port and invalid input. Both passed, as did frontend lint/type checking. New desktop/mobile browser cases verify actual CSS response/MIME type, font/reset/layout, loading completion, overflow, keyboard-driven history navigation and runtime/console health. CI runs the guard tests before building.
+
+Local Browser access was rejected by the saved origin policy, so no local rendered/screenshot acceptance is claimed and no browser fallback was attempted. Hosted production build/browser results and manual restart remain pending at this checkpoint. The guard is an initial port check, not a process lock; undeclared custom ports, direct Next commands and a listener starting after the check remain operator responsibilities. No credentials, audit quotas or portfolio state changed.
+
 ## Real portfolio audit and approved draft PR
 
 Hosted follow-up at 2026-10-25T06:48:36+05:30: implementation source [`e5928afa66071f25ff44e06b6c62cf8d6668db57`](https://github.com/thanushreesuresh/SEOpilot/commit/e5928afa66071f25ff44e06b6c62cf8d6668db57) passed [run 40149886193](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40149886193): **623 backend tests in 31.08 seconds and 46 browser scenarios in 41.2 seconds**, 34 AST and seven validator/proxy cases each, Ruff/ESLint/type checking, production build, generated-contract drift and credential/history checks. This is SEOPilot's fixture/implementation CI; the portfolio's owner workflow and live deployment gates remain unresolved. Frontend source is unchanged; no new visual inspection is claimed.
