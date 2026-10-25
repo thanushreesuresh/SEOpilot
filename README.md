@@ -145,6 +145,10 @@ Dashboard and deployment-verification audits can use the same resolver: set `SEO
 
 The fresh portfolio report from 25 October 2026, audit `b71fab35-f2dc-40f7-8202-300b3cd95af4`, assessed eight HTML pages and found 12 observations with score 84/100, using no AI calls. Open that audit in history and choose **Download report**; Markdown and JSON copies were also saved to the owner's Downloads folder. This is a partial audit: a PDF is unchecked and retained text reached extraction limits. Failed zero-page runs remain unknown, never clean; the dashboard exposes their blocking reason and an **Inspect failed pages** action. No network audit can guarantee page access. Failed audits remain exportable evidence records and are not reused as successful results.
 
+After the owner-authorized API restart, the normal dashboard proxy independently produced audit `b5bfa1da-0d6a-4a63-9ae3-851c0b5f509b` with the same eight-page/12-finding/84 partial result and recorded resolver provenance. AI allowance remained 14. The live backend has loaded the fix; the new failure controls require the usual production frontend stop/build/start cycle. See the [verification record](docs/verification.md#portfolio-report-and-dashboard-dns-failure).
+
+Resolver-fix source [`57bcd9b`](https://github.com/thanushreesuresh/SEOpilot/commit/57bcd9b5ff5ced20b093c22fd780dc0687e0071f) passed [all hosted checks](https://github.com/thanushreesuresh/SEOpilot/actions/runs/40153134015): 637 backend tests, 51 browser scenarios, helper/proxy/build-guard checks, lint/types, production build, generated-contract drift and credential/history checks. Recorded 2026-10-25T07:38:42+05:30; hosted browser cases use isolated fixtures and the development server.
+
 The [real portfolio pilot](docs/portfolio-pilot-2026-10-25.md) assessed eight HTML pages, recorded 12 observations and produced an owner-approved [homepage metadata draft PR](https://github.com/thanushreesuresh/thanushree-portfolio/pull/1). Vercel reports its preview Ready; configured render checks and production deployment remain unverified.
 
 ## Checks

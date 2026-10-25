@@ -1,5 +1,16 @@
 # Change log
 
+## 2026-10-25T07:38:42+05:30 — Record passing hosted resolver and report checks
+
+- Verified: Exact source 57bcd9b completed hosted run 40153134015 successfully: 637 backend tests in 26.09 seconds, 51 browser scenarios in 35.6 seconds, helper/proxy/build-guard cases, lint/types, production build, generated-contract drift and credential/history checks.
+- Delivery: README, verification and AI-use records distinguish the now-working real dashboard API audit from hosted fixture/browser results. The backend restart blocker was resolved after the owner's explicit stop instruction. The local production frontend has not been rebuilt, local browser inspection remains blocked, and human review remains pending. Framework-generated files stay outside this commit.
+
+## 2026-10-25T07:37:02+05:30 — Verify the repaired normal audit workflow against the live portfolio
+
+- Runtime: The owner explicitly requested stopping the backend after its initial policy rejection. Stopped only the verified SEOPilot API listener, restarted it with the configured resolver, then submitted an AI-disabled audit through the normal Next proxy. New run b5bfa1da-0d6a-4a63-9ae3-851c0b5f509b was not reused and assessed eight pages, found 12 issues and scored 84/100 with explicit partial coverage. Exported Markdown/JSON reports to Downloads.
+- Verified: Saved Google HTTPS resolver provenance, normal 202 admission/worker/history/report flow and unchanged 14-call AI allowance. No counter resets, portfolio edits, merge or deployment. Source 57bcd9b was atomically pushed and matched remote main; its hosted production build passed, browser scenarios still running at this checkpoint.
+- Limitations: Local rendered browser access remains blocked. New frontend failure controls still require the normal stopped-server production rebuild. Human review pending.
+
 ## 2026-10-25T07:33:37+05:30 — Produce the real portfolio report and fix dashboard DNS selection
 
 - Real result first: Saved audit b71fab35-f2dc-40f7-8202-300b3cd95af4 and exported Markdown/JSON to the owner's Downloads. Eight HTML pages assessed, 12 findings, score 84/100; one PDF unchecked and retained text truncated. AI disabled; public counters and existing audit history were not reset.
