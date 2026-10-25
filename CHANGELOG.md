@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-25T06:48:36+05:30 — Record hosted developer-audit acceptance
+
+- Changed: Recorded source e5928afa66071f25ff44e06b6c62cf8d6668db57 and passing hosted run 40149886193 in README, verification, pilot/readiness and submission records. No application code changed.
+- Validation: 623 backend tests in 31.08 seconds, 46 browser scenarios in 41.2 seconds, 34 AST and seven validator/proxy each, lint/types/build, generated contracts and credential/history checks passed. Local source was previously reviewed by both independent axes; no new visual-inspection claim.
+- Limits: Portfolio draft PR #1 remains unmerged; its configured owner validator and production verification remain pending. No website/AI requests, counter resets or further portfolio writes for this checkpoint. Human release review pending.
+
 ## 2026-10-25T06:41:05+05:30 — Run the real portfolio pilot and separate developer admission
 
 - Changed: Added a terminal-only AI-disabled developer audit command, atomic capacity-aware persistence and reuse of cancellation handling; added an explicit fixed Google DoH option for local NAT64 synthesis without relaxing IP/TLS/origin/robots checks. Added 25 meaningful developer/DNS regressions. Updated README, architecture, verification, readiness and pilot/submission records.
