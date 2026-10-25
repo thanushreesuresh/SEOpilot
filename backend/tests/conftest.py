@@ -5,6 +5,7 @@ import os
 # Set before test modules import app.py: don't load backend/.env during pytest.
 # Individual SDK contract tests explicitly install harmless fake credentials.
 os.environ["PYTHON_DOTENV_DISABLED"] = "1"
+os.environ["SEOPILOT_CRAWL_DNS"] = "system"
 os.environ["OPENAI_API_KEY"] = ""
 # Unit contracts exercise injected fake providers even when the developer/CI has
 # the runtime kill switch off. Credentials remain blank and dotenv stays disabled.

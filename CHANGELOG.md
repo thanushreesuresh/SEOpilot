@@ -1,5 +1,13 @@
 # Change log
 
+## 2026-10-25T07:33:37+05:30 — Produce the real portfolio report and fix dashboard DNS selection
+
+- Real result first: Saved audit b71fab35-f2dc-40f7-8202-300b3cd95af4 and exported Markdown/JSON to the owner's Downloads. Eight HTML pages assessed, 12 findings, score 84/100; one PDF unchecked and retained text truncated. AI disabled; public counters and existing audit history were not reset.
+- Root cause: Reproduced the failed dashboard's restricted-address error. System DNS returned public A records mixed with restricted 64:ff9b::/96 translations. Explicit Google HTTPS resolution returned public addresses and completed the same protected crawl.
+- Changed: Added validated server-only SEOPILOT_CRAWL_DNS selection to Settings/runner and safe env example, recorded configured resolver provenance in discovery, improved zero-evidence summaries and dashboard failure details, and added API/worker/report plus desktop/mobile keyboard regression scenarios. Kept the default system resolver, all-address rejection, pinning, robots/TLS/redirect bounds, paid-call limits and fixture isolation.
+- Validation: Full backend suite passed 636 tests in 99.89 seconds before the last override/provenance test was added; all five final targeted DNS tests passed in 5.32 seconds. Ruff, frontend lint and type checking passed. Hosted browser/build checks pending. Local browser inspection remains permission-blocked.
+- Runtime limitation: Configured Google resolution in ignored backend/.env without exposing credentials. Automatic approval review rejected restarting the backend as blocked by policy (no additional reason); a manual restart was requested. Existing production dashboard also needs its normal stopped-server rebuild to display new failure controls. Human review pending; no portfolio writes or deployment claims.
+
 ## 2026-10-25T07:26:17+05:30 — Enable unlimited localhost audit testing
 
 - Changed: Added the explicit server-only `SEOPILOT_LOCAL_UNLIMITED_AUDITS` setting, authenticated-loopback daily/burst admission exemption, nullable unlimited usage contract, matching dashboard label/button behavior, and the same exemption for live verification. Updated backend settings/storage/API tests, generated frontend contracts, browser scenario, safe environment example and README. Default/public limits remain unchanged.

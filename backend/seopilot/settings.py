@@ -23,6 +23,7 @@ class Settings:
     ai_enabled: bool = True
     ai_daily_call_limit: int = 20
     ai_max_output_tokens: int = 2500
+    crawl_dns: str = "system"
     local_unlimited_audits: bool = False
 
     @classmethod
@@ -30,6 +31,9 @@ class Settings:
         enabled = os.environ.get("SEOPILOT_AI_ENABLED", "true").lower()
         if enabled not in {"true", "false"}:
             raise ValueError("SEOPILOT_AI_ENABLED must be true or false")
+        dns = os.environ.get("SEOPILOT_CRAWL_DNS", "system").lower()
+        if dns not in {"system", "google"}:
+            raise ValueError("SEOPILOT_CRAWL_DNS must be system or google")
         unlimited = os.environ.get("SEOPILOT_LOCAL_UNLIMITED_AUDITS", "false").lower()
         if unlimited not in {"true", "false"}:
             raise ValueError("SEOPILOT_LOCAL_UNLIMITED_AUDITS must be true or false")
@@ -37,6 +41,7 @@ class Settings:
             ai_enabled=enabled == "true",
             ai_daily_call_limit=_integer("SEOPILOT_AI_DAILY_CALL_LIMIT", 20, 0, 100),
             ai_max_output_tokens=_integer("OPENAI_MAX_OUTPUT_TOKENS", 2500, 512, 2500),
+            crawl_dns=dns,
             local_unlimited_audits=unlimited == "true",
         )
 

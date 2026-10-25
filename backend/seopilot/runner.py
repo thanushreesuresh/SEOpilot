@@ -16,6 +16,13 @@ async def execute(audit: Audit, store: Store, *, settings: Settings | None = Non
     from .crawler import crawl
     from .rules import RULES_VERSION, analyze, calculate_score, rule_recommendations
 
+    settings = settings or Settings.from_env()
+    using_google_dns = resolver is None and settings.crawl_dns == "google"
+    if using_google_dns:
+        from .developer_dns import resolve_google
+
+        resolver = resolve_google
+
     async def progress(pages: list[Page], discovered: int, discovery: CrawlDiscovery):
         audit.pages = list(pages)
         audit.discovery = discovery
@@ -33,6 +40,8 @@ async def execute(audit: Audit, store: Store, *, settings: Settings | None = Non
     audit.warnings = result.warnings
     audit.coverage = result.coverage
     audit.discovery = result.discovery_snapshot()
+    if using_google_dns:
+        audit.discovery.notes.append("Server DNS: Google HTTPS resolver selected; all destination restrictions remain enforced.")
     audit.status = "analyzing"
     audit.progress.stage = "analyzing"
     audit.progress.message = "Checking page evidence against SEO rules"

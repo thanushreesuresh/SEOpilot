@@ -251,6 +251,9 @@ def _valid_candidates(audit: Audit, candidates: list[Candidate], evidence: dict,
 
 
 def _summary(audit: Audit, accepted: int = 0) -> str:
+    if not any(page.outcome in {"html", "http_error"} for page in audit.pages):
+        return ("No pages could be assessed. SEO findings and score are unknown. "
+                "Review Pages and crawl discovery details for the blocking reason.")
     counts = {severity: sum(issue.severity == severity for issue in audit.issues) for severity in POINTS}
     count_text = ", ".join(f"{count} {severity.lower()}" for severity, count in counts.items() if count)
     prefix = f"Analyzed {audit.score.assessed_pages} pages; found {len(audit.issues)} verified findings"
