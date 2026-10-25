@@ -1,5 +1,12 @@
 # Change log
 
+## 2026-10-25T05:28:25+05:30 — Preserve legacy duplicate reuse and establish release evidence
+
+- Changed: Recognize the released pre-v2 admission fingerprint for unchanged normal crawls alongside the current format; fixed-URL verification keeps its distinct binding. Added the actual historical schema and 15 upgrade regressions covering raw rows, decisions, scores, quota salt/charges, reuse at the daily limit, API reuse headers and changed-request isolation. Renamed the prior current-schema reopen test honestly. Added a line-linked release-readiness audit and pinned public portfolio compatibility evidence; updated README.
+- Why: Four new regression cases reproduced a recent legacy audit being admitted again because the newer fingerprint includes an empty verification-URL list. The previous migration test only lowered a current database version and did not exercise decision events.
+- Validation: 598 backend tests passed in 59.25 seconds and Ruff passed; existing upstream TestClient warning remains. The production AST probe changed only the public portfolio home page, preserved inherited description/layout, and refused a dynamic project route without executing target code. Blob hashes verified and temporary source input deleted. Credential/link checks passed and both independent review axes found no actionable issues; hosted rerun pending.
+- Limits: No original database writes/counter resets, live App credentials read, website requests, portfolio writes or OpenAI API calls. Original counts remain 5 audits/7 pages/26 issues/29 recommendations/0 decisions/3 admissions/6 AI reservations. Owner workflow and noninteractive lint preparation, App setup, manual local restart, reviewed PR, manual merge/deployment/live verification and human review remain pending. No pilot build/deployment or ranking improvement claimed.
+
 ## 2026-10-25T05:11:33+05:30 — Record optional setup-isolation acceptance
 
 - Changed: Recorded exact source `dca6465843d8565429fa39e6d2a8e036aa33cb83` and passing hosted run in README, verification and submission records, including the correction to the prior fatal optional-settings limitation.

@@ -23,11 +23,9 @@ def run_for(project, audit):
         targets=[], changed_files=[], changed_lines=0)
 
 
-def test_v2_migration_preserves_audits_counters_and_decisions(tmp_path):
+def test_reopening_existing_workflow_schema_preserves_mapping_and_counters(tmp_path):
     store, project, audit = setup(tmp_path)
     assert store.reserve_ai_call(audit.id, 20)
-    with store.connection() as db:
-        db.execute("PRAGMA user_version=2")
     reopened = Store(store.path)
     assert reopened.get(audit.id).url == audit.url
     assert reopened.quota("192.0.2.1")["used"] == 1

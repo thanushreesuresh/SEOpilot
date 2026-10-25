@@ -178,17 +178,23 @@ class Store:
         """Quota, duplicate detection and queue insertion share one write lock."""
         tick = time.time() if at is None else at
         key = self._identity_key(identity)
-        fingerprint = hashlib.sha256(json.dumps({"url": audit.url, "context": audit.business_context,
-            "options": audit.options.model_dump(), "allow_ai": audit.allow_ai,
-            "verification_urls": audit.verification_urls}, sort_keys=True).encode()).hexdigest()
+        fields = {"url": audit.url, "context": audit.business_context,
+                  "options": audit.options.model_dump(), "allow_ai": audit.allow_ai}
+        fingerprint = hashlib.sha256(json.dumps({**fields, "verification_urls": audit.verification_urls},
+                                                sort_keys=True).encode()).hexdigest()
+        # Released pre-v2 admissions omitted verification_urls. Recognize that
+        # format only for normal crawls; frozen-URL verification stays separate.
+        legacy_fingerprint = (hashlib.sha256(json.dumps(fields, sort_keys=True).encode()).hexdigest()
+                              if not audit.verification_urls else fingerprint)
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
             quota = self._quota(db, key, tick)
             duplicate = db.execute("""SELECT a.payload FROM admissions q JOIN audits a ON a.id=q.audit_id
-                WHERE q.identity=? AND q.fingerprint=? AND
+                WHERE q.identity=? AND q.fingerprint IN (?,?) AND
                 (a.status IN ('queued','crawling','analyzing','reviewing') OR
                  (?=0 AND q.admitted_at>? AND a.status IN ('completed','partial')))
-                ORDER BY q.admitted_at DESC LIMIT 1""", (key, fingerprint, bool(audit.verification_urls), tick - 900)).fetchone()
+                ORDER BY q.admitted_at DESC LIMIT 1""", (key, fingerprint, legacy_fingerprint,
+                                                        bool(audit.verification_urls), tick - 900)).fetchone()
             if duplicate:
                 return Audit.model_validate_json(duplicate[0]), "reused", quota
             if not quota["remaining"]:
