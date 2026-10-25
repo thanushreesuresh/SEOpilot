@@ -12,7 +12,7 @@ from .storage import Store
 log = logging.getLogger(__name__)
 
 
-async def execute(audit: Audit, store: Store, *, settings: Settings | None = None):
+async def execute(audit: Audit, store: Store, *, settings: Settings | None = None, resolver=None):
     from .crawler import crawl
     from .rules import RULES_VERSION, analyze, calculate_score, rule_recommendations
 
@@ -24,10 +24,11 @@ async def execute(audit: Audit, store: Store, *, settings: Settings | None = Non
         audit.progress.message = f"Checked {len(pages)} pages; {discovered} discovered"
         store.save(audit)
 
+    network_options = {"resolver": resolver} if resolver is not None else {}
     if audit.verification_urls:
-        result = await crawl(audit.url, audit.options, progress=progress, targets=audit.verification_urls)
+        result = await crawl(audit.url, audit.options, progress=progress, targets=audit.verification_urls, **network_options)
     else:
-        result = await crawl(audit.url, audit.options, progress=progress)
+        result = await crawl(audit.url, audit.options, progress=progress, **network_options)
     audit.pages = result.pages
     audit.warnings = result.warnings
     audit.coverage = result.coverage

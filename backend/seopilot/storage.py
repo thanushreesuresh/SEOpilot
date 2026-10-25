@@ -161,6 +161,20 @@ class Store:
     def _identity_key(self, identity: str) -> str:
         return hmac.new(self._quota_salt, identity.encode(), hashlib.sha256).hexdigest()
 
+    def start_developer_audit(self, audit: Audit, max_pending: int = 5):
+        """Local CLI only: retain the run without changing public admissions or AI budgets."""
+        if audit.mode != "live" or audit.allow_ai or audit.status != "queued":
+            raise ValueError("Developer audits must be new live runs with AI disabled.")
+        with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            count = db.execute("SELECT COUNT(*) FROM audits WHERE status IN ('queued','crawling','analyzing','reviewing')").fetchone()[0]
+            if count >= max_pending:
+                raise ValueError("Audit capacity reached. Wait for active runs to finish.")
+            # The CLI owns execution; the existing queue worker must never claim it.
+            audit.status = "crawling"
+            audit.progress.stage = "crawling"
+            self._write(db, audit)
+
     def _quota(self, db, identity: str, tick: float) -> dict:
         row = db.execute("SELECT COUNT(*),MIN(admitted_at) FROM admissions WHERE identity=? AND admitted_at>?",
                          (identity, tick - 86400)).fetchone()

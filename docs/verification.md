@@ -2,6 +2,14 @@
 
 Updated 25 October 2026 (IST), using Node 22.17.0, Python 3.13.6, Next.js 16.4.3 and committed lockfiles. Historical real SEO/AI observations remain in the [bounded live record](live-validation-2026-10-25.md).
 
+## Real portfolio audit and approved draft PR
+
+At 2026-10-25T06:41:05+05:30, the [real pilot record](portfolio-pilot-2026-10-25.md) documents eight assessed HTML pages, 12 evidence-backed observations, partial coverage and score 84. An explicitly approved exact metadata patch was published through the installed App as [portfolio draft PR #1](https://github.com/thanushreesuresh/thanushree-portfolio/pull/1), head `512001fa1e26a77eb37cddee59f2808345d07306`; its single-parent, single-file remote commit was verified. Vercel reports the preview Ready, while the protected preview audit stopped on an off-origin redirect. The configured owner workflow is missing; no rendered/production verification or score improvement is claimed.
+
+The user clarified that public admission limits do not apply to local developers. The terminal-only command makes real, AI-disabled runs in existing history without altering admissions or exposing an HTTP exemption. Default DNS still refuses the locally synthesized restricted NAT64 results; the explicitly selected Google DoH resolver checks both families, rejects restricted/incomplete replies and retains pinned transport. Public admission rows remained three and paid reservations six. Three new developer audit records (including the honest failed DNS and preview attempts), the project mapping, proposal/checkpoints and one approved publication reservation were added. Earlier records and counters were not reset.
+
+Checks: 623 backend tests passed in 68.99 seconds after the cancellation correction, plus 34 AST, seven validator, seven proxy, repository Ruff and frontend lint/types. Initial developer/DNS tests failed before their modules existed; the full suite then passed. One lint invocation from inside backend incorrectly applied that folder's rules to the existing scripts directory; the documented root Ruff command passed. Existing upstream Python/Node warnings remain. Both independent review axes are clear after the developer processor was changed to honor dashboard cancellation. Hosted source/browser rerun remains pending at this checkpoint.
+
 ## Installed App live connection check
 
 At 2026-10-25T06:23:12+05:30, the owner-configured App authenticated to GitHub and returned one selected-repository installation with exactly Metadata/Actions read and Contents/Pull requests write. Exactly one eligible repository was returned: `thanushreesuresh/thanushree-portfolio`. Scoped authorization and reading `main` passed at `193eb61222d1ee695077cdbff095c50de0ca1db1`.

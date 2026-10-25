@@ -1,5 +1,13 @@
 # Change log
 
+## 2026-10-25T06:41:05+05:30 — Run the real portfolio pilot and separate developer admission
+
+- Changed: Added a terminal-only AI-disabled developer audit command, atomic capacity-aware persistence and reuse of cancellation handling; added an explicit fixed Google DoH option for local NAT64 synthesis without relaxing IP/TLS/origin/robots checks. Added 25 meaningful developer/DNS regressions. Updated README, architecture, verification, readiness and pilot/submission records.
+- Why: The owner clarified the daily admission allowance applies to public users. The real system resolver returned restricted translations; a complete A/AAAA lookup was needed to run the protected pilot safely.
+- Real result: Eight HTML pages assessed, 12 observations, partial coverage, historical score 84. After exact wording/hash approval, the App created portfolio draft PR #1 with one commit and six additions to app/page.tsx; exact remote commit verified. Vercel reports preview Ready. Configured workflow missing and preview audit blocked by an off-origin redirect; no production verification claimed.
+- Checks: 623 backend tests in 68.99 seconds; Ruff, frontend lint/types, 34 AST, seven validator and seven proxy cases passed. Standards review found a cancellation gap; fixed with a regression and both review axes cleared. Public admissions stayed 3 and AI reservations 6; zero OpenAI calls, no counter resets. Hosted source/browser rerun pending.
+- Limits: Local backend still needs manual restart. Owner workflow, configured build/render validation, manual merge/deployment, live verification and human review remain pending. Dynamic pages and canonical/policy changes remain outside automatic edits. Details: docs/portfolio-pilot-2026-10-25.md.
+
 ## 2026-10-25T06:23:12+05:30 — Verify installed portfolio App access
 
 - Changed: Updated README, App setup, verification, release-readiness and submission records after the owner configured and installed the private App. No application code changed.

@@ -119,6 +119,8 @@ The sample mode parses bundled HTML fixtures, includes a simulated missing page,
 
 ## Persistence and recovery
 
+Local developer execution is a separate terminal entry point, `python -m seopilot.developer_audit`, without a public API bypass. `Store.start_developer_audit` validates a new AI-disabled live run, checks active capacity under a write lock and persists it directly as crawling so the queue cannot claim it. Developer provenance and resolver choice are retained in business context. The existing cancellation-aware processor owns execution. Public admissions and AI reservations are unchanged. The CLI does not load dotenv credentials. An explicitly selected fixed-provider DoH resolver checks both address families and passes all returned addresses through the existing public-IP policy and pinned TLS transport. It fails closed on unverified DNS replies; the ordinary API/system resolver is unchanged.
+
 SQLite stores structured page metadata and bounded excerpts, not complete HTML, response bodies, cookies, or credentials. Normalized child records accompany audit snapshots for atomic persistence. Decision events are append-only; repeating an unchanged decision is idempotent.
 
 Run one API process with one lifespan-managed worker. Queued runs remain queued across restarts; previously active runs become interrupted with existing evidence preserved. Restart recovery does not silently resume network requests or generate new AI calls. Start a new audit to retry.
